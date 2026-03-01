@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="${pageTitle} ?: 'Admin'">Admin</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body>
+<div class="app">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar__top">
+            <div class="brand">
+                <div class="brand__logo">Y</div>
+                <div class="brand__name">Yonex</div>
+            </div>
+
+            <button id="toggleSidebar" class="icon-btn" type="button" aria-label="Thu gọn / Mở sidebar">
+                ‹
+            </button>
+        </div>
+
+        <nav class="nav">
+            <a class="nav__item active" th:href="@{/dashboard}">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý nhân viên</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý khách hàng</span>
+            </a>
+            <a class="nav__item" href="#">
+            <span class="nav__icon"></span>
+            <span class="nav__text">Quản lý sản phẩm</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý hóa đơn</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Báo cáo</span>
+            </a>
+
+            <div class="nav__section-title">
+                <span class="nav__text">KÊNH BÁN HÀNG</span>
+            </div>
+
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Bán tại cửa hàng</span>
+            </a>
+        </nav>
+
+        <div class="sidebar__bottom">
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Thiết lập</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar__title" th:text="${pageHeading} ?: 'Bàn làm việc'">Bàn làm việc</div>
+            <div class="topbar__right">
+                <button class="pill" type="button">Bán tại cửa hàng</button>
+                <button class="icon-btn" type="button" aria-label="Thông báo">🔔</button>
+                <div class="avatar" aria-label="User">👤</div>
+            </div>
+        </header>
+        <section class="content">
+            <div class="card">
+                <h2>Dashboard</h2>
+                <p>Nội dung ở đây</p>
+            </div>
+        </section>
+<!--        <section class="content">-->
+<!--            &lt;!&ndash; chỗ này các page con sẽ đổ vào &ndash;&gt;-->
+<!--            <div th:replace="${content}">-->
+
+<!--            </div>-->
+<!--        </section>-->
+    </main>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+</body>
+</html>
