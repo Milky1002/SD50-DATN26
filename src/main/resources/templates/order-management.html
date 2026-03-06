@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${pageTitle} ?: 'Quản lý đơn hàng'">Quản lý đơn hàng</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+    <link rel="stylesheet" th:href="@{/css/order-management.css}"/>
+</head>
+<body>
+<div class="app">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar__top">
+            <div class="brand">
+                <div class="brand__logo">Y</div>
+                <div class="brand__name">Yonex</div>
+            </div>
+
+            <button id="toggleSidebar" class="icon-btn" type="button" aria-label="Thu gọn / Mở sidebar">
+                ‹
+            </button>
+        </div>
+
+        <nav class="nav">
+            <a class="nav__item" th:href="@{/dashboard}">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Tổng quan</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý nhân viên</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý khách hàng</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý sản phẩm</span>
+            </a>
+            <a class="nav__item" th:href="@{/invoices}">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý hóa đơn</span>
+            </a>
+            <a class="nav__item active" th:href="@{/orders}">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý đơn hàng</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Báo cáo</span>
+            </a>
+
+            <div class="nav__section-title">
+                <span class="nav__text">KÊNH BÁN HÀNG</span>
+            </div>
+
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Bán tại cửa hàng</span>
+            </a>
+        </nav>
+
+        <div class="sidebar__bottom">
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Thiết lập</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar__title" th:text="${pageHeading} ?: 'Quản lý đơn hàng'">Quản lý đơn hàng</div>
+            <div class="topbar__right">
+                <button class="pill" type="button">Bán tại cửa hàng</button>
+                <button class="icon-btn" type="button" aria-label="Thông báo">🔔</button>
+                <div class="avatar" aria-label="User">👤</div>
+            </div>
+        </header>
+
+        <section class="content">
+            <div class="card order-card">
+                <div class="order-card__header">
+                    <div>
+                        <h2>Danh sách đơn hàng</h2>
+                        <p class="order-card__subtitle">Quản lý, theo dõi và xử lý các đơn hàng của cửa hàng</p>
+                    </div>
+                    <div class="order-card__header-actions">
+                        <button id="btnExport" class="btn btn--secondary" type="button">Xuất file</button>
+                        <button id="btnCreateOrder" class="btn btn--primary" type="button">Tạo đơn hàng</button>
+                    </div>
+                </div>
+
+                <div class="order-tabs">
+                    <button class="order-tabs__item is-active" type="button" data-order-tab="all">
+                        Tất cả đơn hàng
+                    </button>
+                    <button class="order-tabs__item" type="button" data-order-tab="waiting">
+                        Chờ xác nhận
+                    </button>
+                    <button class="order-tabs__item" type="button" data-order-tab="shipping">
+                        Đang giao hàng
+                    </button>
+                    <button class="order-tabs__item" type="button" data-order-tab="done">
+                        Hoàn tất
+                    </button>
+                    <button class="order-tabs__item" type="button" data-order-tab="cancelled">
+                        Đã hủy
+                    </button>
+                </div>
+
+                <div class="order-table-wrapper">
+                    <table class="order-table">
+                        <thead>
+                        <tr>
+                            <th>Mã đơn hàng</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Sản phẩm</th>
+                            <th class="order-table__col-right">Tổng tiền</th>
+                            <th>Thanh toán</th>
+                            <th>Vận chuyển</th>
+                            <th class="order-table__col-center">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="orderTableBody">
+                        <tr th:each="order : ${orders}" th:attr="data-status=${order.tabKey}">
+                            <td class="order-code">
+                                <a href="#" class="order-code__link" th:text="${order.code}">#DH00000</a>
+                            </td>
+                            <td>
+                                <div class="order-row__customer">
+                                    <div class="order-row__avatar" th:text="${order.initials}">NA</div>
+                                    <div>
+                                        <div class="order-row__name" th:text="${order.customerName}">Tên khách hàng</div>
+                                        <div class="order-row__sub" th:text="${order.customerPhone}">SĐT</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td th:attr="data-date=${order.createdAt}">
+                                <div class="order-row__date"
+                                     th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                    01/01/2026 00:00
+                                </div>
+                            </td>
+                            <td>
+                                <div class="order-row__product">
+                                    <div class="order-row__product-img"></div>
+                                    <div class="order-row__product-meta">
+                                        <div class="order-row__product-name" th:text="${order.productName}">
+                                            Tên sản phẩm
+                                        </div>
+                                        <div class="order-row__sub">
+                                            Số lượng:
+                                            <span th:text="${order.quantity}">1</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="order-table__col-right"
+                                th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                0₫
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${order.displayPaymentStatus == 'Đã thanh toán'} ? ' badge--paid' :
+                                                      (order.displayPaymentStatus == 'Chờ thanh toán' ? ' badge--waiting-payment' :
+                                                       ' badge--partial')"
+                                      th:text="${order.displayPaymentStatus}">
+                                    Đã thanh toán
+                                </span>
+                            </td>
+                            <td>
+                                <form th:action="@{'/orders/' + ${order.id} + '/status'}" method="post">
+                                    <select name="status" class="status-select" onchange="this.form.submit()">
+                                        <option th:value="0"
+                                                th:selected="${order.orderStatus == 0}">Chờ xử lý</option>
+                                        <option th:value="1"
+                                                th:selected="${order.orderStatus == 1}">Đang giao</option>
+                                        <option th:value="2"
+                                                th:selected="${order.orderStatus == 2}">Hoàn tất</option>
+                                        <option th:value="3"
+                                                th:selected="${order.orderStatus == 3}">Đã hủy</option>
+                                    </select>
+                                </form>
+                            </td>
+                            <td class="order-table__col-center">
+                                <form th:action="@{'/orders/' + ${order.id} + '/delete'}" method="post"
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa đơn hàng này?');">
+                                    <button class="icon-btn icon-btn--ghost" type="submit">🗑</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="order-footer">
+
+                    <div class="pagination">
+                        <button class="pagination__item" type="button">&lt;</button>
+                        <button class="pagination__item is-active" type="button">1</button>
+                        <button class="pagination__item" type="button">2</button>
+                        <button class="pagination__item" type="button">3</button>
+                        <button class="pagination__item" type="button">&gt;</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/order-management.js}"></script>
+</body>
+</html>
+

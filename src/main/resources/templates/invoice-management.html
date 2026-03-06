@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${pageTitle} ?: 'Quản lý hóa đơn'">Quản lý hóa đơn</title>
+
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+    <link rel="stylesheet" th:href="@{/css/invoice-management.css}"/>
+</head>
+<body>
+<div class="app">
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar__top">
+            <div class="brand">
+                <div class="brand__logo">Y</div>
+                <div class="brand__name">Yonex</div>
+            </div>
+            <button id="toggleSidebar" class="icon-btn" type="button" aria-label="Thu gọn / Mở sidebar">
+                ‹
+            </button>
+        </div>
+
+        <nav class="nav">
+            <a class="nav__item" th:href="@{/dashboard}">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Tổng quan</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý nhân viên</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý khách hàng</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý sản phẩm</span>
+            </a>
+            <a class="nav__item active" th:href="@{/invoices}">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý hóa đơn</span>
+            </a>
+            <a class="nav__item" th:href="@{/orders}">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý đơn hàng</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Báo cáo</span>
+            </a>
+
+            <div class="nav__section-title">
+                <span class="nav__text">KÊNH BÁN HÀNG</span>
+            </div>
+
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Bán tại cửa hàng</span>
+            </a>
+        </nav>
+
+        <div class="sidebar__bottom">
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Thiết lập</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar__title" th:text="${pageHeading} ?: 'Quản lý hóa đơn'">Quản lý hóa đơn</div>
+            <div class="topbar__right">
+                <button class="pill" type="button">Bán tại cửa hàng</button>
+                <button class="icon-btn" type="button" aria-label="Thông báo">🔔</button>
+                <div class="avatar" aria-label="User">👤</div>
+            </div>
+        </header>
+
+        <section class="content">
+            <div class="invoice-layout">
+                <div class="invoice-stats">
+                    <div class="invoice-stat-card">
+                        <div class="invoice-stat-card__label">Tổng hóa đơn</div>
+                        <div class="invoice-stat-card__value"
+                             th:text="${#numbers.formatInteger(stats.totalInvoices, 0, 'POINT')}">1,284
+                        </div>
+                    </div>
+                    <div class="invoice-stat-card">
+                        <div class="invoice-stat-card__label">Chờ thanh toán</div>
+                        <div class="invoice-stat-card__value"
+                             th:text="${#numbers.formatInteger(stats.waitingPayment, 0, 'POINT')}">42
+                        </div>
+                    </div>
+                    <div class="invoice-stat-card">
+                        <div class="invoice-stat-card__label">Đơn hoàn tất</div>
+                        <div class="invoice-stat-card__value"
+                             th:text="${#numbers.formatInteger(stats.completed, 0, 'POINT')}">1,120
+                        </div>
+                    </div>
+                </div>
+
+                <div class="invoice-filters">
+                    <div class="invoice-filters__search">
+                        <input id="invoiceSearchInput" class="invoice-input" type="text"
+                               placeholder="Tìm kiếm mã hóa đơn, tên khách hàng...">
+                    </div>
+                    <div class="invoice-filters__right">
+                        <select id="invoiceStatusFilter" class="invoice-input">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="paid">Đã thanh toán</option>
+                            <option value="unpaid">Chưa thanh toán</option>
+                            <option value="partial">T.toán một phần</option>
+                        </select>
+                        <input id="invoiceDateFrom" class="invoice-input" type="date">
+                        <input id="invoiceDateTo" class="invoice-input" type="date">
+                        <button id="invoiceFilterReset" class="btn btn--ghost" type="button">Bỏ lọc</button>
+                    </div>
+                </div>
+
+                <div class="invoice-table-wrapper">
+                    <table class="invoice-table">
+                        <thead>
+                        <tr>
+                            <th>Mã hóa đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày lập</th>
+                            <th class="invoice-table__col-right">Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th class="invoice-table__col-center">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="invoiceTableBody">
+                        <tr th:each="inv : ${invoices}"
+                            th:attr="data-status=${inv.displayPaymentStatus}">
+                            <td>
+                                <a href="#" class="invoice-code" th:text="${inv.code}">#INV-00001</a>
+                            </td>
+                            <td>
+                                <div class="invoice-row__customer">
+                                    <div class="invoice-row__avatar" th:text="${inv.initials}">NL</div>
+                                    <div>
+                                        <div class="invoice-row__name" th:text="${inv.customerName}">
+                                            Nguyễn Văn Linh
+                                        </div>
+                                        <div class="invoice-row__sub" th:text="${inv.customerPhone}">
+                                            0987 654 321
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td th:attr="data-date=${inv.createdAt}">
+                                <div class="invoice-row__date"
+                                     th:text="${#temporals.format(inv.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                    12/10/2023 14:30
+                                </div>
+                            </td>
+                            <td class="invoice-table__col-right"
+                                th:text="${#numbers.formatDecimal(inv.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                0₫
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${inv.displayPaymentStatus == 'Đã thanh toán'} ? ' badge--paid' :
+                                                      (inv.displayPaymentStatus == 'Chưa thanh toán' ? ' badge--waiting-payment' :
+                                                       ' badge--partial')"
+                                      th:text="${inv.displayPaymentStatus}">
+                                    Đã thanh toán
+                                </span>
+                            </td>
+                            <td class="invoice-table__col-center">
+                                <button class="icon-btn icon-btn--ghost" type="button">👁</button>
+                                <button class="icon-btn icon-btn--ghost" type="button">✏️</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="invoice-footer">
+                    <div class="invoice-footer__info">
+                        Hiển thị
+                        <span th:text="${#lists.size(invoices)}">0</span>
+                        hóa đơn
+                    </div>
+                    <div class="pagination">
+                        <button class="pagination__item" type="button">&lt;</button>
+                        <button class="pagination__item is-active" type="button">1</button>
+                        <button class="pagination__item" type="button">2</button>
+                        <button class="pagination__item" type="button">3</button>
+                        <button class="pagination__item" type="button">&gt;</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/invoice-management.js}"></script>
+</body>
+</html>
+

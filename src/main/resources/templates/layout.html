@@ -25,6 +25,10 @@
         <nav class="nav">
             <a class="nav__item active" th:href="@{/dashboard}">
                 <span class="nav__icon"></span>
+                <span class="nav__text">Tổng quan</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon"></span>
                 <span class="nav__text">Quản lý nhân viên</span>
             </a>
             <a class="nav__item" href="#">
@@ -35,9 +39,13 @@
             <span class="nav__icon"></span>
             <span class="nav__text">Quản lý sản phẩm</span>
             </a>
-            <a class="nav__item" href="#">
+            <a class="nav__item" th:href="@{/invoices}">
                 <span class="nav__icon"></span>
                 <span class="nav__text">Quản lý hóa đơn</span>
+            </a>
+            <a class="nav__item" th:href="@{/orders}">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Quản lý đơn hàng</span>
             </a>
             <a class="nav__item" href="#">
                 <span class="nav__icon"></span>
