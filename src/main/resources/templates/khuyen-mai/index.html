@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="${pageTitle} ?: 'Quản Lý Khuyến Mại'">Quản Lý Khuyến Mại</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <link rel="stylesheet" th:href="@{/css/khuyen-mai.css}" />
+</head>
+<body>
+<div class="app">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar__top">
+            <div class="brand">
+                <div class="brand__logo">M</div>
+                <div class="brand__name">MISA AMIS</div>
+            </div>
+            <button id="toggleSidebar" class="icon-btn" type="button" aria-label="Thu gọn / Mở sidebar">
+                ‹
+            </button>
+        </div>
+
+        <nav class="nav">
+            <a class="nav__item" href="#">
+                <span class="nav__icon">📊</span>
+                <span class="nav__text">Tổng quan</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon">📦</span>
+                <span class="nav__text">Đơn hàng</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon">🛍️</span>
+                <span class="nav__text">Hóa đơn bán hàng</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon">📋</span>
+                <span class="nav__text">Hóa đơn mua hàng</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon">👥</span>
+                <span class="nav__text">Đối tác</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon">📦</span>
+                <span class="nav__text">Kho hàng</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon">💰</span>
+                <span class="nav__text">Sổ quỹ</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon">👤</span>
+                <span class="nav__text">Nhân viên</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon">📊</span>
+                <span class="nav__text">Báo cáo</span>
+            </a>
+
+            <div class="nav__section-title">
+                <span class="nav__text">KÊNH BÁN HÀNG</span>
+            </div>
+
+            <a class="nav__item" href="#">
+                <span class="nav__icon">🏪</span>
+                <span class="nav__text">Bán tại cửa hàng</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon">🌐</span>
+                <span class="nav__text">Nguồn khác</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon">📱</span>
+                <span class="nav__text">Kế toán dịch vụ</span>
+            </a>
+            <a class="nav__item" href="#">
+                <span class="nav__icon">🔧</span>
+                <span class="nav__text">Ứng dụng</span>
+            </a>
+            <a class="nav__item active" th:href="@{/khuyen-mai}">
+                <span class="nav__icon">🎁</span>
+                <span class="nav__text">Nghiệp vụ khác</span>
+            </a>
+        </nav>
+
+        <div class="sidebar__bottom">
+            <a class="nav__item" href="#">
+                <span class="nav__icon">⚙️</span>
+                <span class="nav__text">Thiết lập</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+        <header class="topbar">
+            <div class="topbar__title" th:text="${pageHeading}">Nghiệp vụ khác</div>
+            <div class="topbar__right">
+                <button class="pill">HỖ KINH DOANH THAY ĐỔI</button>
+                <button class="btn-primary">Bán tại cửa hàng</button>
+                <button class="icon-btn">🔔</button>
+                <button class="icon-btn">❓</button>
+                <div class="avatar">👤</div>
+            </div>
+        </header>
+
+        <section class="content">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="chuong-trinh">Chương trình khuyến mại</button>
+                <button class="tab-btn" data-tab="lich-su">Lịch sử áp dụng</button>
+            </div>
+
+            <!-- Tab Content: Chương trình khuyến mại -->
+            <div class="tab-content active" id="tab-chuong-trinh">
+                <div class="card">
+                    <!-- Header -->
+                    <div class="card-header">
+                        <h2 class="card-title">Chương trình khuyến mại</h2>
+                        <button class="btn-primary" onclick="openAddModal()">
+                            + Thêm chương trình
+                        </button>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="filters">
+                        <div class="search-box">
+                            <input type="text" id="searchInput" placeholder="Tìm kiếm theo mã, tên chương trình..." />
+                        </div>
+                        <select class="filter-select" id="filterLoai">
+                            <option value="">Tất cả loại</option>
+                            <option value="1">Giảm giá hóa đơn</option>
+                            <option value="2">Giảm giá sản phẩm</option>
+                            <option value="3">Tặng hàng</option>
+                            <option value="4">Đồng giá</option>
+                        </select>
+                        <button class="btn-secondary btn-reset-filter" type="button" onclick="resetFilters()">
+                            Hủy lọc
+                        </button>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th width="50">
+                                        <input type="checkbox" id="selectAll" />
+                                    </th>
+                                    <th>Mã CTKM</th>
+                                    <th>Tên CTKM</th>
+                                    <th>Khách hàng</th>
+                                    <th>Ngày bắt đầu</th>
+                                    <th>Ngày kết thúc</th>
+                                    <th>Loại khuyến mại</th>
+                                    <th>Mô tả</th>
+                                    <th>Trạng thái</th>
+                                    <th width="100">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr>
+                                    <td colspan="10" class="text-center">
+                                        <div class="loading">Đang tải dữ liệu...</div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination">
+                        <div class="pagination-info">
+                            Hiển thị <span id="showingFrom">0</span> - <span id="showingTo">0</span> 
+                            trong tổng số <span id="totalRecords">0</span> bản ghi
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="btn-icon" id="btnPrevPage">‹</button>
+                            <span id="pageInfo">Trang 1</span>
+                            <button class="btn-icon" id="btnNextPage">›</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Lịch sử áp dụng -->
+            <div class="tab-content" id="tab-lich-su">
+                <div class="card">
+                    <h2 class="card-title">Lịch sử áp dụng khuyến mại</h2>
+                    <p class="text-muted">Chức năng đang phát triển...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Modal: Thêm chương trình khuyến mại -->
+<div class="modal" id="modalAddCTKM">
+    <div class="modal-overlay" onclick="closeModal('modalAddCTKM')"></div>
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h3 class="modal-title">Thêm chương trình khuyến mại</h3>
+            <button class="btn-close" onclick="closeModal('modalAddCTKM')">×</button>
+        </div>
+        <div class="modal-body">
+            <!-- Step 1: Chọn loại khuyến mại -->
+            <div id="step1" class="step-content active">
+                <h4 class="step-title">Chọn loại chương trình khuyến mại</h4>
+                <div class="promo-types">
+                    <div class="promo-type-card" onclick="selectPromoType(1)">
+                        <div class="promo-type-icon">💰</div>
+                        <div class="promo-type-title">Giảm giá hóa đơn</div>
+                        <div class="promo-type-desc">VD: Giảm 10% hóa đơn trên 3.000.000; Giảm 10% khách VIP</div>
+                    </div>
+                    <div class="promo-type-card" onclick="selectPromoType(2)">
+                        <div class="promo-type-icon">🛍️</div>
+                        <div class="promo-type-title">Giảm giá hàng hóa</div>
+                        <div class="promo-type-desc">Giảm giá cho sản phẩm cụ thể</div>
+                    </div>
+                    <div class="promo-type-card" onclick="selectPromoType(3)">
+                        <div class="promo-type-icon">🎁</div>
+                        <div class="promo-type-title">Tặng hàng</div>
+                        <div class="promo-type-desc">Tặng sản phẩm khi mua hàng</div>
+                    </div>
+                    <div class="promo-type-card" onclick="selectPromoType(4)">
+                        <div class="promo-type-icon">💵</div>
+                        <div class="promo-type-title">Đồng giá</div>
+                        <div class="promo-type-desc">Bán sản phẩm với giá cố định</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Form nhập thông tin -->
+            <div id="step2" class="step-content">
+                <form id="formCTKM">
+                    <input type="hidden" id="ctkm_id" />
+                    <input type="hidden" id="loaiKhuyenMai" />
+
+                    <h4 class="form-section-title">THÔNG TIN CƠ BẢN</h4>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tên CTKM <span class="required">*</span></label>
+                            <input type="text" id="tenChuongTrinh" placeholder="Nhập tên chương trình khuyến mại" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Mã CTKM</label>
+                            <input type="text" id="maChuongTrinh" placeholder="VD: CTKM2" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <textarea id="moTa" rows="3" placeholder="Mô tả chi tiết về chương trình..."></textarea>
+                    </div>
+
+                    <h4 class="form-section-title">PHẠM VI ÁP DỤNG</h4>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Khách hàng <span class="required">*</span></label>
+                            <select id="khachHangApDung" required>
+                                <option value="1">Tất cả khách hàng</option>
+                                <option value="2">Bán tại cửa hàng</option>
+                                <option value="3">Người bán hàng</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h4 class="form-section-title">THỜI GIAN ÁP DỤNG</h4>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ngày bắt đầu <span class="required">*</span></label>
+                            <input type="date" id="ngayBatDau" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Giờ bắt đầu</label>
+                            <input type="time" id="gioBatDau" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Chọn ngày bắt đầu <span class="required">*</span></label>
+                            <input type="date" id="ngayKetThuc" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Giờ kết thúc</label>
+                            <input type="time" id="gioKetThuc" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Giờ áp dụng</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ngayTrongTuan" value="2" /> Thứ 2
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ngayTrongTuan" value="3" /> Thứ 3
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ngayTrongTuan" value="4" /> Thứ 4
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ngayTrongTuan" value="5" /> Thứ 5
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ngayTrongTuan" value="6" /> Thứ 6
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ngayTrongTuan" value="7" /> Thứ 7
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ngayTrongTuan" value="CN" /> Chủ nhật
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Ngày trong tháng</label>
+                        <input type="text" id="ngayTrongThang" placeholder="VD: 1,15,30 hoặc để trống nếu áp dụng mọi ngày" />
+                    </div>
+
+                    <h4 class="form-section-title">ĐIỀU KIỆN ÁP DỤNG</h4>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="apDungCungNhieuCtkm" />
+                            Áp dụng đồng thời 1 trong nhiều CTKM
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="tuDongApDung" />
+                            Tự động áp dụng chương trình này khi đủ điều kiện
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="tongLienHoaDon" />
+                            Tổng liền hóa đơn áp dụng khi đủ điều kiện, không tính lại hóa đơn, đồng thời hóa đơn trước đó
+                        </label>
+                    </div>
+
+                    <h4 class="form-section-title">HÌNH THỨC GIẢM GIÁ</h4>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Loại giảm <span class="required">*</span></label>
+                            <select id="loaiGiam" required onchange="toggleGiamToiDa()">
+                                <option value="1">Theo %</option>
+                                <option value="2">Theo tiền</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Giá trị giảm <span class="required">*</span></label>
+                            <input type="number" id="giaTriGiam" placeholder="VD: 10 hoặc 50000" required />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" id="groupGiamToiDa">
+                            <label>Giảm tối đa (VNĐ)</label>
+                            <input type="number" id="giamToiDa" placeholder="VD: 500000" />
+                        </div>
+                        <div class="form-group">
+                            <label>Đơn hàng tối thiểu (VNĐ)</label>
+                            <input type="number" id="donHangToiThieu" placeholder="VD: 3000000" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal('modalAddCTKM')">Đóng</button>
+            <button class="btn-secondary" id="btnBack" onclick="backToStep1()" style="display:none;">Quay lại</button>
+            <button class="btn-primary" id="btnSave" onclick="saveCTKM()" style="display:none;">Lưu</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/app.js}"></script>
+<script th:src="@{/js/khuyen-mai.js}"></script>
+</body>
+</html>

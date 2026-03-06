@@ -1,4 +1,4 @@
-package com.example.sd50datn.Controller;
+package com.example.sd50datn.controller;
 
 import com.example.sd50datn.Service.DashboardService;
 import com.example.sd50datn.Model.DashboardRevenuePointModel;
