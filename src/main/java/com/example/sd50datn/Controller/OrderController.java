@@ -17,18 +17,6 @@ public class OrderController {
 
     @GetMapping("/orders")
     public String orderManagement(Model model) {
-        // #region agent log
-        try (var out = java.nio.file.Files.newOutputStream(
-                java.nio.file.Path.of("debug-c061a8.log"),
-                java.nio.file.StandardOpenOption.CREATE,
-                java.nio.file.StandardOpenOption.APPEND)) {
-            String json = "{\"sessionId\":\"c061a8\",\"runId\":\"pre-fix\",\"hypothesisId\":\"H1\",\"location\":\"OrderController.java:16\",\"message\":\"enter /orders controller\",\"timestamp\":" +
-                    System.currentTimeMillis() + "}";
-            out.write((json + System.lineSeparator()).getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        } catch (Exception ignored) {
-        }
-        // #endregion agent log
-
         model.addAttribute("pageTitle", "Quản lý đơn hàng");
         model.addAttribute("pageHeading", "Quản lý đơn hàng");
         model.addAttribute("orders", orderService.getOrderSummaries());
