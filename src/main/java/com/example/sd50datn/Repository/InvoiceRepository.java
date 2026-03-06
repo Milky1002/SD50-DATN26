@@ -1,7 +1,7 @@
 package com.example.sd50datn.Repository;
 
-import com.example.sd50datn.dto.InvoiceStatsDTO;
-import com.example.sd50datn.dto.InvoiceSummaryDTO;
+import com.example.sd50datn.Dto.InvoiceStatsDTO;
+import com.example.sd50datn.Dto.InvoiceSummaryDTO;
 import com.example.sd50datn.Entity.HoaDon;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

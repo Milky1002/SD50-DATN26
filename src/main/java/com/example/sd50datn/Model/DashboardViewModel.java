@@ -1,4 +1,4 @@
-package com.example.sd50datn.model;
+package com.example.sd50datn.Model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

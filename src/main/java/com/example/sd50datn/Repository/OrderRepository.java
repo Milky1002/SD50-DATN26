@@ -1,6 +1,6 @@
 package com.example.sd50datn.Repository;
 
-import com.example.sd50datn.dto.OrderSummaryDTO;
+import com.example.sd50datn.Dto.OrderSummaryDTO;
 import com.example.sd50datn.Entity.HoaDon;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

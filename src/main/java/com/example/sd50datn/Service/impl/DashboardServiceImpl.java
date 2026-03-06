@@ -2,8 +2,8 @@ package com.example.sd50datn.Service.impl;
 
 import com.example.sd50datn.Repository.DashboardRepository;
 import com.example.sd50datn.Service.DashboardService;
-import com.example.sd50datn.model.DashboardRevenuePointModel;
-import com.example.sd50datn.model.DashboardViewModel;
+import com.example.sd50datn.Model.DashboardRevenuePointModel;
+import com.example.sd50datn.Model.DashboardViewModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

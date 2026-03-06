@@ -1,6 +1,6 @@
 package com.example.sd50datn.Service.impl;
 
-import com.example.sd50datn.dto.OrderSummaryDTO;
+import com.example.sd50datn.Dto.OrderSummaryDTO;
 import com.example.sd50datn.Repository.OrderRepository;
 import com.example.sd50datn.Service.OrderService;
 import lombok.RequiredArgsConstructor;

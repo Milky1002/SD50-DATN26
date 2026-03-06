@@ -1,7 +1,7 @@
 package com.example.sd50datn.Service.impl;
 
-import com.example.sd50datn.dto.InvoiceStatsDTO;
-import com.example.sd50datn.dto.InvoiceSummaryDTO;
+import com.example.sd50datn.Dto.InvoiceStatsDTO;
+import com.example.sd50datn.Dto.InvoiceSummaryDTO;
 import com.example.sd50datn.Repository.InvoiceRepository;
 import com.example.sd50datn.Service.InvoiceService;
 import lombok.RequiredArgsConstructor;

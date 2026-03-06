@@ -1,9 +1,9 @@
 package com.example.sd50datn.Repository;
 
 import com.example.sd50datn.Entity.HoaDon;
-import com.example.sd50datn.model.DashboardOperationModel;
-import com.example.sd50datn.model.DashboardRevenuePointModel;
-import com.example.sd50datn.model.DashboardSalesModel;
+import com.example.sd50datn.Model.DashboardOperationModel;
+import com.example.sd50datn.Model.DashboardRevenuePointModel;
+import com.example.sd50datn.Model.DashboardSalesModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
