@@ -15,4 +15,8 @@ public class DashboardController {
         model.addAttribute("content", "dashboard :: dashboardContent");
         return "layout";
     }
+    @GetMapping("/staff")
+    public String staff() {
+        return "QlyNhanVien/Staff";
+    }
 }
