@@ -16,9 +16,14 @@ public class InvoiceController {
     public String invoiceManagement(Model model) {
         model.addAttribute("pageTitle", "Quản lý hóa đơn");
         model.addAttribute("pageHeading", "Quản lý hóa đơn");
+        model.addAttribute("activeMenu", "hoadon");
+
         model.addAttribute("stats", invoiceService.getStats());
         model.addAttribute("invoices", invoiceService.getInvoiceSummaries());
-        return "invoice-management";
+
+        model.addAttribute("content", "invoice-management");
+        model.addAttribute("pageCss", "/css/invoice-management.css");
+
+        return "layout";
     }
 }
-

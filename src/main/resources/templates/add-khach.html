@@ -1,0 +1,41 @@
+
+<div th:fragment="content">
+
+<form th:action="@{/khachhang/add}" th:object="${kh}" method="post">
+
+    <div>
+        <label>Tên</label>
+        <input type="text" th:field="*{tenKhachHang}">
+        <span style="color:red" th:errors="*{tenKhachHang}"></span>
+    </div>
+
+    <div>
+        <label>SĐT</label>
+        <input type="text" th:field="*{sdt}">
+        <span style="color:red" th:errors="*{sdt}"></span>
+    </div>
+
+    <div>
+        <label>Email</label>
+        <input type="text" th:field="*{email}">
+        <span style="color:red" th:errors="*{email}"></span>
+    </div>
+
+    <div>
+        <label>Địa chỉ</label>
+        <input type="text" th:field="*{diaChiKhachHang}">
+        <span style="color:red" th:errors="*{diaChiKhachHang}"></span>
+    </div>
+
+    <div>
+        <label>Trạng thái</label>
+        <select th:field="*{trangThai}">
+            <option value="1">Đang theo dõi</option>
+            <option value="0">Ngừng</option>
+        </select>
+    </div>
+
+    <br>
+    <button type="submit">Thêm</button>
+
+</form>

@@ -1,0 +1,215 @@
+<div th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/mausac.css}">
+
+    <div class="ms-wrap">
+        <div class="ms-toolbar">
+            <form class="ms-search" th:action="@{/mau-sac}" method="get">
+                <span class="ms-search__icon">🔎</span>
+                <input name="q" th:value="${q}" placeholder="Tìm tên màu sắc"/>
+            </form>
+
+            <div class="ms-actions">
+                <button class="ms-btn ms-btn--primary" type="button" id="btnOpenAdd">+ Thêm mới</button>
+            </div>
+        </div>
+
+        <div class="ms-card ms-tablewrap">
+            <table class="ms-table">
+                <thead>
+                <tr>
+                    <th style="width:160px">Mã màu sắc</th>
+                    <th>Tên màu sắc</th>
+                    <th style="width:220px">Mã HEX</th>
+                    <th style="width:120px">Màu</th>
+                    <th style="width:160px">Trạng thái</th>
+                    <th style="width:160px; text-align:right;">Chức năng</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${list}">
+                    <td class="mono"
+                        th:text="${'MS' + #numbers.formatInteger(item.mauSacId, 6)}"></td>
+
+                    <td th:text="${item.tenMau}"></td>
+
+                    <td th:text="${item.maMauHex}"></td>
+
+                    <td>
+                        <span class="ms-color-box"
+                              th:style="'background:' + ${item.maMauHex}"></span>
+                    </td>
+
+                    <td>
+                        <span th:if="${item.trangThai == 1}" class="pill pill--ok">Đang theo dõi</span>
+                        <span th:if="${item.trangThai == 0}" class="pill pill--off">Ngừng theo dõi</span>
+                    </td>
+
+                    <td style="text-align:right;">
+                        <a class="ms-action"
+                           th:href="@{/mau-sac/edit/{id}(id=${item.mauSacId})}">✎ Sửa</a>
+                        <a class="ms-action ms-action--danger"
+                           th:href="@{/mau-sac/delete/{id}(id=${item.mauSacId})}"
+                           onclick="return confirm('Xóa màu sắc này?')">🗑 Xóa</a>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(list)}">
+                    <td colspan="6" class="empty">Không có dữ liệu</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL ADD -->
+    <div class="ms-modal" id="addModal" aria-hidden="true">
+        <div class="ms-modal__overlay" id="addModalOverlay"></div>
+
+        <div class="ms-modal__dialog">
+            <div class="ms-modal__header">
+                <div class="ms-modal__title">Thêm mới màu sắc</div>
+                <button type="button" class="ms-modal__close" id="btnCloseAdd">×</button>
+            </div>
+
+            <form th:action="@{/mau-sac/save}" method="post" th:object="${mauSac}">
+                <div class="ms-modal__body">
+                    <div class="ms-field">
+                        <label>Tên màu <span class="req">*</span></label>
+                        <input type="text" th:field="*{tenMau}" placeholder="Nhập tên màu" required>
+                    </div>
+
+                    <div class="ms-field">
+                        <label>Mã màu HEX <span class="req">*</span></label>
+                        <input type="text" th:field="*{maMauHex}" placeholder="#000000" required>
+                    </div>
+
+                    <div class="ms-field">
+                        <label>Trạng thái</label>
+                        <select th:field="*{trangThai}">
+                            <option value="1">Đang theo dõi</option>
+                            <option value="0">Ngừng theo dõi</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="ms-modal__footer">
+                    <button type="button" class="ms-btn ms-btn--ghost" id="btnCancelAdd">Hủy</button>
+                    <button type="submit" class="ms-btn ms-btn--outline" name="continue" value="0">Lưu</button>
+                    <button type="submit" class="ms-btn ms-btn--primary" name="continue" value="1">Lưu và thêm mới</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT -->
+    <div class="ms-modal" id="editModal" aria-hidden="true">
+        <div class="ms-modal__overlay" id="editModalOverlay"></div>
+
+        <div class="ms-modal__dialog">
+            <div class="ms-modal__header">
+                <div class="ms-modal__title">Sửa màu sắc</div>
+                <button type="button" class="ms-modal__close" id="btnCloseEdit">×</button>
+            </div>
+
+            <form th:action="@{/mau-sac/save}" method="post" th:object="${mauSac}">
+                <input type="hidden" th:field="*{mauSacId}"/>
+
+                <div class="ms-modal__body">
+                    <div class="ms-field">
+                        <label>Mã màu sắc</label>
+                        <input type="text"
+                               th:value="${mauSac.mauSacId != null ? 'MS' + #numbers.formatInteger(mauSac.mauSacId, 6) : ''}"
+                               readonly>
+                    </div>
+
+                    <div class="ms-field">
+                        <label>Tên màu <span class="req">*</span></label>
+                        <input type="text" th:field="*{tenMau}" required>
+                    </div>
+
+                    <div class="ms-field">
+                        <label>Mã màu HEX <span class="req">*</span></label>
+                        <input type="text" th:field="*{maMauHex}" required>
+                    </div>
+
+                    <div class="ms-field">
+                        <label>Trạng thái</label>
+                        <select th:field="*{trangThai}">
+                            <option value="1">Đang theo dõi</option>
+                            <option value="0">Ngừng theo dõi</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="ms-modal__footer">
+                    <button type="button" class="ms-btn ms-btn--ghost" id="btnCancelEdit">Hủy</button>
+                    <button type="submit" class="ms-btn ms-btn--primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        (function () {
+            const modal = document.getElementById('addModal');
+            const openBtn = document.getElementById('btnOpenAdd');
+            const closeBtn = document.getElementById('btnCloseAdd');
+            const cancelBtn = document.getElementById('btnCancelAdd');
+            const overlay = document.getElementById('addModalOverlay');
+
+            function openModal() {
+                if (!modal) return;
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeModal() {
+                if (!modal) return;
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            openBtn && openBtn.addEventListener('click', openModal);
+            closeBtn && closeBtn.addEventListener('click', closeModal);
+            cancelBtn && cancelBtn.addEventListener('click', closeModal);
+            overlay && overlay.addEventListener('click', closeModal);
+
+            const url = new URL(window.location.href);
+            const fromUrl = url.searchParams.get('openAdd') === '1';
+            const fromModel = /*[[${openAdd}]]*/ 0 === 1;
+
+            if (fromUrl || fromModel) {
+                openModal();
+            }
+        })();
+
+        (function () {
+            const editModal = document.getElementById('editModal');
+            const closeEdit = document.getElementById('btnCloseEdit');
+            const cancelEdit = document.getElementById('btnCancelEdit');
+            const overlayEdit = document.getElementById('editModalOverlay');
+
+            function openEditModal() {
+                if (!editModal) return;
+                editModal.classList.add('is-open');
+                editModal.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeEditModal() {
+                if (!editModal) return;
+                editModal.classList.remove('is-open');
+                editModal.setAttribute('aria-hidden', 'true');
+                window.location.href = '/mau-sac';
+            }
+
+            closeEdit && closeEdit.addEventListener('click', closeEditModal);
+            cancelEdit && cancelEdit.addEventListener('click', closeEditModal);
+            overlayEdit && overlayEdit.addEventListener('click', closeEditModal);
+
+            const shouldOpenEdit = /*[[${openEdit}]]*/ 0;
+            if (shouldOpenEdit === 1) {
+                openEditModal();
+            }
+        })();
+    </script>
+</div>

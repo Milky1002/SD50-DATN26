@@ -1,6 +1,6 @@
-package com.example.sd50datn.repository;
+package com.example.sd50datn.Repository;
 
-import com.example.sd50datn.entity.ChuongTrinhKhuyenMaiChiTiet;
+import com.example.sd50datn.Entity.ChuongTrinhKhuyenMaiChiTiet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,15 +15,23 @@ public interface ChuongTrinhKhuyenMaiChiTietRepository extends JpaRepository<Chu
 
     List<ChuongTrinhKhuyenMaiChiTiet> findBySanPhamId(Integer sanPhamId);
 
-    List<ChuongTrinhKhuyenMaiChiTiet> findByDanhMucSanPhamId(Integer danhMucSanPhamId);
+    List<ChuongTrinhKhuyenMaiChiTiet> findByDanhMucSanPham_DanhMucSanPhamId(Integer danhMucSanPhamId);
 
-    @Query("SELECT c FROM ChuongTrinhKhuyenMaiChiTiet c " +
-           "WHERE c.chuongTrinhKhuyenMai.id = :chuongTrinhId " +
-           "AND (c.sanPham.id = :sanPhamId OR c.danhMucSanPham.id IN " +
-           "(SELECT sp.danhMucSanPham.id FROM SanPham sp WHERE sp.id = :sanPhamId))")
+    @Query("""
+           SELECT c FROM ChuongTrinhKhuyenMaiChiTiet c
+           WHERE c.chuongTrinhKhuyenMai.id = :chuongTrinhId
+           AND (
+                c.sanPham.id = :sanPhamId
+                OR c.danhMucSanPham.danhMucSanPhamId IN (
+                    SELECT sp.danhMucSanPham.danhMucSanPhamId
+                    FROM SanPham sp
+                    WHERE sp.id = :sanPhamId
+                )
+           )
+           """)
     List<ChuongTrinhKhuyenMaiChiTiet> findApplicableDetailsForProduct(
-        @Param("chuongTrinhId") Integer chuongTrinhId,
-        @Param("sanPhamId") Integer sanPhamId
+            @Param("chuongTrinhId") Integer chuongTrinhId,
+            @Param("sanPhamId") Integer sanPhamId
     );
 
     void deleteByChuongTrinhKhuyenMaiId(Integer chuongTrinhKhuyenMaiId);

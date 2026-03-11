@@ -1,7 +1,11 @@
-package com.example.sd50datn.controller;
+package com.example.sd50datn.Controller;
 
-import com.example.sd50datn.dto.*;
-import com.example.sd50datn.service.ChuongTrinhKhuyenMaiService;
+import com.example.sd50datn.Dto.ApiResponse;
+import com.example.sd50datn.Dto.ChuongTrinhKhuyenMaiDTO;
+import com.example.sd50datn.Dto.ChuongTrinhKhuyenMaiRequest;
+import com.example.sd50datn.Service.ChuongTrinhKhuyenMaiService;
+import com.example.sd50datn.Dto.*;
+import com.example.sd50datn.Service.ChuongTrinhKhuyenMaiService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

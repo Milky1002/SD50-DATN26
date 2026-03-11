@@ -1,6 +1,6 @@
-package com.example.sd50datn.repository;
+package com.example.sd50datn.Repository;
 
-import com.example.sd50datn.entity.ChuongTrinhKhuyenMai;
+import com.example.sd50datn.Entity.ChuongTrinhKhuyenMai;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

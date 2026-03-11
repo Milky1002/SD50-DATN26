@@ -1,4 +1,4 @@
-package com.example.sd50datn.dto;
+package com.example.sd50datn.Dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

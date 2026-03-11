@@ -25,11 +25,11 @@ public interface InvoiceRepository extends JpaRepository<HoaDon, Integer> {
     }
 
     interface InvoiceStatsProjection {
-        long getTotalInvoices();
+        Long getTotalInvoices();
 
-        long getWaitingPayment();
+        Long getWaitingPayment();
 
-        long getCompleted();
+        Long getCompleted();
     }
 
     @Query(

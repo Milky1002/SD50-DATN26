@@ -20,7 +20,11 @@ public class OrderController {
         model.addAttribute("pageTitle", "Quản lý đơn hàng");
         model.addAttribute("pageHeading", "Quản lý đơn hàng");
         model.addAttribute("orders", orderService.getOrderSummaries());
-        return "order-management";
+
+        model.addAttribute("activeMenu", "donhang");
+        model.addAttribute("content", "order-management");
+        model.addAttribute("pageCss", "/css/order-management.css");
+        return "layout";
     }
 
     @PostMapping("/orders/{id}/delete")

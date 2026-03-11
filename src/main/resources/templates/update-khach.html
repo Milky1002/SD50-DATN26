@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- fragment để layout gọi -->
+<div th:fragment="content">
+
+    <h2>Sửa khách hàng</h2>
+
+    <form th:action="@{/khachhang/update}" th:object="${kh}" method="post">
+
+        <input type="hidden" th:field="*{khachHangId}">
+
+        Tên
+        <input type="text" th:field="*{tenKhachHang}">
+        <br>
+        <span style="color:red" th:errors="*{tenKhachHang}"></span>
+
+        <br>
+
+        SĐT
+        <input type="text" th:field="*{sdt}">
+        <br>
+        <span style="color:red" th:errors="*{sdt}"></span>
+
+        <br>
+
+        Email
+        <input type="text" th:field="*{email}">
+        <br>
+        <span style="color:red" th:errors="*{email}"></span>
+
+        <br>
+
+        Địa chỉ
+        <input type="text" th:field="*{diaChiKhachHang}">
+        <br>
+        <span style="color:red" th:errors="*{diaChiKhachHang}"></span>
+
+        <br>
+
+        Trạng thái
+        <select th:field="*{trangThai}">
+            <option value="1">Đang theo dõi</option>
+            <option value="0">Ngừng</option>
+        </select>
+
+        <br><br>
+
+        <button type="submit">Update</button>
+
+    </form>
+
+</div>
+
+</body>
+</html>

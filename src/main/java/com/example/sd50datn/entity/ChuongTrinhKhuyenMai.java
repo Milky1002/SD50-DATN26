@@ -1,4 +1,4 @@
-package com.example.sd50datn.entity;
+package com.example.sd50datn.Entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

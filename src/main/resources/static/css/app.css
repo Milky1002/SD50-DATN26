@@ -117,7 +117,17 @@ body{ margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; 
     border-radius: 999px;
     cursor:pointer;
 }
-
+.menu-icon{
+    width:16px;
+    height:16px;
+    object-fit:contain;
+}
+.nav__icon{
+    width:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
 .avatar{
     width: 34px; height: 34px;
     border-radius: 999px;

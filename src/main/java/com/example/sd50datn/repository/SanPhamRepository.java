@@ -1,6 +1,6 @@
-package com.example.sd50datn.repository;
+package com.example.sd50datn.Repository;
 
-import com.example.sd50datn.entity.SanPham;
+import com.example.sd50datn.Entity.SanPham;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,7 +16,7 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
 
     List<SanPham> findByTrangThai(Integer trangThai);
 
-    List<SanPham> findByDanhMucSanPhamId(Integer danhMucSanPhamId);
+    List<SanPham> findByDanhMucSanPham_DanhMucSanPhamId(Integer danhMucSanPhamId);
 
     boolean existsByMaSanPham(String maSanPham);
 

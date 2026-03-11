@@ -1,15 +1,15 @@
-package com.example.sd50datn.service;
+package com.example.sd50datn.Service;
 
-import com.example.sd50datn.dto.ChuongTrinhKhuyenMaiChiTietDTO;
-import com.example.sd50datn.dto.ChuongTrinhKhuyenMaiChiTietRequest;
-import com.example.sd50datn.dto.ChuongTrinhKhuyenMaiDTO;
-import com.example.sd50datn.dto.ChuongTrinhKhuyenMaiRequest;
-import com.example.sd50datn.entity.ChuongTrinhKhuyenMai;
-import com.example.sd50datn.entity.ChuongTrinhKhuyenMaiChiTiet;
-import com.example.sd50datn.entity.SanPham;
-import com.example.sd50datn.repository.ChuongTrinhKhuyenMaiChiTietRepository;
-import com.example.sd50datn.repository.ChuongTrinhKhuyenMaiRepository;
-import com.example.sd50datn.repository.SanPhamRepository;
+import com.example.sd50datn.Dto.ChuongTrinhKhuyenMaiChiTietDTO;
+import com.example.sd50datn.Dto.ChuongTrinhKhuyenMaiChiTietRequest;
+import com.example.sd50datn.Dto.ChuongTrinhKhuyenMaiDTO;
+import com.example.sd50datn.Dto.ChuongTrinhKhuyenMaiRequest;
+import com.example.sd50datn.Entity.ChuongTrinhKhuyenMai;
+import com.example.sd50datn.Entity.ChuongTrinhKhuyenMaiChiTiet;
+import com.example.sd50datn.Entity.SanPham;
+import com.example.sd50datn.Repository.ChuongTrinhKhuyenMaiChiTietRepository;
+import com.example.sd50datn.Repository.ChuongTrinhKhuyenMaiRepository;
+import com.example.sd50datn.Repository.SanPhamRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -274,7 +274,7 @@ public class ChuongTrinhKhuyenMaiService {
         }
         
         if (entity.getDanhMucSanPham() != null) {
-            dto.setDanhMucSanPhamId(entity.getDanhMucSanPham().getId());
+            dto.setDanhMucSanPhamId(entity.getDanhMucSanPham().getDanhMucSanPhamId());
             dto.setTenDanhMuc(entity.getDanhMucSanPham().getTenDanhMuc());
         }
         

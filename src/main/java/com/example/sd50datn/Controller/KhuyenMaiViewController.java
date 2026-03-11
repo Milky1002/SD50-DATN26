@@ -1,6 +1,6 @@
-package com.example.sd50datn.controller;
+package com.example.sd50datn.Controller;
 
-import com.example.sd50datn.service.ChuongTrinhKhuyenMaiService;
+import com.example.sd50datn.Service.ChuongTrinhKhuyenMaiService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +18,9 @@ public class KhuyenMaiViewController {
     public String khuyenMaiPage(Model model) {
         model.addAttribute("pageTitle", "Quản Lý Khuyến Mại");
         model.addAttribute("pageHeading", "Nghiệp vụ khác");
-        return "khuyen-mai/index";
+        model.addAttribute("activeMenu", "khuyenmai");
+        model.addAttribute("content", "khuyen-mai/index");
+        model.addAttribute("pageCss", "/css/khuyen-mai.css");
+        return "layout";
     }
 }

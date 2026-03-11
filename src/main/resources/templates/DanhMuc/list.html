@@ -1,0 +1,256 @@
+
+<div th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/danhmuc.css}">
+    <div class="dm-wrap">
+        <div class="dm-toolbar">
+            <form class="dm-search" th:action="@{/danh-muc}" method="get">
+                <span class="dm-search__icon">🔎</span>
+                <input name="q" th:value="${q}" placeholder="Tìm tên danh mục sản phẩm"/>
+            </form>
+
+            <div class="dm-actions">
+                <button class="dm-btn dm-btn--primary" type="button" id="btnOpenAdd">+ Thêm mới</button>
+            </div>
+        </div>
+
+
+
+        <div class="dm-card dm-tablewrap">
+            <table class="dm-table">
+                <thead>
+                <tr>
+                    <th style="width:160px">Danh mục sản phẩm</th>
+                    <th>Tên danh mục sản phẩm</th>
+                    <th style="width:260px">Diễn giải</th>
+                    <th style="width:160px">Trạng thái</th>
+                    <th style="width:160px; text-align:right;">Chức năng</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${list}">
+                    <td class="mono"
+                        th:text="${'DM' + #numbers.formatInteger(item.danhMucSanPhamId, 6)}"></td>
+                    <td th:text="${item.tenDanhMuc}"></td>
+                    <td class="muted">--</td>
+                    <td>
+                        <span th:if="${item.trangThai == 1}" class="pill pill--ok">Đang theo dõi</span>
+                        <span th:if="${item.trangThai == 0}" class="pill pill--off">Ngừng theo dõi</span>
+                    </td>
+                    <td style="text-align:right;">
+                        <a class="dm-action"
+                           th:href="@{/danh-muc/edit/{id}(id=${item.danhMucSanPhamId})}">
+                            ✎ Sửa
+                        </a>
+                        <a class="dm-action dm-action--danger"
+                           th:href="@{/danh-muc/delete/{id}(id=${item.danhMucSanPhamId})}"
+                           onclick="return confirm('Xóa danh mục này?')">🗑 Xóa</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<!--    Model ADD-->
+    <div class="dm-modal" id="addModal" aria-hidden="true">
+        <div class="dm-modal__overlay" id="addModalOverlay"></div>
+
+        <div class="dm-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
+            <div class="dm-modal__header">
+                <div class="dm-modal__title" id="addModalTitle">Thêm mới Nhóm hàng hóa</div>
+                <button type="button" class="dm-modal__close" id="btnCloseAdd" aria-label="Đóng">×</button>
+            </div>
+
+            <form th:action="@{/danh-muc/save}" method="post" th:object="${dm}">
+                <div class="dm-modal__body">
+
+
+                    <div class="dm-field">
+                        <label>Tên nhóm hàng hóa <span class="req">*</span></label>
+
+                        <input type="text"
+                               th:field="*{tenDanhMuc}"
+                               placeholder="Nhập tên nhóm hàng hóa">
+
+                        <div class="dm-error"
+                             th:if="${#fields.hasErrors('tenDanhMuc')}"
+                             th:errors="*{tenDanhMuc}">
+                        </div>
+                    </div>
+
+                    <div class="dm-field">
+                        <label>Trạng thái</label>
+                        <select th:field="*{trangThai}">
+                            <option value="1">Đang theo dõi</option>
+                            <option value="0">Ngừng theo dõi</option>
+                        </select>
+                    </div>
+
+
+                </div>
+
+                <div class="dm-modal__footer">
+                    <button type="button" class="dm-btn dm-btn--ghost" id="btnCancelAdd">Hủy</button>
+
+                    <!-- Lưu -->
+                    <button type="submit" class="dm-btn dm-btn--outline" name="continue" value="0">Lưu</button>
+
+                    <!-- Lưu và thêm mới -->
+                    <button type="submit" class="dm-btn dm-btn--primary" name="continue" value="1">Lưu và thêm mới</button>
+                </div>
+            </form>
+        </div>
+
+
+    </div>
+    <!-- MODAL SỬA -->
+    <div class="dm-modal" id="editModal" aria-hidden="true">
+        <div class="dm-modal__overlay" id="editModalOverlay"></div>
+
+        <div class="dm-modal__dialog" role="dialog" aria-modal="true">
+            <div class="dm-modal__header">
+                <div class="dm-modal__title">Sửa Nhóm hàng hóa</div>
+                <button type="button" class="dm-modal__close" id="btnCloseEdit">×</button>
+            </div>
+
+            <form th:action="@{/danh-muc/save}" method="post" th:object="${dm}">
+                <input type="hidden" th:field="*{danhMucSanPhamId}"/>
+
+                <div class="dm-modal__body">
+
+                    <div class="dm-field">
+                        <label>Mã nhóm hàng hóa</label>
+                        <input type="text"
+                               th:value="${dm.danhMucSanPhamId != null ? 'NHH' + #numbers.formatInteger(dm.danhMucSanPhamId, 7) : ''}"
+                               readonly>
+                    </div>
+
+                    <div class="dm-field">
+                        <label>Tên nhóm hàng hóa <span class="req">*</span></label>
+                        <input type="text" th:field="*{tenDanhMuc}" required>
+                    </div>
+
+                    <div class="dm-field dm-checkbox">
+                        <label>Trạng thái</label>
+
+                        <label class="checkbox-wrap">
+                            <input type="checkbox"
+                                   id="trangThaiCheckbox"
+                                   th:checked="${dm.trangThai == 1}">
+                            <span>Ngừng theo dõi</span>
+                        </label>
+
+                        <input type="hidden" th:field="*{trangThai}" id="trangThaiHidden">
+                    </div>
+
+                </div>
+
+                <div class="dm-modal__footer">
+                    <button type="button" class="dm-btn dm-btn--ghost" id="btnCancelEdit">Hủy</button>
+                    <button type="submit" class="dm-btn dm-btn--primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        (function(){
+            const btn = document.getElementById('toggleInlineForm');
+            const box = document.getElementById('inlineForm');
+            if(!btn || !box) return;
+            btn.addEventListener('click', () => {
+                const hidden = box.style.display === 'none';
+                box.style.display = hidden ? '' : 'none';
+                btn.textContent = hidden ? 'Thu gọn' : 'Mở rộng';
+            });
+        })();
+        (function () {
+            const modal = document.getElementById('addModal');
+            const openBtn = document.getElementById('btnOpenAdd');
+            const closeBtn = document.getElementById('btnCloseAdd');
+            const cancelBtn = document.getElementById('btnCancelAdd');
+            const overlay = document.getElementById('addModalOverlay');
+
+            function openModal() {
+                if (!modal) return;
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+                const input = modal.querySelector('input[name$="tenDanhMuc"]');
+                input && setTimeout(() => input.focus(), 50);
+            }
+
+            function closeModal() {
+                if (!modal) return;
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            openBtn && openBtn.addEventListener('click', openModal);
+            closeBtn && closeBtn.addEventListener('click', closeModal);
+            cancelBtn && cancelBtn.addEventListener('click', closeModal);
+            overlay && overlay.addEventListener('click', closeModal);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+
+            const url = new URL(window.location.href);
+            const fromUrl = url.searchParams.get('openAdd') === '1';
+            const fromModel = /*[[${openAdd}]]*/ 0 === 1;
+
+            if (fromUrl || fromModel) {
+                openModal();
+            }
+        })();
+        // function sữa
+        (function () {
+            const editModal = document.getElementById('editModal');
+            const closeEdit = document.getElementById('btnCloseEdit');
+            const cancelEdit = document.getElementById('btnCancelEdit');
+            const overlayEdit = document.getElementById('editModalOverlay');
+
+            function openEditModal() {
+                if (!editModal) return;
+                editModal.classList.add('is-open');
+                editModal.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeEditModal() {
+                if (!editModal) return;
+                editModal.classList.remove('is-open');
+                editModal.setAttribute('aria-hidden', 'true');
+                window.location.href = '/danh-muc';
+            }
+
+            closeEdit && closeEdit.addEventListener('click', closeEditModal);
+            cancelEdit && cancelEdit.addEventListener('click', closeEditModal);
+            overlayEdit && overlayEdit.addEventListener('click', closeEditModal);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeEditModal();
+            });
+
+            const shouldOpenEdit = '[[${openEdit}]]';
+            if (shouldOpenEdit === '1') {
+                openEditModal();
+            }
+        })();
+        (function () {
+
+            const checkbox = document.getElementById("trangThaiCheckbox");
+            const hidden = document.getElementById("trangThaiHidden");
+
+            if (!checkbox || !hidden) return;
+
+            function updateValue() {
+                hidden.value = checkbox.checked ? 0 : 1;
+            }
+
+            checkbox.addEventListener("change", updateValue);
+
+            updateValue();
+
+        })();
+    </script>
+
+
+
+</div>
