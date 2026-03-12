@@ -1,4 +1,4 @@
-﻿(function () {
+﻿﻿(function () {
     const metrics = window.dashboardMetrics || {labels: [], current: [], previous: []};
     const chart = document.getElementById("revenueChart");
     const radios = document.querySelectorAll('input[name="revenueSeries"]');
@@ -64,9 +64,9 @@
         }
 
         const completed = Number(donut.dataset.completed || 0);
-        const returned = Number(donut.dataset.returned || 0);
+        const shipping = Number(donut.dataset.shipping || 0);
         const canceled = Number(donut.dataset.canceled || 0);
-        const total = completed + returned + canceled;
+        const total = completed + shipping + canceled;
 
         if (total <= 0) {
             donut.style.background = "conic-gradient(#d1d5db 0deg 360deg)";
@@ -74,13 +74,13 @@
         }
 
         const completedDeg = (completed / total) * 360;
-        const returnedDeg = (returned / total) * 360;
-        const canceledDeg = 360 - completedDeg - returnedDeg;
+        const shippingDeg = (shipping / total) * 360;
+        const canceledDeg = 360 - completedDeg - shippingDeg;
 
         donut.style.background = `conic-gradient(
             #22c55e 0deg ${completedDeg}deg,
-            #5b5bd6 ${completedDeg}deg ${completedDeg + returnedDeg}deg,
-            #ef4444 ${completedDeg + returnedDeg}deg ${completedDeg + returnedDeg + canceledDeg}deg
+            #5b5bd6 ${completedDeg}deg ${completedDeg + shippingDeg}deg,
+            #ef4444 ${completedDeg + shippingDeg}deg ${completedDeg + shippingDeg + canceledDeg}deg
         )`;
     }
 

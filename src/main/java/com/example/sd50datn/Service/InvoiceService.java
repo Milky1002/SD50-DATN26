@@ -9,6 +9,6 @@ public interface InvoiceService {
 
     InvoiceStatsDTO getStats();
 
-    List<InvoiceSummaryDTO> getInvoiceSummaries();
+    List<InvoiceSummaryDTO> getInvoiceSummaries(String keyword);
 }
 

@@ -42,7 +42,8 @@ public class DashboardController {
                 dashboardView.getPreviousFromDate().format(rangeFormatter) + " - " +
                         dashboardView.getPreviousToDate().format(rangeFormatter));
         model.addAttribute("salesDateLabel",
-                dashboardView.getDataReferenceDate().format(rangeFormatter));
+                dashboardView.getCurrentFromDate().format(rangeFormatter) + " - " +
+                        dashboardView.getCurrentToDate().format(rangeFormatter));
 
         return "dashboard";
     }

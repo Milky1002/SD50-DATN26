@@ -21,8 +21,16 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<InvoiceSummaryDTO> getInvoiceSummaries() {
-        return invoiceRepository.fetchInvoiceSummaries();
+    public List<InvoiceSummaryDTO> getInvoiceSummaries(String keyword) {
+        String q = keyword != null ? keyword.trim() : "";
+        if (q.isEmpty()) {
+            return invoiceRepository.fetchInvoiceSummaries();
+        }
+        String idKeyword = q.replaceAll("\\D+", "");
+        if (idKeyword.isBlank()) {
+            idKeyword = null;
+        }
+        return invoiceRepository.fetchInvoiceSummariesByKeyword(q, idKeyword);
     }
 }
 

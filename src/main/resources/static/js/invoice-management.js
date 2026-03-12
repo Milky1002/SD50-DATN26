@@ -19,8 +19,8 @@
         rows.forEach(function (row) {
             const code = row.querySelector(".invoice-code")?.textContent || "";
             const name = row.querySelector(".invoice-row__name")?.textContent || "";
-            const phone = row.querySelector(".invoice-row__sub")?.textContent || "";
             const statusText = row.getAttribute("data-status") || "";
+            const phone = row.querySelector(".invoice-row__sub")?.textContent || "";
             const dateAttr = row.querySelector("[data-date]");
             const d = dateAttr ? new Date(dateAttr.getAttribute("data-date")) : null;
 

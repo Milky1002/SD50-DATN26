@@ -7,32 +7,32 @@
 .order-card{
     display:flex;
     flex-direction:column;
-    gap:16px;
+    gap:12px;
 }
 
 .order-card__header{
     display:flex;
     align-items:flex-start;
     justify-content:space-between;
-    gap:12px;
+    gap:10px;
 }
 
 .order-card__subtitle{
-    margin:4px 0 0;
-    font-size:13px;
+    margin:2px 0 0;
+    font-size:12px;
     color:#6b7280;
 }
 
 .order-card__header-actions{
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:6px;
 }
 
 .btn{
-    border-radius:10px;
-    padding:8px 12px;
-    font-size:14px;
+    border-radius:8px;
+    padding:6px 10px;
+    font-size:13px;
     border:1px solid transparent;
     background:#e5e7eb;
     cursor:pointer;
@@ -122,7 +122,7 @@
 .order-table{
     width:100%;
     border-collapse:collapse;
-    font-size:13px;
+    font-size:12.5px;
 }
 
 .order-table thead{
@@ -131,7 +131,7 @@
 
 .order-table th,
 .order-table td{
-    padding:10px 12px;
+    padding:8px 10px;
     border-bottom:1px solid #e5e7eb;
     vertical-align:middle;
 }
@@ -153,9 +153,9 @@
 .badge{
     display:inline-flex;
     align-items:center;
-    padding:4px 8px;
+    padding:3px 8px;
     border-radius:999px;
-    font-size:12px;
+    font-size:11.5px;
     font-weight:500;
 }
 
@@ -215,16 +215,16 @@
 
 .order-tabs{
     display:flex;
-    gap:8px;
-    margin-bottom:12px;
+    gap:6px;
+    margin-bottom:8px;
 }
 
 .order-tabs__item{
     border:none;
     background:transparent;
-    padding:4px 10px;
+    padding:3px 8px;
     border-radius:999px;
-    font-size:13px;
+    font-size:12.5px;
     color:#6b7280;
     cursor:pointer;
 }
@@ -241,12 +241,12 @@
 }
 
 .order-row__avatar{
-    width:32px;
-    height:32px;
+    width:28px;
+    height:28px;
     border-radius:999px;
     display:grid;
     place-items:center;
-    font-size:13px;
+    font-size:12px;
     font-weight:600;
     color:#fff;
 }
@@ -258,11 +258,11 @@
 
 .order-row__name{
     font-weight:600;
-    font-size:13px;
+    font-size:12.5px;
 }
 
 .order-row__sub{
-    font-size:12px;
+    font-size:11.5px;
     color:#6b7280;
 }
 
@@ -273,19 +273,19 @@
 }
 
 .order-row__product-img{
-    width:40px;
-    height:40px;
-    border-radius:10px;
+    width:32px;
+    height:32px;
+    border-radius:8px;
     background:#e5e7eb;
 }
 
 .order-row__product-name{
-    font-size:13px;
+    font-size:12.5px;
     font-weight:500;
 }
 
 .order-row__date{
-    font-size:13px;
+    font-size:12.5px;
 }
 
 .chip{
@@ -317,20 +317,20 @@
 }
 
 .status-select{
-    height:30px;
-    padding:4px 8px;
+    height:28px;
+    padding:3px 8px;
     border-radius:999px;
     border:1px solid #e5e7eb;
-    font-size:12px;
+    font-size:11.5px;
     background:#f9fafb;
 }
 
 .order-footer{
-    margin-top:12px;
+    margin-top:8px;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    font-size:12px;
+    font-size:11.5px;
     color:#6b7280;
 }
 
@@ -341,13 +341,13 @@
 }
 
 .pagination__item{
-    min-width:28px;
-    height:28px;
+    min-width:26px;
+    height:26px;
     padding:0 8px;
     border-radius:999px;
     border:1px solid #e5e7eb;
     background:#fff;
-    font-size:12px;
+    font-size:11.5px;
     cursor:pointer;
 }
 

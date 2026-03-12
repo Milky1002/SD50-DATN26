@@ -24,7 +24,7 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
     interface OperationProjection {
         Long getCompletedOrders();
 
-        Long getReturnedOrders();
+        Long getShippingOrders();
 
         Long getCanceledOrders();
     }
@@ -34,6 +34,15 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
 
         BigDecimal getRevenue();
     }
+
+    @Query(
+            value = """
+                    SELECT MIN(CAST(h.Ngay_tao AS date))
+                    FROM HoaDon h
+                    """,
+            nativeQuery = true
+    )
+    LocalDate findEarliestInvoiceDate();
 
     @Query(
             value = """
@@ -50,17 +59,24 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
                         COUNT(*) AS totalOrders,
                         COALESCE(SUM(h.Tong_tien_sau_khi_giam), 0) AS totalRevenue
                     FROM HoaDon h
-                    WHERE CAST(h.Ngay_tao AS date) = :reportDate
+                    WHERE CAST(h.Ngay_tao AS date) BETWEEN :fromDate AND :toDate
+                      AND EXISTS (
+                          SELECT 1
+                          FROM ThanhToan tt
+                          WHERE tt.Hoa_don_id = h.Hoa_don_id
+                            AND tt.Trang_thai = 1
+                      )
                     """,
             nativeQuery = true
     )
-    SalesProjection findSalesByDate(@Param("reportDate") LocalDate reportDate);
+    SalesProjection findSalesByRange(@Param("fromDate") LocalDate fromDate,
+                                     @Param("toDate") LocalDate toDate);
 
     @Query(
             value = """
                     SELECT
                         SUM(CASE WHEN h.Trang_thai = 2 THEN 1 ELSE 0 END) AS completedOrders,
-                        SUM(CASE WHEN h.Trang_thai IN (4, 5) THEN 1 ELSE 0 END) AS returnedOrders,
+                        SUM(CASE WHEN h.Trang_thai = 1 THEN 1 ELSE 0 END) AS shippingOrders,
                         SUM(CASE WHEN h.Trang_thai = 3 THEN 1 ELSE 0 END) AS canceledOrders
                     FROM HoaDon h
                     WHERE CAST(h.Ngay_tao AS date) BETWEEN :fromDate AND :toDate
@@ -77,6 +93,12 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
                         COALESCE(SUM(h.Tong_tien_sau_khi_giam), 0) AS revenue
                     FROM HoaDon h
                     WHERE CAST(h.Ngay_tao AS date) BETWEEN :fromDate AND :toDate
+                      AND EXISTS (
+                          SELECT 1
+                          FROM ThanhToan tt
+                          WHERE tt.Hoa_don_id = h.Hoa_don_id
+                            AND tt.Trang_thai = 1
+                      )
                     GROUP BY CAST(h.Ngay_tao AS date)
                     ORDER BY CAST(h.Ngay_tao AS date)
                     """,
@@ -89,8 +111,12 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
         return Optional.ofNullable(findLatestInvoiceDate());
     }
 
-    default DashboardSalesModel fetchSalesByDate(LocalDate reportDate) {
-        SalesProjection projection = findSalesByDate(reportDate);
+    default Optional<LocalDate> fetchEarliestInvoiceDate() {
+        return Optional.ofNullable(findEarliestInvoiceDate());
+    }
+
+    default DashboardSalesModel fetchSalesByRange(LocalDate fromDate, LocalDate toDate) {
+        SalesProjection projection = findSalesByRange(fromDate, toDate);
         if (projection == null) {
             return new DashboardSalesModel(0, BigDecimal.ZERO);
         }
@@ -107,9 +133,9 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
         }
 
         long completed = projection.getCompletedOrders() != null ? projection.getCompletedOrders() : 0;
-        long returned = projection.getReturnedOrders() != null ? projection.getReturnedOrders() : 0;
+        long shipping = projection.getShippingOrders() != null ? projection.getShippingOrders() : 0;
         long canceled = projection.getCanceledOrders() != null ? projection.getCanceledOrders() : 0;
-        return new DashboardOperationModel(completed, returned, canceled);
+        return new DashboardOperationModel(completed, shipping, canceled);
     }
 
     default List<DashboardRevenuePointModel> fetchDailyRevenue(LocalDate fromDate, LocalDate toDate) {

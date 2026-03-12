@@ -1,4 +1,4 @@
-﻿<!doctype html>
+﻿﻿<!doctype html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
@@ -23,40 +23,80 @@
         </div>
 
         <nav class="nav">
-            <a class="nav__item active" th:href="@{/dashboard}">
-                <span class="nav__icon"></span>
+            <a class="nav__item"
+               th:href="@{/dashboard}"
+               th:classappend="${activeMenu == 'dashboard'} ? ' active'">
+                <span class="nav__icon">
+                    <img th:src="@{/images/iconbaocao.png}" class="menu-icon"/>
+                </span>
                 <span class="nav__text">Tổng quan</span>
             </a>
-            <a class="nav__item" href="#">
+
+            <a class="nav__item"
+
+               th:classappend="${activeMenu == 'nhanvien'} ? ' active'">
                 <span class="nav__icon"></span>
                 <span class="nav__text">Quản lý nhân viên</span>
             </a>
-            <a class="nav__item" href="#">
+
+
+            <a class="nav__item"
+               th:href="@{/khachhang/hienthi}"
+               th:classappend="${activeMenu == 'khachhang'} ? ' active'">
                 <span class="nav__icon"></span>
                 <span class="nav__text">Quản lý khách hàng</span>
             </a>
-            <a class="nav__item" href="#">
-                <span class="nav__icon"></span>
-                <span class="nav__text">Quản lý sản phẩm</span>
-            </a>
-            <a class="nav__item" th:href="@{/invoices}">
+
+            <a class="nav__item"
+               th:href="@{/invoices}"
+               th:classappend="${activeMenu == 'hoadon'} ? ' active'">
                 <span class="nav__icon"></span>
                 <span class="nav__text">Quản lý hóa đơn</span>
             </a>
-            <a class="nav__item" th:href="@{/orders}">
+            <a class="nav__item"
+               th:href="@{/orders}"
+               th:classappend="${activeMenu == 'ordes'} ? ' active'">
                 <span class="nav__icon"></span>
                 <span class="nav__text">Quản lý đơn hàng</span>
             </a>
-            <a class="nav__item" href="#">
+            <a class="nav__item"
+               th:href="@{/khuyen-mai}"
+               th:classappend="${activeMenu == 'khuyenmai'} ? ' active'">
                 <span class="nav__icon"></span>
-                <span class="nav__text">Báo cáo</span>
+                <span class="nav__text">Chương trình khuyến mãi</span>
+            </a>
+
+
+            <div class="nav__section-title">
+                <span class="nav__text">SẢN PHẨM</span>
+            </div>
+
+            <a class="nav__item"
+               href="#"
+               th:classappend="${activeMenu == 'sanpham'} ? ' active'">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Sản phẩm</span>
+            </a>
+            <a class="nav__item"
+               th:href="@{/danh-muc}"
+               th:classappend="${activeMenu == 'danhmuc'} ? ' active'">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Danh mục sản phẩm</span>
+            </a>
+            <a class="nav__item"
+               th:href="@{/mau-sac}"
+               th:classappend="${activeMenu == 'mausac'} ? ' active'">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Màu Sắc</span>
             </a>
 
             <div class="nav__section-title">
                 <span class="nav__text">KÊNH BÁN HÀNG</span>
             </div>
 
-            <a class="nav__item" href="#">
+            <a class="nav__item"
+               href="#"
+               th:classappend="${activeMenu == 'banhang'} ? ' active'">
                 <span class="nav__icon"></span>
                 <span class="nav__text">Bán tại cửa hàng</span>
             </a>
@@ -92,7 +132,7 @@
                         </select>
                     </div>
                     <div class="panel-note">
-                        Dữ liệu ngày: <strong th:text="${salesDateLabel}">--/--/----</strong>
+                        Dữ liệu: <strong th:text="${salesDateLabel}">--/--/----</strong>
                     </div>
 
                     <div class="sales-list">
@@ -154,7 +194,7 @@
 
                     <div class="donut-wrap">
                         <div id="operationDonut" class="donut-chart"
-                             th:attr="data-completed=${operationOverview.completedOrders},data-returned=${operationOverview.returnedOrders},data-canceled=${operationOverview.canceledOrders}">
+                             th:attr="data-completed=${operationOverview.completedOrders},data-shipping=${operationOverview.shippingOrders},data-canceled=${operationOverview.canceledOrders}">
                         </div>
                     </div>
 
@@ -166,8 +206,8 @@
                         </div>
                         <div class="legend-item">
                             <span class="dot dot--blue"></span>
-                            <span>Đơn đổi trả</span>
-                            <strong th:text="${operationOverview.returnedOrders}">0</strong>
+                            <span>Đang giao hàng</span>
+                            <strong th:text="${operationOverview.shippingOrders}">0</strong>
                         </div>
                         <div class="legend-item">
                             <span class="dot dot--red"></span>

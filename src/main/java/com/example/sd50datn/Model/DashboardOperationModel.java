@@ -8,10 +8,10 @@ import lombok.Getter;
 public class DashboardOperationModel {
 
     private final long completedOrders;
-    private final long returnedOrders;
+    private final long shippingOrders;
     private final long canceledOrders;
 
     public long getTotalOrders() {
-        return completedOrders + returnedOrders + canceledOrders;
+        return completedOrders + shippingOrders + canceledOrders;
     }
 }

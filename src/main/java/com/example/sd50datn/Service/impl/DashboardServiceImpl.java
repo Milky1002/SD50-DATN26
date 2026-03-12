@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,10 +24,14 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public DashboardViewModel getDashboardView() {
         LocalDate currentToDate = dashboardRepository.fetchLatestInvoiceDate().orElse(LocalDate.now());
-        LocalDate currentFromDate = currentToDate.minusDays(6);
+        LocalDate currentFromDate = dashboardRepository.fetchEarliestInvoiceDate().orElse(currentToDate);
+        if (currentFromDate.isAfter(currentToDate)) {
+            currentFromDate = currentToDate;
+        }
 
+        long rangeDays = ChronoUnit.DAYS.between(currentFromDate, currentToDate);
         LocalDate previousToDate = currentFromDate.minusDays(1);
-        LocalDate previousFromDate = previousToDate.minusDays(6);
+        LocalDate previousFromDate = previousToDate.minusDays(rangeDays);
 
         List<DashboardRevenuePointModel> currentSeries = fillMissingDays(
                 dashboardRepository.fetchDailyRevenue(currentFromDate, currentToDate),
@@ -41,7 +46,7 @@ public class DashboardServiceImpl implements DashboardService {
         );
 
         return new DashboardViewModel(
-                dashboardRepository.fetchSalesByDate(currentToDate),
+                dashboardRepository.fetchSalesByRange(currentFromDate, currentToDate),
                 dashboardRepository.fetchOperationStats(currentFromDate, currentToDate),
                 currentSeries,
                 previousSeries,

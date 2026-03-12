@@ -25,10 +25,12 @@
         </div>
 
         <div class="invoice-filters">
-            <div class="invoice-filters__search">
-                <input id="invoiceSearchInput" class="invoice-input" type="text"
+            <form class="invoice-filters__search" method="get" th:action="@{/invoices}">
+                <input id="invoiceSearchInput" class="invoice-input" type="text" name="q"
+                       th:value="${searchQuery}"
                        placeholder="Tìm kiếm mã hóa đơn, tên khách hàng...">
-            </div>
+                <button class="btn btn--secondary" type="submit">Tìm</button>
+            </form>
             <div class="invoice-filters__right">
                 <select id="invoiceStatusFilter" class="invoice-input">
                     <option value="">Tất cả trạng thái</option>

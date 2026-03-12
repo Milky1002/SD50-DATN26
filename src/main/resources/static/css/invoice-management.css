@@ -43,6 +43,13 @@
 
 .invoice-filters__search{
     flex:1;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.invoice-filters__search .invoice-input{
+    flex:1;
 }
 
 .invoice-filters__right{
