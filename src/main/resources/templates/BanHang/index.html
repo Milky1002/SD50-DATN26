@@ -1,0 +1,442 @@
+
+<div th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/banhang.css}">
+
+    <div class="pos-container">
+        <!-- ORDER TABS -->
+        <div class="pos-tabs">
+            <div class="pos-tab pos-tab--active" id="tab1">
+                <span>Đơn hàng 1</span>
+                <button type="button" class="pos-tab__close" title="Đóng">&times;</button>
+            </div>
+            <button type="button" class="pos-tab pos-tab--add" id="btnAddTab" title="Thêm đơn hàng">+</button>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="pos-main">
+            <!-- SEARCH BAR -->
+            <div class="pos-search">
+                <span class="pos-search__icon">&#128270;</span>
+                <input type="text" id="productSearch" placeholder="Tìm kiếm hàng hóa (F3)" autocomplete="off"/>
+                <button type="button" class="pos-search__scan" id="btnScanPos" title="Quét mã vạch">&#128247;</button>
+            </div>
+
+            <!-- LEFT: CART ITEMS / EMPTY STATE -->
+            <div class="pos-body">
+                <div class="pos-cart-area" id="cartArea">
+                    <!-- Cart table header (hidden when empty) -->
+                    <div class="pos-cart-table" id="cartTable" style="display:none">
+                        <div class="pos-cart-thead">
+                            <span class="pos-col pos-col--stt">STT</span>
+                            <span class="pos-col pos-col--name">Tên hàng hóa</span>
+                            <span class="pos-col pos-col--qty">Số lượng</span>
+                            <span class="pos-col pos-col--price">Đơn giá</span>
+                            <span class="pos-col pos-col--total">Thành tiền</span>
+                            <span class="pos-col pos-col--action"></span>
+                        </div>
+                        <div class="pos-cart-tbody" id="cartItems"></div>
+                    </div>
+
+                    <!-- Empty state -->
+                    <div class="pos-empty" id="cartEmpty">
+                        <div class="pos-empty__icon">&#128722;</div>
+                        <p>Ấn <strong>F3</strong> để tìm kiếm hàng hóa</p>
+                    </div>
+
+                    <!-- Product search results dropdown -->
+                    <div class="pos-search-results" id="productList" style="display:none"></div>
+                </div>
+
+                <!-- RIGHT SIDEBAR -->
+                <div class="pos-sidebar">
+                    <!-- Customer -->
+                    <div class="pos-sidebar__section">
+                        <div class="pos-customer-row">
+                            <input type="text" id="customerInput" placeholder="Ten khach hang (F4)"/>
+                            <button type="button" class="pos-icon-btn" title="Them khach hang">+</button>
+                        </div>
+                        <div class="pos-customer-row" style="margin-top:6px;">
+                            <input type="text" id="customerPhone" placeholder="So dien thoai khach hang"/>
+                        </div>
+                        <div class="pos-datetime" id="posDatetime"></div>
+                    </div>
+
+                    <!-- Totals -->
+                    <div class="pos-sidebar__section">
+                        <div class="pos-total-row">
+                            <span>Tổng tiền</span>
+                            <span class="pos-badge" id="itemCountBadge">0 hàng hóa</span>
+                            <span class="pos-amount" id="totalAmount">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Coupon -->
+                    <div class="pos-sidebar__section">
+                        <div class="pos-coupon-row">
+                            <span class="pos-coupon-icon">&#127991;</span>
+                            <input type="text" id="couponInput" placeholder="Nhập mã ưu đãi"/>
+                        </div>
+                    </div>
+
+                    <!-- Payment -->
+                    <div class="pos-sidebar__section">
+                        <div class="pos-payment-label">
+                            <strong>Còn phải thu</strong>
+                            <span class="pos-amount" id="amountDue">0</span>
+                        </div>
+
+                        <div class="pos-payment-methods" id="paymentMethods">
+                            <label class="pos-radio">
+                                <input type="radio" name="paymentMethod" value="cash" checked/>
+                                <span>Tiền mặt</span>
+                            </label>
+                            <label class="pos-radio">
+                                <input type="radio" name="paymentMethod" value="transfer"/>
+                                <span>Chuyển khoản</span>
+                            </label>
+                            <label class="pos-radio">
+                                <input type="radio" name="paymentMethod" value="card"/>
+                                <span>Thẻ</span>
+                            </label>
+                            <label class="pos-radio">
+                                <input type="radio" name="paymentMethod" value="ewallet"/>
+                                <span>Ví</span>
+                            </label>
+                        </div>
+
+                        <div class="pos-field-row">
+                            <label>Tiền khách đưa</label>
+                            <input type="number" id="cashGiven" value="0" min="0" step="1000"/>
+                        </div>
+
+                        <div class="pos-field-row">
+                            <label>Tính vào công nợ</label>
+                            <span class="pos-amount" id="debtAmount">0</span>
+                        </div>
+                    </div>
+
+                    <!-- Options -->
+                    <div class="pos-sidebar__section pos-options">
+                        <a href="#" class="pos-link">Thông tin xuất hóa đơn &rarr;</a>
+                        <label class="pos-checkbox">
+                            <input type="checkbox" id="chkInvoice" checked/>
+                            <span>Phát hành hóa đơn ngay</span>
+                        </label>
+                        <label class="pos-checkbox">
+                            <input type="checkbox" id="chkPrint" checked/>
+                            <span>In phiếu tính tiền (F10)</span>
+                        </label>
+                        <textarea id="orderNote" placeholder="Ghi chú..." rows="2"></textarea>
+                    </div>
+
+                    <!-- Checkout button -->
+                    <div class="pos-sidebar__bottom">
+                        <button type="button" class="pos-checkout-btn" id="btnCheckout" disabled>
+                            Thanh toán (F9)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barcode scanner modal -->
+    <div class="bh-modal" id="scanModalPos" aria-hidden="true">
+        <div class="bh-modal__overlay" id="scanModalPosOverlay"></div>
+        <div class="bh-modal__dialog">
+            <div class="bh-modal__header">
+                <div class="bh-modal__title">Quét mã vạch</div>
+                <button type="button" class="bh-modal__close" id="btnCloseScanPos">&times;</button>
+            </div>
+            <div class="bh-modal__body" style="text-align:center">
+                <div id="posScannerView" style="width:100%;max-width:400px;margin:0 auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        (function () {
+            var cart = [];
+            var searchInput = document.getElementById('productSearch');
+            var productList = document.getElementById('productList');
+            var cartItems = document.getElementById('cartItems');
+            var cartTable = document.getElementById('cartTable');
+            var cartEmpty = document.getElementById('cartEmpty');
+            var totalAmount = document.getElementById('totalAmount');
+            var amountDue = document.getElementById('amountDue');
+            var itemCountBadge = document.getElementById('itemCountBadge');
+            var btnCheckout = document.getElementById('btnCheckout');
+            var cashGiven = document.getElementById('cashGiven');
+            var debtAmount = document.getElementById('debtAmount');
+            var searchTimeout = null;
+
+            /* ---------- DATE/TIME ---------- */
+            function updateDateTime() {
+                var now = new Date();
+                var d = now.toLocaleDateString('vi-VN') + ' - ' + now.toLocaleTimeString('vi-VN', {hour:'2-digit',minute:'2-digit'});
+                document.getElementById('posDatetime').textContent = d;
+            }
+            updateDateTime();
+            setInterval(updateDateTime, 60000);
+
+            /* ---------- FORMAT ---------- */
+            function formatMoney(n) {
+                return Number(n).toLocaleString('vi-VN');
+            }
+
+            /* ---------- SEARCH ---------- */
+            function renderProducts(products) {
+                if (!products.length) {
+                    productList.innerHTML = '<div class="pos-search-empty">Không tìm thấy sản phẩm</div>';
+                    productList.style.display = 'block';
+                    return;
+                }
+                var html = '';
+                products.forEach(function (p) {
+                    html += '<div class="pos-search-item" data-id="' + p.id + '">'
+                        + '<div class="pos-search-item__left">'
+                        + '<strong>' + p.tenSanPham + '</strong>'
+                        + '<span class="muted">' + p.maSanPham + (p.barcode ? ' | ' + p.barcode : '') + '</span>'
+                        + '</div>'
+                        + '<div class="pos-search-item__right">'
+                        + '<span class="pos-price">' + formatMoney(p.giaBan) + '</span>'
+                        + '<span class="muted">Tồn: ' + p.soLuongTon + '</span>'
+                        + '</div>'
+                        + '</div>';
+                });
+                productList.innerHTML = html;
+                productList.style.display = 'block';
+                productList.querySelectorAll('.pos-search-item').forEach(function (el) {
+                    el.addEventListener('click', function () {
+                        var id = parseInt(this.dataset.id);
+                        var p = products.find(function (x) { return x.id === id; });
+                        if (p) addToCart(p);
+                        productList.style.display = 'none';
+                        searchInput.value = '';
+                    });
+                });
+            }
+
+            function searchProducts(q) {
+                fetch('/ban-hang/api/tim-san-pham?q=' + encodeURIComponent(q))
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) { renderProducts(data); })
+                    .catch(function () {
+                        productList.innerHTML = '<div class="pos-search-empty">Lỗi khi tìm kiếm</div>';
+                        productList.style.display = 'block';
+                    });
+            }
+
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                var q = this.value.trim();
+                if (!q) { productList.style.display = 'none'; return; }
+                searchTimeout = setTimeout(function () { searchProducts(q); }, 300);
+            });
+
+            searchInput.addEventListener('focus', function () {
+                if (this.value.trim()) searchProducts(this.value.trim());
+            });
+
+            document.addEventListener('click', function (e) {
+                if (!productList.contains(e.target) && e.target !== searchInput) {
+                    productList.style.display = 'none';
+                }
+            });
+
+            /* ---------- CART ---------- */
+            function addToCart(product) {
+                var existing = cart.find(function (c) { return c.id === product.id; });
+                if (existing) {
+                    if (existing.soLuong >= product.soLuongTon) {
+                        alert('Vượt quá số lượng tồn kho');
+                        return;
+                    }
+                    existing.soLuong++;
+                } else {
+                    if (product.soLuongTon <= 0) {
+                        alert('Sản phẩm hết hàng');
+                        return;
+                    }
+                    cart.push({
+                        id: product.id,
+                        tenSanPham: product.tenSanPham,
+                        maSanPham: product.maSanPham,
+                        giaBan: product.giaBan,
+                        soLuongTon: product.soLuongTon,
+                        soLuong: 1
+                    });
+                }
+                renderCart();
+            }
+
+            function renderCart() {
+                if (!cart.length) {
+                    cartTable.style.display = 'none';
+                    cartEmpty.style.display = 'flex';
+                    totalAmount.textContent = '0';
+                    amountDue.textContent = '0';
+                    itemCountBadge.textContent = '0 hàng hóa';
+                    btnCheckout.disabled = true;
+                    updateDebt();
+                    return;
+                }
+                cartEmpty.style.display = 'none';
+                cartTable.style.display = 'block';
+                var html = '';
+                var total = 0;
+                var totalQty = 0;
+                cart.forEach(function (item, idx) {
+                    var lineTotal = item.giaBan * item.soLuong;
+                    total += lineTotal;
+                    totalQty += item.soLuong;
+                    html += '<div class="pos-cart-row">'
+                        + '<span class="pos-col pos-col--stt">' + (idx + 1) + '</span>'
+                        + '<span class="pos-col pos-col--name">' + item.tenSanPham + '<br><span class="muted">' + item.maSanPham + '</span></span>'
+                        + '<span class="pos-col pos-col--qty">'
+                        + '<button type="button" class="pos-qty-btn" data-action="minus" data-idx="' + idx + '">−</button>'
+                        + '<input type="number" class="pos-qty-input" value="' + item.soLuong + '" min="1" max="' + item.soLuongTon + '" data-idx="' + idx + '"/>'
+                        + '<button type="button" class="pos-qty-btn" data-action="plus" data-idx="' + idx + '">+</button>'
+                        + '</span>'
+                        + '<span class="pos-col pos-col--price">' + formatMoney(item.giaBan) + '</span>'
+                        + '<span class="pos-col pos-col--total">' + formatMoney(lineTotal) + '</span>'
+                        + '<span class="pos-col pos-col--action"><button type="button" class="pos-remove-btn" data-idx="' + idx + '">&times;</button></span>'
+                        + '</div>';
+                });
+                cartItems.innerHTML = html;
+                totalAmount.textContent = formatMoney(total);
+                amountDue.textContent = formatMoney(total);
+                itemCountBadge.textContent = totalQty + ' hàng hóa';
+                btnCheckout.disabled = false;
+                updateDebt();
+
+                // Event listeners
+                cartItems.querySelectorAll('.pos-qty-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var idx = parseInt(this.dataset.idx);
+                        if (this.dataset.action === 'minus') {
+                            cart[idx].soLuong--;
+                            if (cart[idx].soLuong <= 0) cart.splice(idx, 1);
+                        } else {
+                            if (cart[idx].soLuong >= cart[idx].soLuongTon) { alert('Vượt quá số lượng tồn kho'); return; }
+                            cart[idx].soLuong++;
+                        }
+                        renderCart();
+                    });
+                });
+                cartItems.querySelectorAll('.pos-qty-input').forEach(function (inp) {
+                    inp.addEventListener('change', function () {
+                        var idx = parseInt(this.dataset.idx);
+                        var val = parseInt(this.value);
+                        if (isNaN(val) || val < 1) val = 1;
+                        if (val > cart[idx].soLuongTon) { val = cart[idx].soLuongTon; alert('Vượt quá số lượng tồn kho'); }
+                        cart[idx].soLuong = val;
+                        renderCart();
+                    });
+                });
+                cartItems.querySelectorAll('.pos-remove-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        cart.splice(parseInt(this.dataset.idx), 1);
+                        renderCart();
+                    });
+                });
+            }
+
+            /* ---------- PAYMENT CALC ---------- */
+            function getTotal() {
+                var total = 0;
+                cart.forEach(function (item) { total += item.giaBan * item.soLuong; });
+                return total;
+            }
+
+            function updateDebt() {
+                var total = getTotal();
+                var cash = parseInt(cashGiven.value) || 0;
+                var debt = total - cash;
+                debtAmount.textContent = debt > 0 ? formatMoney(debt) : '0';
+            }
+
+            cashGiven.addEventListener('input', updateDebt);
+
+            /* ---------- CHECKOUT ---------- */
+            btnCheckout.addEventListener('click', function () {
+                if (!cart.length) return;
+                var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+                var payload = {
+                    tenKhachHang: document.getElementById('customerInput').value || 'Khach le',
+                    sdtKhachHang: document.getElementById('customerPhone').value || '',
+                    ghiChu: document.getElementById('orderNote').value || '',
+                    phuongThucThanhToan: paymentMethod,
+                    tienKhachDua: parseInt(cashGiven.value) || 0,
+                    items: cart.map(function (c) {
+                        return { sanPhamId: c.id, soLuong: c.soLuong };
+                    })
+                };
+                btnCheckout.disabled = true;
+                fetch('/ban-hang/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        alert('Thanh toán thành công!\nMã hóa đơn: ' + data.hoaDonId + '\nTổng tiền: ' + formatMoney(data.tongTien));
+                        cart = [];
+                        renderCart();
+                        document.getElementById('customerInput').value = '';
+                        document.getElementById('orderNote').value = '';
+                        document.getElementById('customerPhone').value = '';
+                        cashGiven.value = '0';
+                        searchInput.value = '';
+                        productList.style.display = 'none';
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                        btnCheckout.disabled = false;
+                    }
+                })
+                .catch(function () {
+                    alert('Lỗi kết nối server');
+                    btnCheckout.disabled = false;
+                });
+            });
+
+            /* ---------- KEYBOARD SHORTCUTS ---------- */
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'F3') { e.preventDefault(); searchInput.focus(); }
+                if (e.key === 'F9') { e.preventDefault(); btnCheckout.click(); }
+            });
+
+            /* ---------- BARCODE SCANNER ---------- */
+            var scanModal = document.getElementById('scanModalPos');
+            var posScanner = null;
+            document.getElementById('btnScanPos').addEventListener('click', function () {
+                scanModal.classList.add('is-open');
+                if (typeof Html5Qrcode !== 'undefined') {
+                    posScanner = new Html5Qrcode('posScannerView');
+                    posScanner.start(
+                        { facingMode: 'environment' },
+                        { fps: 10, qrbox: { width: 300, height: 100 } },
+                        function (decoded) {
+                            posScanner.stop().catch(function () {});
+                            scanModal.classList.remove('is-open');
+                            searchInput.value = decoded;
+                            searchProducts(decoded);
+                        },
+                        function () {}
+                    ).catch(function () {});
+                }
+            });
+            function closeScanPos() {
+                if (posScanner && posScanner.isScanning) posScanner.stop().catch(function () {});
+                scanModal.classList.remove('is-open');
+            }
+            document.getElementById('btnCloseScanPos').addEventListener('click', closeScanPos);
+            document.getElementById('scanModalPosOverlay').addEventListener('click', closeScanPos);
+
+            /* ---------- INIT ---------- */
+            renderCart();
+        })();
+    </script>
+</div>

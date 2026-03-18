@@ -23,8 +23,9 @@ Hệ thống quản lý chương trình khuyến mại cho cửa hàng bán lẻ
 git clone <repository-url>
 cd SD50-DATN26
 
-# 2. Tạo database
-# Chạy script.sql và promotion_schema.sql trong SQL Server
+# 2. Chạy file SQL duy nhất để tạo database + schema + dữ liệu mẫu:
+#    SQL_Query/SetupDatabaseSQL.sql
+#    (File này tự tạo database sd50, tất cả bảng, và seed data)
 
 # 3. Cấu hình database
 # Chỉnh sửa src/main/resources/application.properties
@@ -36,9 +37,31 @@ mvn clean install
 # 5. Chạy application
 mvn spring-boot:run
 
-# 6. Test API
-curl http://localhost:8888/api/chuong-trinh-khuyen-mai
+# 6. Mở trình duyệt: http://localhost:8888/dashboard
 ```
+
+### Cài Đặt Database
+
+Chỉ cần chạy **1 file duy nhất**: `SQL_Query/SetupDatabaseSQL.sql`
+
+File này bao gồm:
+- Tạo database `sd50`
+- Tất cả bảng (ecommerce, khuyến mại, nhập/xuất kho)
+- Dữ liệu mẫu: nhân viên, danh mục, màu sắc, sản phẩm, khuyến mại
+
+### Các Trang Chính
+
+| URL | Chức năng |
+|-----|-----------|
+| `/dashboard` | Tổng quan |
+| `/san-pham` | Quản lý sản phẩm (CRUD, tìm kiếm, lọc, Excel, barcode) |
+| `/danh-muc` | Quản lý danh mục sản phẩm |
+| `/mau-sac` | Quản lý màu sắc |
+| `/ban-hang` | Bán hàng tại quầy (POS) |
+| `/xuat-kho` | Quản lý xuất kho |
+| `/invoices` | Quản lý hóa đơn |
+| `/orders` | Quản lý đơn hàng |
+| `/khuyen-mai` | Chương trình khuyến mại |
 
 ## 📚 Tài Liệu
 
@@ -94,8 +117,8 @@ SD50-DATN26/
 │   │   └── resources/
 │   │       └── application.properties
 │   └── test/
-├── script.sql                       # Database schema (original)
-├── promotion_schema.sql             # Promotion tables schema
+├── script.sql                       # Database schema (legacy, use SetupDatabaseSQL.sql)
+├── promotion_schema.sql             # Promotion tables schema (legacy)
 ├── pom.xml                          # Maven configuration
 ├── README.md                        # This file
 ├── QUICKSTART.md                    # Quick start guide
@@ -334,8 +357,8 @@ Nếu có vấn đề hoặc câu hỏi:
 
 ---
 
-**Version:** 1.0.0  
-**Last Updated:** 2026-03-05  
+**Version:** 1.1.0  
+**Last Updated:** 2026-03-19  
 **Status:** ✅ Production Ready
 
 **Happy Coding! 🚀**

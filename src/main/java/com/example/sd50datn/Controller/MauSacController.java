@@ -24,16 +24,37 @@ public class MauSacController {
                        @RequestParam(value = "editId", required = false) Integer editId,
                        Model model) {
 
-        model.addAttribute("list", service.search(q));
+        try {
+            model.addAttribute("list", service.search(q));
+        } catch (Exception e) {
+            model.addAttribute("list", java.util.Collections.emptyList());
+            model.addAttribute("error", "Lỗi khi tải dữ liệu: " + e.getMessage());
+        }
         model.addAttribute("q", q == null ? "" : q);
 
         MauSac mauSac;
         if (editId != null) {
-            mauSac = service.getById(editId);
-            model.addAttribute("openEdit", 1);
+            try {
+                mauSac = service.getById(editId);
+            } catch (Exception e) {
+                mauSac = null;
+                model.addAttribute("error", "Lỗi khi tải màu sắc: " + e.getMessage());
+            }
+            if (mauSac == null) {
+                mauSac = new MauSac();
+                mauSac.setTrangThai(1);
+                mauSac.setMaMauHex("#000000");
+                model.addAttribute("openEdit", 0);
+            } else {
+                if (mauSac.getMaMauHex() == null || mauSac.getMaMauHex().isBlank()) {
+                    mauSac.setMaMauHex("#000000");
+                }
+                model.addAttribute("openEdit", 1);
+            }
         } else {
             mauSac = new MauSac();
             mauSac.setTrangThai(1);
+            mauSac.setMaMauHex("#000000");
             model.addAttribute("openEdit", 0);
         }
 
@@ -43,7 +64,7 @@ public class MauSacController {
         model.addAttribute("pageTitle", "Màu sắc");
         model.addAttribute("pageHeading", "Quản lý màu sắc");
         model.addAttribute("activeMenu", "mausac");
-        model.addAttribute("content", "mausac/list");
+        model.addAttribute("content", "MauSac/list");
         model.addAttribute("pageCss", "/css/mausac.css");
 
         return "layout";
@@ -65,7 +86,11 @@ public class MauSacController {
         }
 
         if (result.hasErrors()) {
-            model.addAttribute("list", service.getAll());
+            try {
+                model.addAttribute("list", service.getAll());
+            } catch (Exception e) {
+                model.addAttribute("list", java.util.Collections.emptyList());
+            }
 
             boolean isEdit = mauSac.getMauSacId() != null;
             model.addAttribute("openAdd", isEdit ? 0 : 1);
@@ -75,7 +100,7 @@ public class MauSacController {
             model.addAttribute("pageTitle", "Màu sắc");
             model.addAttribute("pageHeading", "Quản lý màu sắc");
             model.addAttribute("activeMenu", "mausac");
-            model.addAttribute("content", "mausac/list");
+            model.addAttribute("content", "MauSac/list");
             model.addAttribute("pageCss", "/css/mausac.css");
 
             return "layout";

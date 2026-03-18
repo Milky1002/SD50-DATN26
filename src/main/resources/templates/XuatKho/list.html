@@ -1,0 +1,185 @@
+
+<div th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/xuatkho.css}">
+
+    <div class="xk-wrap">
+        <div class="xk-toolbar">
+            <h3 style="margin:0">Danh sách phiếu xuất</h3>
+            <button class="xk-btn xk-btn--primary" type="button" id="btnOpenAdd">+ Tạo phiếu xuất</button>
+        </div>
+
+        <div th:if="${success}" class="xk-alert xk-alert--ok" th:text="${success}"></div>
+        <div th:if="${error}" class="xk-alert xk-alert--err" th:text="${error}"></div>
+
+        <div class="xk-card xk-tablewrap">
+            <table class="xk-table">
+                <thead>
+                <tr>
+                    <th style="width:140px">Mã phiếu</th>
+                    <th style="width:180px">Ngày xuất</th>
+                    <th>Lý do</th>
+                    <th style="width:140px;text-align:right">Tổng tiền</th>
+                    <th style="width:120px">Trạng thái</th>
+                    <th style="width:120px;text-align:right">Chi tiết</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item : ${list}">
+                    <td class="mono" th:text="${item.maPhieuXuat}"></td>
+                    <td th:text="${#temporals.format(item.ngayXuat, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td th:text="${item.lyDo != null ? item.lyDo : '--'}"></td>
+                    <td style="text-align:right" th:text="${#numbers.formatDecimal(item.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                    <td>
+                        <span th:if="${item.trangThai == 1}" class="pill pill--ok">Đã xác nhận</span>
+                        <span th:if="${item.trangThai == 0}" class="pill pill--off">Chờ duyệt</span>
+                    </td>
+                    <td style="text-align:right">
+                        <a class="xk-action" th:href="@{/xuat-kho(detailId=${item.id})}">Xem</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(list)}">
+                    <td colspan="6" class="empty">Chưa có phiếu xuất</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL TAO PHIEU XUAT -->
+    <div class="xk-modal" id="addModal" aria-hidden="true">
+        <div class="xk-modal__overlay" id="addModalOverlay"></div>
+        <div class="xk-modal__dialog xk-modal__dialog--wide">
+            <div class="xk-modal__header">
+                <div class="xk-modal__title">Tạo phiếu xuất kho</div>
+                <button type="button" class="xk-modal__close" id="btnCloseAdd">&times;</button>
+            </div>
+            <form th:action="@{/xuat-kho/save}" method="post" id="xuatKhoForm">
+                <div class="xk-modal__body">
+                    <div class="xk-field">
+                        <label>Lý do xuất kho</label>
+                        <input type="text" name="lyDo" placeholder="VD: Chuyển kho, Trả hàng..."/>
+                    </div>
+                    <div class="xk-field">
+                        <label>Ghi chú</label>
+                        <textarea name="ghiChu" rows="2" placeholder="Ghi chú thêm"></textarea>
+                    </div>
+
+                    <div class="xk-field">
+                        <label>Chọn sản phẩm</label>
+                        <select id="spSelect">
+                            <option value="">-- Chọn sản phẩm --</option>
+                            <option th:each="sp : ${sanPhamList}"
+                                    th:value="${sp.id}"
+                                    th:text="${sp.maSanPham + ' - ' + sp.tenSanPham + ' (Tồn: ' + sp.soLuongTon + ')'}"
+                                    th:data-ton="${sp.soLuongTon}"
+                                    th:data-name="${sp.tenSanPham}">
+                            </option>
+                        </select>
+                        <button type="button" class="xk-btn xk-btn--outline" id="btnAddSp" style="margin-top:8px">+ Thêm sản phẩm</button>
+                    </div>
+
+                    <table class="xk-table" id="spTable" style="margin-top:8px">
+                        <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th style="width:120px">Số lượng</th>
+                            <th style="width:80px"></th>
+                        </tr>
+                        </thead>
+                        <tbody id="spTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="xk-modal__footer">
+                    <button type="button" class="xk-btn xk-btn--ghost" id="btnCancelAdd">Hủy</button>
+                    <button type="submit" class="xk-btn xk-btn--primary" id="btnSubmitXk">Xác nhận xuất kho</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CHI TIET -->
+    <div class="xk-modal" id="detailModal" aria-hidden="true">
+        <div class="xk-modal__overlay" id="detailModalOverlay"></div>
+        <div class="xk-modal__dialog xk-modal__dialog--wide">
+            <div class="xk-modal__header">
+                <div class="xk-modal__title">Chi tiết phiếu xuất</div>
+                <button type="button" class="xk-modal__close" id="btnCloseDetail">&times;</button>
+            </div>
+            <div class="xk-modal__body" th:if="${detail != null}">
+                <p><strong>Mã phiếu:</strong> <span th:text="${detail.maPhieuXuat}"></span></p>
+                <p><strong>Ngày xuất:</strong> <span th:text="${#temporals.format(detail.ngayXuat, 'dd/MM/yyyy HH:mm')}"></span></p>
+                <p><strong>Lý do:</strong> <span th:text="${detail.lyDo != null ? detail.lyDo : '--'}"></span></p>
+                <p><strong>Tổng tiền:</strong> <span th:text="${#numbers.formatDecimal(detail.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></p>
+                <table class="xk-table" style="margin-top:12px">
+                    <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th style="width:100px;text-align:right">Số lượng</th>
+                        <th style="width:120px;text-align:right">Đơn giá</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="ct : ${detailItems}">
+                        <td th:text="${ct.sanPham.tenSanPham}"></td>
+                        <td style="text-align:right" th:text="${ct.soLuongXuat}"></td>
+                        <td style="text-align:right" th:text="${#numbers.formatDecimal(ct.donGia, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        (function () {
+            var addModal = document.getElementById('addModal');
+            var openBtn = document.getElementById('btnOpenAdd');
+            var closeBtn = document.getElementById('btnCloseAdd');
+            var cancelBtn = document.getElementById('btnCancelAdd');
+            var overlay = document.getElementById('addModalOverlay');
+            var spIdx = 0;
+
+            function openAddModal() { addModal && addModal.classList.add('is-open'); }
+            function closeAddModal() { addModal && addModal.classList.remove('is-open'); }
+
+            openBtn && openBtn.addEventListener('click', openAddModal);
+            closeBtn && closeBtn.addEventListener('click', closeAddModal);
+            cancelBtn && cancelBtn.addEventListener('click', closeAddModal);
+            overlay && overlay.addEventListener('click', closeAddModal);
+
+            document.getElementById('btnAddSp').addEventListener('click', function () {
+                var sel = document.getElementById('spSelect');
+                var id = sel.value;
+                if (!id) return;
+                var opt = sel.options[sel.selectedIndex];
+                var name = opt.dataset.name;
+                var ton = parseInt(opt.dataset.ton);
+                var tbody = document.getElementById('spTableBody');
+
+                var tr = document.createElement('tr');
+                tr.innerHTML = '<td>' + name
+                    + '<input type="hidden" name="sanPhamIds" value="' + id + '"/></td>'
+                    + '<td><input type="number" name="soLuongs" value="1" min="1" max="' + ton + '" style="width:100%;padding:6px 8px;border:1px solid #d9dfec;border-radius:6px"/></td>'
+                    + '<td><button type="button" class="xk-remove-btn" onclick="this.closest(\'tr\').remove()">&times;</button></td>';
+                tbody.appendChild(tr);
+                sel.value = '';
+            });
+
+            var detailModal = document.getElementById('detailModal');
+            var closeDetail = document.getElementById('btnCloseDetail');
+            var detailOverlay = document.getElementById('detailModalOverlay');
+
+            function closeDetailModal() {
+                detailModal && detailModal.classList.remove('is-open');
+                window.location.href = '/xuat-kho';
+            }
+
+            closeDetail && closeDetail.addEventListener('click', closeDetailModal);
+            detailOverlay && detailOverlay.addEventListener('click', closeDetailModal);
+
+            var openDetail = /*[[${openDetail}]]*/ 0;
+            if (openDetail === 1 && detailModal) detailModal.classList.add('is-open');
+        })();
+    </script>
+</div>

@@ -53,6 +53,9 @@ public class SanPham {
     @Column(name = "Don_vi_tinh", length = 50)
     private String donViTinh;
 
+    @Column(name = "Barcode", length = 100)
+    private String barcode;
+
     @Column(name = "Mo_ta", columnDefinition = "nvarchar(max)")
     private String moTa;
 

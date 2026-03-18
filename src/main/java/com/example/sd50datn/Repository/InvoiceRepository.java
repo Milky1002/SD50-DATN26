@@ -76,8 +76,8 @@ public interface InvoiceRepository extends JpaRepository<HoaDon, Integer> {
             value = """
                     SELECT 
                         COUNT(*) AS totalInvoices,
-                        SUM(CASE WHEN ISNULL(tt.Trang_thai, 0) = 0 THEN 1 ELSE 0 END) AS waitingPayment,
-                        SUM(CASE WHEN ISNULL(tt.Trang_thai, 0) = 1 THEN 1 ELSE 0 END) AS completed
+                        ISNULL(SUM(CASE WHEN ISNULL(tt.Trang_thai, 0) = 0 THEN 1 ELSE 0 END), 0) AS waitingPayment,
+                        ISNULL(SUM(CASE WHEN ISNULL(tt.Trang_thai, 0) = 1 THEN 1 ELSE 0 END), 0) AS completed
                     FROM HoaDon h
                     LEFT JOIN ThanhToan tt ON tt.Hoa_don_id = h.Hoa_don_id
                     """,
@@ -116,7 +116,11 @@ public interface InvoiceRepository extends JpaRepository<HoaDon, Integer> {
         if (p == null) {
             return new InvoiceStatsDTO(0, 0, 0);
         }
-        return new InvoiceStatsDTO(p.getTotalInvoices(), p.getWaitingPayment(), p.getCompleted());
+        return new InvoiceStatsDTO(
+                p.getTotalInvoices() != null ? p.getTotalInvoices() : 0,
+                p.getWaitingPayment() != null ? p.getWaitingPayment() : 0,
+                p.getCompleted() != null ? p.getCompleted() : 0
+        );
     }
 }
 

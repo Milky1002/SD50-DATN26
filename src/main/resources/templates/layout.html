@@ -33,7 +33,7 @@
             </a>
 
             <a class="nav__item"
-
+               th:href="@{/nhan-vien}"
                th:classappend="${activeMenu == 'nhanvien'} ? ' active'">
                 <span class="nav__icon"></span>
                 <span class="nav__text">Quản lý nhân viên</span>
@@ -72,7 +72,7 @@
             </div>
 
             <a class="nav__item"
-               href="#"
+               th:href="@{/san-pham}"
                th:classappend="${activeMenu == 'sanpham'} ? ' active'">
                 <span class="nav__icon"></span>
                 <span class="nav__text">Sản phẩm</span>
@@ -87,7 +87,7 @@
                th:href="@{/mau-sac}"
                th:classappend="${activeMenu == 'mausac'} ? ' active'">
                 <span class="nav__icon"></span>
-                <span class="nav__text">Màu Sắc</span>
+                <span class="nav__text">Màu sắc</span>
             </a>
 
             <div class="nav__section-title">
@@ -95,10 +95,21 @@
             </div>
 
             <a class="nav__item"
-               href="#"
+               th:href="@{/ban-hang}"
                th:classappend="${activeMenu == 'banhang'} ? ' active'">
                 <span class="nav__icon"></span>
                 <span class="nav__text">Bán tại cửa hàng</span>
+            </a>
+
+            <div class="nav__section-title">
+                <span class="nav__text">KHO HÀNG</span>
+            </div>
+
+            <a class="nav__item"
+               th:href="@{/xuat-kho}"
+               th:classappend="${activeMenu == 'xuatkho'} ? ' active'">
+                <span class="nav__icon"></span>
+                <span class="nav__text">Xuất kho</span>
             </a>
         </nav>
 

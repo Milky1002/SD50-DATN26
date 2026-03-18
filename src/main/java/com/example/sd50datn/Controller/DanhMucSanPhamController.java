@@ -25,7 +25,7 @@ public class DanhMucSanPhamController {
                        @RequestParam(value = "editId", required = false) Integer editId,
                        Model model) {
 
-        DanhMucSanPham dm = new DanhMucSanPham();
+        DanhMucSanPham dm;
         model.addAttribute("list", service.search(q));
         if (editId != null) {
             dm = service.getById(editId);
@@ -36,8 +36,6 @@ public class DanhMucSanPhamController {
             model.addAttribute("openEdit", 0);
         }
 
-
-        dm.setTrangThai(1);
         model.addAttribute("dm", dm);
 
         model.addAttribute("q", q == null ? "" : q);
@@ -47,7 +45,7 @@ public class DanhMucSanPhamController {
         model.addAttribute("activeMenu", "danhmuc");// active ở đây nhé mấy con gà
 
 
-        model.addAttribute("content", "danhmuc/list");
+        model.addAttribute("content", "DanhMuc/list");
 
         model.addAttribute("pageCss", "/css/danhmuc.css");
 
@@ -75,8 +73,8 @@ public class DanhMucSanPhamController {
             model.addAttribute("q", "");
             model.addAttribute("pageTitle", "Danh mục sản phẩm");
             model.addAttribute("pageHeading", "Quản lý danh mục sản phẩm");
-            model.addAttribute("activeMenu", "sanpham");
-            model.addAttribute("content", "danhmuc/list");
+            model.addAttribute("activeMenu", "danhmuc");
+            model.addAttribute("content", "DanhMuc/list");
             model.addAttribute("pageCss", "/css/danhmuc.css");
 
             return "layout";

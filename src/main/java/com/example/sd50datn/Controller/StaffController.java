@@ -41,7 +41,12 @@ StaffController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("status", status);
 
-        return "QlyNhanVien/Staff";
+        model.addAttribute("pageTitle", "Quản lý nhân viên");
+        model.addAttribute("pageHeading", "Quản lý nhân viên");
+        model.addAttribute("activeMenu", "nhanvien");
+        model.addAttribute("content", "QlyNhanVien/Staff");
+
+        return "layout";
     }
 
     @PostMapping("/save")

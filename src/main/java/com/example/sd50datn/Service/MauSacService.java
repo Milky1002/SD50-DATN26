@@ -32,10 +32,6 @@ public class MauSacService {
     }
 
     public MauSac save(MauSac mauSac) {
-        if (mauSac.getMauSacId() == null) {
-            mauSac.setNgayTao(LocalDateTime.now());
-        }
-        mauSac.setNgayCapNhat(LocalDateTime.now());
         return repository.save(mauSac);
     }
 
@@ -44,6 +40,9 @@ public class MauSacService {
     }
 
     public boolean isTenMauExistsForSave(MauSac mauSac) {
+        if (mauSac == null || mauSac.getTenMau() == null || mauSac.getTenMau().isBlank()) {
+            return false;
+        }
         if (mauSac.getMauSacId() == null) {
             return repository.existsByTenMau(mauSac.getTenMau());
         }

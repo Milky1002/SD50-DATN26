@@ -36,7 +36,9 @@
 
                     <td>
                         <span class="ms-color-box"
+                              th:if="${item.maMauHex != null and !#strings.isEmpty(#strings.trim(item.maMauHex))}"
                               th:style="'background:' + ${item.maMauHex}"></span>
+                        <span th:if="${item.maMauHex == null or #strings.isEmpty(#strings.trim(item.maMauHex))}" class="muted">--</span>
                     </td>
 
                     <td>

@@ -38,7 +38,7 @@
                     </td>
                     <td style="text-align:right;">
                         <a class="dm-action"
-                           th:href="@{/danh-muc/edit/{id}(id=${item.danhMucSanPhamId})}">
+                           th:href="@{/danh-muc(editId=${item.danhMucSanPhamId})}">
                             ✎ Sửa
                         </a>
                         <a class="dm-action dm-action--danger"
@@ -200,7 +200,7 @@
                 openModal();
             }
         })();
-        // function sữa
+        // Modal sửa
         (function () {
             const editModal = document.getElementById('editModal');
             const closeEdit = document.getElementById('btnCloseEdit');

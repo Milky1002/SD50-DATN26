@@ -141,18 +141,18 @@ public class StaffService {
                 cell.setCellStyle(headerStyle);
             }
 
-            // 2. Đổ dữ liệu
+            // 2. Dữ liệu
             int rowIdx = 1;
             for (StaffDTO nv : list) {
                 Row row = sheet.createRow(rowIdx++);
                 row.createCell(0).setCellValue(nv.getId());
-                row.createCell(1).setCellValue(nv.getHoTen());
-                row.createCell(1).setCellValue(nv.getGioiTinh());
-                row.createCell(2).setCellValue(nv.getSdt());
-                row.createCell(1).setCellValue(nv.getDiaChi());
-                row.createCell(3).setCellValue(nv.getEmail());
-                row.createCell(4).setCellValue(nv.getTenChucVu());
-                row.createCell(5).setCellValue(nv.getTrangThai() == 1 ? "Đang làm" : "Nghỉ việc");
+                row.createCell(1).setCellValue(nv.getHoTen() != null ? nv.getHoTen() : "");
+                row.createCell(2).setCellValue(nv.getGioiTinh() != null ? nv.getGioiTinh() : "");
+                row.createCell(3).setCellValue(nv.getSdt() != null ? nv.getSdt() : "");
+                row.createCell(4).setCellValue(nv.getDiaChi() != null ? nv.getDiaChi() : "");
+                row.createCell(5).setCellValue(nv.getEmail() != null ? nv.getEmail() : "");
+                row.createCell(6).setCellValue(nv.getTenChucVu() != null ? nv.getTenChucVu() : "");
+                row.createCell(7).setCellValue(nv.getTrangThai() != null && nv.getTrangThai() == 1 ? "Dang lam" : "Nghi viec");
             }
 
             // Tự động căn chỉnh độ rộng cột
