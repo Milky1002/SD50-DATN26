@@ -12,7 +12,7 @@
         <div class="sp-toolbar">
             <div class="sp-toolbar__left">
                 <form class="sp-search" th:action="@{/san-pham}" method="get">
-                    <span class="sp-search__icon">&#128270;</span>
+                    <span class="sp-search__icon"><i class="bi bi-search"></i></span>
                     <input name="q" th:value="${q}" placeholder="Tìm kiếm theo tên, mã hàng hóa, mã vạch..." id="searchInput"/>
                     <input type="hidden" name="trangThai" th:value="${filterTrangThai}"/>
                     <input type="hidden" name="danhMucId" th:value="${filterDanhMucId}"/>
@@ -27,15 +27,15 @@
                 </form>
             </div>
             <div class="sp-toolbar__right">
-                <button class="sp-btn sp-btn--outline" type="button" id="btnRefresh" title="Làm mới">&#8635;</button>
-                <button class="sp-btn sp-btn--outline" type="button" id="btnPrintBarcode">&#127991; In tem mã</button>
-                <button class="sp-btn sp-btn--outline" type="button" id="btnScanBarcode">&#128247; Quét mã vạch thêm hàng hóa</button>
+                <button class="sp-btn sp-btn--outline" type="button" id="btnRefresh" title="Làm mới"><i class="bi bi-arrow-clockwise"></i></button>
+                <button class="sp-btn sp-btn--outline" type="button" id="btnPrintBarcode"><i class="bi bi-printer"></i> In tem mã</button>
+                <button class="sp-btn sp-btn--outline" type="button" id="btnScanBarcode"><i class="bi bi-upc-scan"></i> Quét mã vạch</button>
                 <a class="sp-btn sp-btn--outline"
                    th:href="@{/san-pham/export(q=${q}, trangThai=${filterTrangThai}, danhMucId=${filterDanhMucId})}">
-                    &#128196; Xuất Excel
+                    <i class="bi bi-file-earmark-excel"></i> Xuất Excel
                 </a>
                 <div class="sp-btn-group">
-                    <button class="sp-btn sp-btn--primary" type="button" id="btnOpenAdd">+ Thêm hàng hóa</button>
+                    <button class="sp-btn sp-btn--primary" type="button" id="btnOpenAdd"><i class="bi bi-plus-lg"></i> Thêm hàng hóa</button>
                 </div>
             </div>
         </div>
@@ -48,6 +48,7 @@
                     <th style="width:40px"><input type="checkbox" id="checkAll"/></th>
                     <th style="width:130px">Mã hàng hóa</th>
                     <th>Tên hàng hóa</th>
+                    <th style="width:140px;text-align:center">Mã vạch</th>
                     <th style="width:130px;text-align:right">Giá bán</th>
                     <th style="width:130px;text-align:right">Giá vốn</th>
                     <th style="width:100px;text-align:right">Tồn kho</th>
@@ -62,6 +63,12 @@
                     <td><input type="checkbox" class="row-check" th:value="${item.id}"/></td>
                     <td class="mono" th:text="${item.maSanPham}"></td>
                     <td th:text="${item.tenSanPham}"></td>
+                    <td class="sp-barcode-cell">
+                        <svg th:if="${item.barcode != null and !#strings.isEmpty(item.barcode)}"
+                             th:id="'bc_tbl_' + ${item.id}"
+                             th:data-barcode="${item.barcode}"></svg>
+                        <span th:if="${item.barcode == null or #strings.isEmpty(item.barcode)}" class="muted">--</span>
+                    </td>
                     <td style="text-align:right" th:text="${#numbers.formatDecimal(item.giaBan, 0, 'COMMA', 0, 'POINT')}"></td>
                     <td style="text-align:right" th:text="${#numbers.formatDecimal(item.giaNhap, 0, 'COMMA', 0, 'POINT')}"></td>
                     <td style="text-align:right" th:text="${item.soLuongTon}"></td>
@@ -82,7 +89,7 @@
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(list)}">
-                    <td colspan="8" class="empty">Không có dữ liệu</td>
+                    <td colspan="9" class="empty">Không có dữ liệu</td>
                 </tr>
                 </tbody>
             </table>
@@ -121,120 +128,124 @@
             </div>
             <form th:action="@{/san-pham/save}" method="post" th:object="${sp}" id="addForm">
                 <div class="sp-modal__body">
+
                     <!-- THÔNG TIN CƠ BẢN -->
-                    <div class="sp-section-title">THÔNG TIN CƠ BẢN</div>
-                    <div class="sp-form-grid">
-                        <div class="sp-field">
-                            <label>Tên hàng hóa <span class="req">*</span></label>
-                            <input type="text" th:field="*{tenSanPham}" placeholder="Nhập tên hàng hóa" required/>
-                        </div>
-                        <div class="sp-field">
-                            <label>Mã hàng hóa</label>
-                            <input type="text" th:field="*{maSanPham}" placeholder="Mã tự động" id="addMaSanPham" readonly class="sp-readonly"/>
-                            <span class="sp-field__hint">Mã được tạo tự động</span>
-                            <span class="sp-field__error" id="addMaError" style="display:none">Mã hàng hóa đã tồn tại</span>
-                        </div>
-                        <div class="sp-field">
-                            <label>Nhóm hàng hóa <span class="req">*</span></label>
-                            <select th:field="*{danhMucSanPham.danhMucSanPhamId}" required id="addDanhMuc">
-                                <option value="">-- Chọn nhóm hàng hóa --</option>
-                                <option th:each="dm : ${danhMucList}"
-                                        th:value="${dm.danhMucSanPhamId}"
-                                        th:text="${dm.tenDanhMuc}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="sp-field">
-                            <label>Mã vạch (Barcode)</label>
-                            <div class="sp-field__with-btn">
-                                <input type="text" th:field="*{barcode}" placeholder="Mã tự động" id="addBarcode" readonly class="sp-readonly"/>
-                                <button type="button" class="sp-field__gen-btn" id="btnGenBarcode" title="Tạo mã vạch mới">&#128260;</button>
+                    <div class="sp-section-panel">
+                        <div class="sp-section-title">THÔNG TIN CƠ BẢN</div>
+                        <div class="sp-form-grid">
+                            <div class="sp-field">
+                                <label>Tên hàng hóa <span class="req">*</span></label>
+                                <input type="text" th:field="*{tenSanPham}" placeholder="Nhập tên hàng hóa" required/>
                             </div>
-                            <span class="sp-field__hint">Mã vạch EAN-13 tạo tự động</span>
-                            <span class="sp-field__error" id="addBarcodeError" style="display:none">Mã vạch đã tồn tại</span>
-                        </div>
-                    </div>
-
-                    <!-- GIÁ BÁN -->
-                    <div class="sp-section-title">GIÁ BÁN</div>
-                    <div class="sp-form-grid">
-                        <div class="sp-field">
-                            <label>Giá bán</label>
-                            <input type="number" th:field="*{giaBan}" placeholder="0" min="0" step="1000"/>
-                        </div>
-                        <div class="sp-field">
-                            <label>Giá vốn (giá nhập)</label>
-                            <input type="number" th:field="*{giaNhap}" placeholder="0" min="0" step="1000"/>
-                        </div>
-                    </div>
-
-                    <!-- TỒN KHO -->
-                    <div class="sp-section-title">TỒN KHO</div>
-                    <div class="sp-form-grid">
-                        <div class="sp-field">
-                            <label>Số lượng tồn</label>
-                            <input type="number" th:field="*{soLuongTon}" placeholder="0" min="0"/>
-                        </div>
-                        <div class="sp-field">
-                            <label>SKU</label>
-                            <input type="text" th:field="*{sku}" placeholder="Tự sinh theo mã hàng" id="addSku" readonly class="sp-readonly"/>
-                            <span class="sp-field__hint">Tự sinh theo mã hàng hóa</span>
+                            <div class="sp-field">
+                                <label>Mã hàng hóa <span class="req">*</span></label>
+                                <input type="text" th:field="*{maSanPham}" placeholder="Tự sinh khi bỏ trống" id="addMaSanPham" readonly class="sp-readonly"/>
+                                <span class="sp-field__hint">Mã được tạo tự động</span>
+                                <span class="sp-field__error" id="addMaError" style="display:none">Mã hàng hóa đã tồn tại</span>
+                            </div>
+                            <div class="sp-field">
+                                <label>Nhóm hàng hóa <span class="req">*</span></label>
+                                <select th:field="*{danhMucSanPham.danhMucSanPhamId}" required id="addDanhMuc">
+                                    <option value="">Nhập nhóm hàng hóa</option>
+                                    <option th:each="dm : ${danhMucList}"
+                                            th:value="${dm.danhMucSanPhamId}"
+                                            th:text="${dm.tenDanhMuc}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="sp-field">
+                                <label>Mã vạch</label>
+                                <div class="sp-field__with-btn">
+                                    <input type="text" th:field="*{barcode}" placeholder="Tự sinh khi bỏ trống" id="addBarcode" readonly class="sp-readonly"/>
+                                    <button type="button" class="sp-field__gen-btn" id="btnGenBarcode" title="Tạo mã vạch mới">&#128260;</button>
+                                </div>
+                                <span class="sp-field__hint">Mã vạch EAN-13 tạo tự động</span>
+                                <span class="sp-field__error" id="addBarcodeError" style="display:none">Mã vạch đã tồn tại</span>
+                                <div class="sp-barcode-inline" id="addBarcodePreview" style="display:none">
+                                    <svg id="addBarcodeSvg"></svg>
+                                </div>
+                            </div>
+                            <div class="sp-field">
+                                <label>Giá bán</label>
+                                <input type="number" th:field="*{giaBan}" placeholder="0" min="0" step="1000"/>
+                            </div>
+                            <div class="sp-field">
+                                <label>Đơn giá vốn</label>
+                                <input type="number" th:field="*{giaNhap}" placeholder="0" min="0" step="1000"/>
+                            </div>
                         </div>
                     </div>
 
                     <!-- ĐƠN VỊ TÍNH -->
-                    <div class="sp-section-title">ĐƠN VỊ TÍNH</div>
-                    <div class="sp-form-grid">
-                        <div class="sp-field">
-                            <label>Đơn vị cơ bản</label>
-                            <select th:field="*{donViTinh}" id="addDonViTinh">
-                                <option value="">-- Chọn đơn vị tính --</option>
-                                <option value="Chiếc">Chiếc</option>
-                                <option value="Cái">Cái</option>
-                                <option value="Đôi">Đôi</option>
-                                <option value="Bộ">Bộ</option>
-                                <option value="Kg">Kg</option>
-                                <option value="Gói">Gói</option>
-                                <option value="Hộp">Hộp</option>
-                                <option value="Chai">Chai</option>
-                                <option value="Lọ">Lọ</option>
-                                <option value="Tờ">Tờ</option>
-                                <option value="Mét">Mét</option>
-                                <option value="Cuộn">Cuộn</option>
-                            </select>
+                    <div class="sp-section-panel">
+                        <div class="sp-section-title">ĐƠN VỊ TÍNH</div>
+                        <div class="sp-form-grid">
+                            <div class="sp-field">
+                                <label>Đơn vị cơ bản</label>
+                                <select th:field="*{donViTinh}" id="addDonViTinh">
+                                    <option value="">-- Chọn đơn vị tính --</option>
+                                    <option value="Chiếc">Chiếc</option>
+                                    <option value="Cái">Cái</option>
+                                    <option value="Đôi">Đôi</option>
+                                    <option value="Bộ">Bộ</option>
+                                    <option value="Kg">Kg</option>
+                                    <option value="Gói">Gói</option>
+                                    <option value="Hộp">Hộp</option>
+                                    <option value="Chai">Chai</option>
+                                    <option value="Lọ">Lọ</option>
+                                    <option value="Tờ">Tờ</option>
+                                    <option value="Mét">Mét</option>
+                                    <option value="Cuộn">Cuộn</option>
+                                </select>
+                                <span class="sp-field__hint">Nên để đơn vị tính nhỏ nhất. VD: Vải bán theo Cuộn và Mét thì đơn vị tính là Mét</span>
+                            </div>
                         </div>
                     </div>
 
                     <!-- THUỘC TÍNH -->
-                    <div class="sp-section-title">THUỘC TÍNH</div>
-                    <div class="sp-form-grid">
-                        <div class="sp-field">
-                            <label>Màu sắc</label>
-                            <select th:field="*{mauSac.mauSacId}" id="addMauSac">
-                                <option value="">-- Chọn màu sắc --</option>
-                                <option th:each="ms : ${mauSacList}"
-                                        th:value="${ms.mauSacId}"
-                                        th:text="${ms.tenMau}">
-                                </option>
-                            </select>
-                        </div>
-                        <div class="sp-field">
-                            <label>Trạng thái</label>
-                            <select th:field="*{trangThai}">
-                                <option value="1">Đang kinh doanh</option>
-                                <option value="0">Ngừng kinh doanh</option>
-                            </select>
+                    <div class="sp-section-panel">
+                        <div class="sp-section-title">THUỘC TÍNH</div>
+                        <div class="sp-form-grid">
+                            <div class="sp-field">
+                                <label>Màu sắc</label>
+                                <select th:field="*{mauSac.mauSacId}" id="addMauSac">
+                                    <option value="">-- Chọn màu sắc --</option>
+                                    <option th:each="ms : ${mauSacList}"
+                                            th:value="${ms.mauSacId}"
+                                            th:text="${ms.tenMau}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="sp-field">
+                                <label>Trạng thái</label>
+                                <select th:field="*{trangThai}">
+                                    <option value="1">Đang kinh doanh</option>
+                                    <option value="0">Ngừng kinh doanh</option>
+                                </select>
+                            </div>
+                            <div class="sp-field">
+                                <label>Tồn kho</label>
+                                <input type="number" th:field="*{soLuongTon}" placeholder="0" min="0"/>
+                            </div>
+                            <div class="sp-field">
+                                <label>SKU</label>
+                                <input type="text" th:field="*{sku}" placeholder="Tự sinh theo mã hàng" id="addSku" readonly class="sp-readonly"/>
+                                <span class="sp-field__hint">Tự sinh theo mã hàng hóa</span>
+                            </div>
                         </div>
                     </div>
 
                     <!-- MÔ TẢ -->
-                    <div class="sp-section-title">MÔ TẢ</div>
-                    <div class="sp-field">
-                        <textarea th:field="*{moTa}" rows="3" placeholder="Nhập mô tả hàng hóa"></textarea>
+                    <div class="sp-section-panel">
+                        <div class="sp-section-title">MÔ TẢ</div>
+                        <div class="sp-field">
+                            <textarea th:field="*{moTa}" rows="3" placeholder="Nhập mô tả hàng hóa"></textarea>
+                        </div>
                     </div>
+
                 </div>
                 <div class="sp-modal__footer">
-                    <button type="button" class="sp-btn sp-btn--ghost" id="btnCancelAdd">Bỏ qua</button>
+                    <button type="button" class="sp-btn sp-btn--ghost" id="btnCancelAdd">Hủy bỏ</button>
                     <button type="submit" class="sp-btn sp-btn--outline">Lưu</button>
                     <input type="hidden" name="saveAndNew" value="0" id="saveAndNewFlag"/>
                     <button type="submit" class="sp-btn sp-btn--primary" onclick="document.getElementById('saveAndNewFlag').value='1'">Lưu và thêm mới</button>
@@ -507,7 +518,7 @@
             if (barcodeField && !barcodeField.value) {
                 fetch('/san-pham/api/generate-barcode')
                     .then(function(r){ return r.json(); })
-                    .then(function(d){ barcodeField.value = d.barcode; });
+                    .then(function(d){ barcodeField.value = d.barcode; setTimeout(function(){ if(typeof renderAddBarcodePreview==='function') renderAddBarcodePreview(); },100); });
             }
         }
 
@@ -596,18 +607,36 @@
         document.getElementById('btnPrintBarcode').addEventListener('click', function() {
             var checked = document.querySelectorAll('.row-check:checked');
             printItems = [];
-            checked.forEach(function(cb) {
-                var row = cb.closest('tr');
-                printItems.push({
-                    id: row.getAttribute('data-id'),
-                    ma: row.getAttribute('data-ma'),
-                    ten: row.getAttribute('data-ten'),
-                    barcode: row.getAttribute('data-barcode') || '',
-                    gia: row.getAttribute('data-gia') || '0',
-                    dvt: row.getAttribute('data-dvt') || '--',
-                    soLuong: 1
+
+            if (checked.length > 0) {
+                // Load only checked rows
+                checked.forEach(function(cb) {
+                    var row = cb.closest('tr');
+                    printItems.push({
+                        id: row.getAttribute('data-id'),
+                        ma: row.getAttribute('data-ma'),
+                        ten: row.getAttribute('data-ten'),
+                        barcode: row.getAttribute('data-barcode') || '',
+                        gia: row.getAttribute('data-gia') || '0',
+                        dvt: row.getAttribute('data-dvt') || '--',
+                        soLuong: 1
+                    });
                 });
-            });
+            } else {
+                // No rows checked - load ALL products from the table
+                var allRows = document.querySelectorAll('#productBody tr[data-id]');
+                allRows.forEach(function(row) {
+                    printItems.push({
+                        id: row.getAttribute('data-id'),
+                        ma: row.getAttribute('data-ma'),
+                        ten: row.getAttribute('data-ten'),
+                        barcode: row.getAttribute('data-barcode') || '',
+                        gia: row.getAttribute('data-gia') || '0',
+                        dvt: row.getAttribute('data-dvt') || '--',
+                        soLuong: 1
+                    });
+                });
+            }
             renderPrintTable();
             updateLabelPreview();
             openModal('printModal');
@@ -725,6 +754,37 @@
                 stopScanner();
             }
         });
+
+        /* ==================== RENDER TABLE BARCODES ==================== */
+        if (typeof JsBarcode !== 'undefined') {
+            document.querySelectorAll('svg[data-barcode]').forEach(function(svg) {
+                var code = svg.getAttribute('data-barcode');
+                if (code) {
+                    try { JsBarcode(svg, code, { format:'CODE128', width:1, height:28, displayValue:true, fontSize:9, margin:2 }); } catch(e){}
+                }
+            });
+        }
+
+        /* ==================== ADD MODAL BARCODE PREVIEW ==================== */
+        var addBarcodeField = document.getElementById('addBarcode');
+        var addBarcodePreview = document.getElementById('addBarcodePreview');
+        function renderAddBarcodePreview() {
+            if (addBarcodeField && addBarcodeField.value && typeof JsBarcode !== 'undefined') {
+                addBarcodePreview.style.display = 'block';
+                try { JsBarcode('#addBarcodeSvg', addBarcodeField.value, { format:'CODE128', width:1.5, height:50, displayValue:true, fontSize:12, margin:4 }); } catch(e){ addBarcodePreview.style.display = 'none'; }
+            } else if (addBarcodePreview) {
+                addBarcodePreview.style.display = 'none';
+            }
+        }
+
+        /* Hook barcode generation to render preview */
+        var origGenBarcode = document.getElementById('btnGenBarcode');
+        if (origGenBarcode) {
+            var origClickHandlers = origGenBarcode.onclick;
+            origGenBarcode.addEventListener('click', function() {
+                setTimeout(renderAddBarcodePreview, 400);
+            });
+        }
 
         /* ==================== DROPDOWN MENUS ==================== */
         document.querySelectorAll('.sp-action--more').forEach(function(btn) {

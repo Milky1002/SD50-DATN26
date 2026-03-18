@@ -1,86 +1,161 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Khách hàng</title>
-
-</head>
-
-<body>
-<link rel="stylesheet" th:href="@{/css/khach.css}">
-
 <div th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/khach.css}">
 
-    <div class="container">
-
-        <!-- THANH TÌM KIẾM -->
-        <div class="toolbar">
-
-            <form th:action="@{/khachhang/search}" method="get" class="search-box">
-                <input type="text"
-                       name="ten"
-                       placeholder="Nhập tên khách hàng">
-                <button type="submit">🔍</button>
-            </form>
-
-            <form th:action="@{/khachhang/status}" method="get">
-                <select name="trangThai" onchange="this.form.submit()">
-                    <option value="">-- Trạng thái --</option>
-                    <option value="1">Đang theo dõi</option>
-                    <option value="0">Ngừng</option>
+    <div class="kh-wrap">
+        <!-- TOOLBAR -->
+        <div class="kh-toolbar">
+            <form class="kh-search" th:action="@{/khachhang/hienthi}" method="get">
+                <span class="kh-search__icon"><i class="bi bi-search"></i></span>
+                <input name="keyword" th:value="${keyword}" placeholder="Tìm theo tên khách hàng..."/>
+                <select name="trangThai" class="kh-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="1" th:selected="${trangThai == 1}">Đang theo dõi</option>
+                    <option value="0" th:selected="${trangThai == 0}">Ngừng theo dõi</option>
                 </select>
+                <button type="submit" class="kh-btn kh-btn--search"><i class="bi bi-funnel"></i> Lọc</button>
+                <a th:href="@{/khachhang/hienthi}" class="kh-btn kh-btn--ghost"><i class="bi bi-arrow-clockwise"></i></a>
             </form>
 
-            <a th:href="@{/khachhang/add}" class="add-btn">
-                 Thêm mới
-            </a>
+            <div class="kh-actions">
+                <button class="kh-btn kh-btn--primary" type="button" id="btnOpenAdd"><i class="bi bi-person-plus-fill"></i> Thêm khách hàng</button>
+            </div>
         </div>
 
-
         <!-- TABLE -->
-        <table class="table">
-
-            <thead>
-            <tr>
-                <th>Mã KH</th>
-                <th>Tên khách hàng</th>
-                <th>SĐT</th>
-                <th>Email</th>
-                <th>Địa chỉ</th>
-                <th>Trạng thái</th>
-                <th>Ngày tạo</th>
-                <th>Ngày cập nhật</th>
-                <th>Chức năng</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            <tr th:each="kh : ${list}">
-
-                <td th:text="${kh.khachHangId}"></td>
-                <td th:text="${kh.tenKhachHang}"></td>
-                <td th:text="${kh.sdt}"></td>
-                <td th:text="${kh.email}"></td>
-                <td th:text="${kh.diaChiKhachHang}"></td>
-
-                <td th:text="${kh.trangThai == 1 ? 'Đang theo dõi' : 'Ngừng'}"></td>
-
-                <td th:text="${#temporals.format(kh.ngayTao,'dd/MM/yyyy')}"></td>
-                <td th:text="${#temporals.format(kh.ngayCapNhat,'dd/MM/yyyy')}"></td>
-
-                <td class="action">
-                    <a th:href="@{/khachhang/update/{id}(id=${kh.khachHangId})}" class="edit">Sửa</a>
-                    <a th:href="@{/khachhang/delete/{id}(id=${kh.khachHangId})}" class="delete">Xóa</a>
-                </td>
-
-            </tr>
-            </tbody>
-
-        </table>
-
+        <div class="kh-card kh-tablewrap">
+            <table class="kh-table">
+                <thead>
+                <tr>
+                    <th style="width:100px">Mã KH</th>
+                    <th>Tên khách hàng</th>
+                    <th style="width:130px">SĐT</th>
+                    <th>Email</th>
+                    <th>Địa chỉ</th>
+                    <th style="width:140px">Trạng thái</th>
+                    <th style="width:120px">Ngày tạo</th>
+                    <th style="width:160px; text-align:right;">Chức năng</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="kh : ${list}">
+                    <td class="mono" th:text="${'KH' + #numbers.formatInteger(kh.khachHangId, 5)}"></td>
+                    <td th:text="${kh.tenKhachHang}"></td>
+                    <td th:text="${kh.sdt}"></td>
+                    <td th:text="${kh.email}"></td>
+                    <td th:text="${kh.diaChiKhachHang}"></td>
+                    <td>
+                        <span th:if="${kh.trangThai == 1}" class="pill pill--ok">Đang theo dõi</span>
+                        <span th:if="${kh.trangThai == 0}" class="pill pill--off">Ngừng theo dõi</span>
+                    </td>
+                    <td th:text="${kh.ngayTao != null} ? ${#temporals.format(kh.ngayTao,'dd/MM/yyyy')} : '--'"></td>
+                    <td style="text-align:right;">
+                        <button type="button" class="kh-action" th:onclick="'openEditModal(' + ${kh.khachHangId} + ')'"><i class="bi bi-pencil-square"></i> Sửa</button>
+                        <a class="kh-action kh-action--danger"
+                           th:href="@{/khachhang/delete/{id}(id=${kh.khachHangId})}"
+                           onclick="return confirm('Bạn chắc chắn muốn xóa khách hàng này?')"><i class="bi bi-trash3"></i> Xóa</a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(list)}">
+                    <td colspan="8" class="empty">Không có dữ liệu khách hàng</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-</div>
+    <!-- MODAL ADD/EDIT -->
+    <div class="kh-modal" id="khModal" aria-hidden="true">
+        <div class="kh-modal__overlay" id="khModalOverlay"></div>
+        <div class="kh-modal__dialog">
+            <div class="kh-modal__header">
+                <div class="kh-modal__title" id="khModalTitle">Thêm khách hàng</div>
+                <button type="button" class="kh-modal__close" id="btnCloseModal">&times;</button>
+            </div>
+            <form id="khForm" th:action="@{/khachhang/save}" method="post">
+                <input type="hidden" name="khachHangId" id="fKhId"/>
+                <div class="kh-modal__body">
+                    <div class="kh-form-grid">
+                        <div class="kh-field kh-field--full">
+                            <label>Tên khách hàng <span class="req">*</span></label>
+                            <input type="text" name="tenKhachHang" id="fTen" placeholder="Nhập tên khách hàng" required>
+                        </div>
+                        <div class="kh-field">
+                            <label>Số điện thoại <span class="req">*</span></label>
+                            <input type="text" name="sdt" id="fSdt" placeholder="0123456789" required pattern="0[0-9]{9}">
+                        </div>
+                        <div class="kh-field">
+                            <label>Email <span class="req">*</span></label>
+                            <input type="email" name="email" id="fEmail" placeholder="email@example.com" required>
+                        </div>
+                        <div class="kh-field kh-field--full">
+                            <label>Địa chỉ <span class="req">*</span></label>
+                            <input type="text" name="diaChiKhachHang" id="fDiaChi" placeholder="Nhập địa chỉ" required>
+                        </div>
+                        <div class="kh-field">
+                            <label>Trạng thái</label>
+                            <select name="trangThai" id="fTrangThai">
+                                <option value="1">Đang theo dõi</option>
+                                <option value="0">Ngừng theo dõi</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="kh-modal__footer">
+                    <button type="button" class="kh-btn kh-btn--ghost" id="btnCancelModal">Hủy</button>
+                    <button type="submit" class="kh-btn kh-btn--primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-</body>
-</html>
+    <script>
+        (function() {
+            var modal = document.getElementById('khModal');
+            var overlay = document.getElementById('khModalOverlay');
+            var btnOpen = document.getElementById('btnOpenAdd');
+            var btnClose = document.getElementById('btnCloseModal');
+            var btnCancel = document.getElementById('btnCancelModal');
+            var form = document.getElementById('khForm');
+
+            function openModal() {
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+            }
+            function closeModalFn() {
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            btnOpen.addEventListener('click', function() {
+                document.getElementById('khModalTitle').textContent = 'Thêm khách hàng';
+                form.reset();
+                document.getElementById('fKhId').value = '';
+                document.getElementById('fTrangThai').value = '1';
+                openModal();
+            });
+
+            btnClose.addEventListener('click', closeModalFn);
+            btnCancel.addEventListener('click', closeModalFn);
+            overlay.addEventListener('click', closeModalFn);
+
+            window.openEditModal = function(id) {
+                fetch('/khachhang/edit/' + id)
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        document.getElementById('khModalTitle').textContent = 'Sửa khách hàng';
+                        document.getElementById('fKhId').value = data.khachHangId;
+                        document.getElementById('fTen').value = data.tenKhachHang || '';
+                        document.getElementById('fSdt').value = data.sdt || '';
+                        document.getElementById('fEmail').value = data.email || '';
+                        document.getElementById('fDiaChi').value = data.diaChiKhachHang || '';
+                        document.getElementById('fTrangThai').value = data.trangThai != null ? data.trangThai : 1;
+                        openModal();
+                    });
+            };
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeModalFn();
+            });
+        })();
+    </script>
+</div>

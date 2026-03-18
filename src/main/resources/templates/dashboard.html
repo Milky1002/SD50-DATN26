@@ -1,234 +1,108 @@
-﻿﻿<!doctype html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title th:text="${pageTitle} ?: 'Tổng quan'">Tổng quan</title>
-
-    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+<div th:fragment="content">
     <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
-</head>
-<body>
-<div class="app">
-    <aside id="sidebar" class="sidebar">
-        <div class="sidebar__top">
-            <div class="brand">
-                <div class="brand__logo">Y</div>
-                <div class="brand__name">Yonex</div>
-            </div>
 
-            <button id="toggleSidebar" class="icon-btn" type="button" aria-label="Thu gọn / Mở sidebar">
-                &#8249;
-            </button>
-        </div>
+    <div class="dashboard-content">
+        <div class="dashboard-grid">
+            <div class="dashboard-panel sales-panel">
+                <div class="panel-header">
+                    <h3><i class="bi bi-graph-up-arrow"></i> Tình hình bán hàng</h3>
+                    <select class="panel-select" id="salesRangeSelect">
+                        <option selected>Theo ngày dữ liệu</option>
+                        <option>7 ngày gần đây</option>
+                        <option>30 ngày gần đây</option>
+                    </select>
+                </div>
+                <div class="panel-note">
+                    Dữ liệu: <strong th:text="${salesDateLabel}">--/--/----</strong>
+                </div>
 
-        <nav class="nav">
-            <a class="nav__item"
-               th:href="@{/dashboard}"
-               th:classappend="${activeMenu == 'dashboard'} ? ' active'">
-                <span class="nav__icon">
-                    <img th:src="@{/images/iconbaocao.png}" class="menu-icon"/>
-                </span>
-                <span class="nav__text">Tổng quan</span>
-            </a>
-
-            <a class="nav__item"
-
-               th:classappend="${activeMenu == 'nhanvien'} ? ' active'">
-                <span class="nav__icon"></span>
-                <span class="nav__text">Quản lý nhân viên</span>
-            </a>
-
-
-            <a class="nav__item"
-               th:href="@{/khachhang/hienthi}"
-               th:classappend="${activeMenu == 'khachhang'} ? ' active'">
-                <span class="nav__icon"></span>
-                <span class="nav__text">Quản lý khách hàng</span>
-            </a>
-
-            <a class="nav__item"
-               th:href="@{/invoices}"
-               th:classappend="${activeMenu == 'hoadon'} ? ' active'">
-                <span class="nav__icon"></span>
-                <span class="nav__text">Quản lý hóa đơn</span>
-            </a>
-            <a class="nav__item"
-               th:href="@{/orders}"
-               th:classappend="${activeMenu == 'ordes'} ? ' active'">
-                <span class="nav__icon"></span>
-                <span class="nav__text">Quản lý đơn hàng</span>
-            </a>
-            <a class="nav__item"
-               th:href="@{/khuyen-mai}"
-               th:classappend="${activeMenu == 'khuyenmai'} ? ' active'">
-                <span class="nav__icon"></span>
-                <span class="nav__text">Chương trình khuyến mãi</span>
-            </a>
-
-
-            <div class="nav__section-title">
-                <span class="nav__text">SẢN PHẨM</span>
-            </div>
-
-            <a class="nav__item"
-               href="#"
-               th:classappend="${activeMenu == 'sanpham'} ? ' active'">
-                <span class="nav__icon"></span>
-                <span class="nav__text">Sản phẩm</span>
-            </a>
-            <a class="nav__item"
-               th:href="@{/danh-muc}"
-               th:classappend="${activeMenu == 'danhmuc'} ? ' active'">
-                <span class="nav__icon"></span>
-                <span class="nav__text">Danh mục sản phẩm</span>
-            </a>
-            <a class="nav__item"
-               th:href="@{/mau-sac}"
-               th:classappend="${activeMenu == 'mausac'} ? ' active'">
-                <span class="nav__icon"></span>
-                <span class="nav__text">Màu sắc</span>
-            </a>
-
-            <div class="nav__section-title">
-                <span class="nav__text">KÊNH BÁN HÀNG</span>
-            </div>
-
-            <a class="nav__item"
-               href="#"
-               th:classappend="${activeMenu == 'banhang'} ? ' active'">
-                <span class="nav__icon"></span>
-                <span class="nav__text">Bán tại cửa hàng</span>
-            </a>
-        </nav>
-
-        <div class="sidebar__bottom">
-            <a class="nav__item" href="#">
-                <span class="nav__icon"></span>
-                <span class="nav__text">Thiết lập</span>
-            </a>
-        </div>
-    </aside>
-
-    <main class="main">
-        <header class="topbar">
-            <div class="topbar__title" th:text="${pageHeading} ?: 'Bàn làm việc'">Bàn làm việc</div>
-            <div class="topbar__right">
-                <button class="pill" type="button">Bán tại cửa hàng</button>
-                <button class="icon-btn" type="button" aria-label="Thông báo">&#128276;</button>
-                <div class="avatar" aria-label="User">&#128100;</div>
-            </div>
-        </header>
-
-        <section class="content dashboard-content">
-            <div class="dashboard-grid">
-                <div class="dashboard-panel sales-panel">
-                    <div class="panel-header">
-                        <h3>Tình hình bán hàng</h3>
-                        <select class="panel-select" id="salesRangeSelect">
-                            <option selected>Theo ngày dữ liệu</option>
-                            <option>7 ngày gần đây</option>
-                            <option>30 ngày gần đây</option>
-                        </select>
-                    </div>
-                    <div class="panel-note">
-                        Dữ liệu: <strong th:text="${salesDateLabel}">--/--/----</strong>
-                    </div>
-
-                    <div class="sales-list">
-                        <div class="sales-item">
-                            <div class="sales-item__icon sales-item__icon--blue">📦</div>
-                            <div>
-                                <div class="sales-item__label">Tổng đơn hàng</div>
-                                <div class="sales-item__value" th:text="${salesOverview.totalOrders}">0</div>
-                            </div>
+                <div class="sales-list">
+                    <div class="sales-item">
+                        <div class="sales-item__icon sales-item__icon--blue"><i class="bi bi-bag-check"></i></div>
+                        <div>
+                            <div class="sales-item__label">Tổng đơn hàng</div>
+                            <div class="sales-item__value" th:text="${salesOverview.totalOrders}">0</div>
                         </div>
+                    </div>
 
-                        <div class="sales-item">
-                            <div class="sales-item__icon sales-item__icon--green">💵</div>
-                            <div>
-                                <div class="sales-item__label">Tổng doanh thu</div>
-                                <div class="sales-item__value"
-                                     th:text="${#numbers.formatDecimal(salesOverview.totalRevenue, 0, 'COMMA', 0, 'POINT')} + 'đ'">
-                                    0đ
-                                </div>
+                    <div class="sales-item">
+                        <div class="sales-item__icon sales-item__icon--green"><i class="bi bi-cash-stack"></i></div>
+                        <div>
+                            <div class="sales-item__label">Tổng doanh thu</div>
+                            <div class="sales-item__value"
+                                 th:text="${#numbers.formatDecimal(salesOverview.totalRevenue, 0, 'COMMA', 0, 'POINT')} + 'đ'">
+                                0đ
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="dashboard-panel revenue-panel">
-                    <div class="panel-header">
-                        <h3>Doanh thu</h3>
-                        <select class="panel-select" id="revenueRangeSelect">
+            <div class="dashboard-panel revenue-panel">
+                <div class="panel-header">
+                    <h3><i class="bi bi-bar-chart-line"></i> Doanh thu</h3>
+                    <select class="panel-select" id="revenueRangeSelect">
+                        <option selected>7 ngày gần đây</option>
+                        <option>30 ngày gần đây</option>
+                    </select>
+                </div>
+
+                <div class="line-chart-wrap">
+                    <svg id="revenueChart" class="line-chart" viewBox="0 0 760 280" preserveAspectRatio="none"></svg>
+                </div>
+
+                <div class="revenue-legend">
+                    <label><input type="radio" name="revenueSeries" value="current" checked/> 7 ngày gần đây
+                        (<span th:text="${currentRangeLabel}">-</span>)</label>
+                    <label><input type="radio" name="revenueSeries" value="previous"/> Kỳ trước
+                        (<span th:text="${previousRangeLabel}">-</span>)</label>
+                </div>
+            </div>
+
+            <div class="dashboard-panel operation-panel">
+                <div class="panel-header operation-panel__header">
+                    <h3><i class="bi bi-pie-chart"></i> Hiệu quả vận hành</h3>
+                    <div class="operation-panel__actions">
+                        <select class="panel-select">
                             <option selected>7 ngày gần đây</option>
                             <option>30 ngày gần đây</option>
                         </select>
                     </div>
+                </div>
 
-                    <div class="line-chart-wrap">
-                        <svg id="revenueChart" class="line-chart" viewBox="0 0 760 280" preserveAspectRatio="none"></svg>
-                    </div>
-
-                    <div class="revenue-legend">
-                        <label><input type="radio" name="revenueSeries" value="current" checked/> 7 ngày gần đây
-                            (<span th:text="${currentRangeLabel}">-</span>)</label>
-                        <label><input type="radio" name="revenueSeries" value="previous"/> Kỳ trước
-                            (<span th:text="${previousRangeLabel}">-</span>)</label>
+                <div class="donut-wrap">
+                    <div id="operationDonut" class="donut-chart"
+                         th:attr="data-completed=${operationOverview.completedOrders},data-shipping=${operationOverview.shippingOrders},data-canceled=${operationOverview.canceledOrders}">
                     </div>
                 </div>
 
-                <div class="dashboard-panel operation-panel">
-                    <div class="panel-header operation-panel__header">
-                        <h3>Hiệu quả vận hành</h3>
-                        <div class="operation-panel__actions">
-                            <button class="icon-btn operation-filter-btn" type="button" aria-label="Bộ lọc">
-                                ⏱
-                            </button>
-                            <select class="panel-select">
-                                <option selected>7 ngày gần đây</option>
-                                <option>30 ngày gần đây</option>
-                            </select>
-                        </div>
+                <div class="operation-legend">
+                    <div class="legend-item">
+                        <span class="dot dot--green"></span>
+                        <span>Đơn hoàn thành</span>
+                        <strong th:text="${operationOverview.completedOrders}">0</strong>
                     </div>
-
-                    <div class="donut-wrap">
-                        <div id="operationDonut" class="donut-chart"
-                             th:attr="data-completed=${operationOverview.completedOrders},data-shipping=${operationOverview.shippingOrders},data-canceled=${operationOverview.canceledOrders}">
-                        </div>
+                    <div class="legend-item">
+                        <span class="dot dot--blue"></span>
+                        <span>Đang giao hàng</span>
+                        <strong th:text="${operationOverview.shippingOrders}">0</strong>
                     </div>
-
-                    <div class="operation-legend">
-                        <div class="legend-item">
-                            <span class="dot dot--green"></span>
-                            <span>Đơn hoàn thành</span>
-                            <strong th:text="${operationOverview.completedOrders}">0</strong>
-                        </div>
-                        <div class="legend-item">
-                            <span class="dot dot--blue"></span>
-                            <span>Đang giao hàng</span>
-                            <strong th:text="${operationOverview.shippingOrders}">0</strong>
-                        </div>
-                        <div class="legend-item">
-                            <span class="dot dot--red"></span>
-                            <span>Đơn hủy</span>
-                            <strong th:text="${operationOverview.canceledOrders}">0</strong>
-                        </div>
+                    <div class="legend-item">
+                        <span class="dot dot--red"></span>
+                        <span>Đơn hủy</span>
+                        <strong th:text="${operationOverview.canceledOrders}">0</strong>
                     </div>
                 </div>
             </div>
-        </section>
-    </main>
-</div>
+        </div>
+    </div>
 
-<script th:inline="javascript">
-    window.dashboardMetrics = {
-        labels: /*[[${currentRevenueLabels}]]*/ [],
-        current: /*[[${currentRevenueValues}]]*/ [],
-        previous: /*[[${previousRevenueValues}]]*/ []
-    };
-</script>
-<script th:src="@{/js/app.js}"></script>
-<script th:src="@{/js/dashboard.js}"></script>
-</body>
-</html>
+    <script th:inline="javascript">
+        window.dashboardMetrics = {
+            labels: /*[[${currentRevenueLabels}]]*/ [],
+            current: /*[[${currentRevenueValues}]]*/ [],
+            previous: /*[[${previousRevenueValues}]]*/ []
+        };
+    </script>
+    <script th:src="@{/js/dashboard.js}"></script>
+</div>

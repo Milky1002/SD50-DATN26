@@ -17,7 +17,7 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    @GetMapping("/dashboard")
+    @GetMapping({"/dashboard", "/"})
     public String dashboard(Model model) {
         DashboardViewModel dashboardView = dashboardService.getDashboardView();
 
@@ -26,6 +26,10 @@ public class DashboardController {
 
         model.addAttribute("pageTitle", "Tổng quan");
         model.addAttribute("pageHeading", "Bàn làm việc");
+        model.addAttribute("activeMenu", "dashboard");
+        model.addAttribute("content", "dashboard");
+        model.addAttribute("pageCss", "/css/dashboard.css");
+
         model.addAttribute("salesOverview", dashboardView.getSalesOverview());
         model.addAttribute("operationOverview", dashboardView.getOperationOverview());
 
@@ -45,7 +49,7 @@ public class DashboardController {
                 dashboardView.getCurrentFromDate().format(rangeFormatter) + " - " +
                         dashboardView.getCurrentToDate().format(rangeFormatter));
 
-        return "dashboard";
+        return "layout";
     }
 
     private List<Double> toNumbers(List<DashboardRevenuePointModel> points) {

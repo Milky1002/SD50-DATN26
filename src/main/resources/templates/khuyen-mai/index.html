@@ -83,8 +83,83 @@
         <!-- Tab Content: Lịch sử áp dụng -->
         <div class="tab-content" id="tab-lich-su">
             <div class="card">
-                <h2 class="card-title">Lịch sử áp dụng khuyến mại</h2>
-                <p class="text-muted">Chức năng đang phát triển...</p>
+                <!-- Header -->
+                <div class="card-header">
+                    <h2 class="card-title">Lịch sử áp dụng khuyến mại</h2>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters">
+                    <div class="search-box">
+                        <select class="filter-select" id="historyFilterPromotion">
+                            <option value="">Tất cả CTKM</option>
+                        </select>
+                    </div>
+                    <input type="date" class="filter-date" id="historyFromDate" title="Từ ngày" />
+                    <input type="date" class="filter-date" id="historyToDate" title="Đến ngày" />
+                    <button type="button" class="btn-primary" onclick="loadHistory()">
+                        <i class="bi bi-search"></i> Tìm kiếm
+                    </button>
+                    <button type="button" class="btn-secondary btn-reset-filter" onclick="resetHistoryFilters()">
+                        Hủy lọc
+                    </button>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th width="50">STT</th>
+                            <th>Mã CTKM</th>
+                            <th>Tên CTKM</th>
+                            <th>Loại</th>
+                            <th>Mã hóa đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Giá trị giảm</th>
+                            <th>Ngày áp dụng</th>
+                            <th width="80">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="9" class="text-center">
+                                <div class="loading">Chọn tab để tải dữ liệu...</div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <div class="pagination-info">
+                        Hiển thị <span id="historyShowingFrom">0</span> - <span id="historyShowingTo">0</span>
+                        trong tổng số <span id="historyTotalRecords">0</span> bản ghi
+                    </div>
+                    <div class="pagination-controls">
+                        <button type="button" class="btn-icon" id="btnHistoryPrevPage">‹</button>
+                        <span id="historyPageInfo">Trang 1</span>
+                        <button type="button" class="btn-icon" id="btnHistoryNextPage">›</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Chi tiết lịch sử áp dụng -->
+        <div class="modal" id="modalHistoryDetail">
+            <div class="modal-overlay" onclick="closeModal('modalHistoryDetail')"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Chi tiết áp dụng khuyến mại</h3>
+                    <button type="button" class="btn-close" onclick="closeModal('modalHistoryDetail')">×</button>
+                </div>
+                <div class="modal-body" id="historyDetailContent">
+                    <p>Đang tải...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modalHistoryDetail')">Đóng</button>
+                </div>
             </div>
         </div>
     </section>

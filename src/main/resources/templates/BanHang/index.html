@@ -4,8 +4,8 @@
 
     <div class="pos-container">
         <!-- ORDER TABS -->
-        <div class="pos-tabs">
-            <div class="pos-tab pos-tab--active" id="tab1">
+        <div class="pos-tabs" id="orderTabs">
+            <div class="pos-tab pos-tab--active" data-tab="0">
                 <span>Đơn hàng 1</span>
                 <button type="button" class="pos-tab__close" title="Đóng">&times;</button>
             </div>
@@ -16,9 +16,9 @@
         <div class="pos-main">
             <!-- SEARCH BAR -->
             <div class="pos-search">
-                <span class="pos-search__icon">&#128270;</span>
+                <span class="pos-search__icon"><i class="bi bi-search"></i></span>
                 <input type="text" id="productSearch" placeholder="Tìm kiếm hàng hóa (F3)" autocomplete="off"/>
-                <button type="button" class="pos-search__scan" id="btnScanPos" title="Quét mã vạch">&#128247;</button>
+                <button type="button" class="pos-search__scan" id="btnScanPos" title="Quét mã vạch"><i class="bi bi-upc-scan"></i></button>
             </div>
 
             <!-- LEFT: CART ITEMS / EMPTY STATE -->
@@ -52,11 +52,12 @@
                     <!-- Customer -->
                     <div class="pos-sidebar__section">
                         <div class="pos-customer-row">
-                            <input type="text" id="customerInput" placeholder="Ten khach hang (F4)"/>
-                            <button type="button" class="pos-icon-btn" title="Them khach hang">+</button>
+                            <input type="text" id="customerInput" placeholder="Tên khách hàng (F4)"/>
+                            <button type="button" class="pos-icon-btn" id="btnAddCustomer" title="Thêm khách hàng mới">+</button>
                         </div>
+                        <div id="customerSuggestions" class="pos-customer-suggestions" style="display:none"></div>
                         <div class="pos-customer-row" style="margin-top:6px;">
-                            <input type="text" id="customerPhone" placeholder="So dien thoai khach hang"/>
+                            <input type="text" id="customerPhone" placeholder="Số điện thoại khách hàng"/>
                         </div>
                         <div class="pos-datetime" id="posDatetime"></div>
                     </div>
@@ -70,12 +71,19 @@
                         </div>
                     </div>
 
-                    <!-- Coupon -->
+                    <!-- Promotion / Coupon -->
                     <div class="pos-sidebar__section">
                         <div class="pos-coupon-row">
                             <span class="pos-coupon-icon">&#127991;</span>
-                            <input type="text" id="couponInput" placeholder="Nhập mã ưu đãi"/>
+                            <input type="text" id="couponInput" placeholder="Nhập mã khuyến mại..." autocomplete="off"/>
+                            <button type="button" class="pos-icon-btn" id="btnApplyPromo" title="Áp dụng">✓</button>
                         </div>
+                        <div class="pos-promo-result" id="promoResult" style="display:none">
+                            <div class="pos-promo-name" id="promoName"></div>
+                            <div class="pos-promo-discount" id="promoDiscount"></div>
+                            <button type="button" class="pos-promo-remove" id="btnRemovePromo" title="Bỏ khuyến mại">✕</button>
+                        </div>
+                        <input type="hidden" id="selectedPromotionId" value=""/>
                     </div>
 
                     <!-- Payment -->
@@ -140,6 +148,35 @@
         </div>
     </div>
 
+    <!-- Add Customer Modal -->
+    <div class="bh-modal" id="addCustomerModal" aria-hidden="true">
+        <div class="bh-modal__overlay" onclick="document.getElementById('addCustomerModal').classList.remove('is-open')"></div>
+        <div class="bh-modal__dialog">
+            <div class="bh-modal__header">
+                <div class="bh-modal__title"><i class="bi bi-person-plus"></i> Thêm khách hàng mới</div>
+                <button type="button" class="bh-modal__close" onclick="document.getElementById('addCustomerModal').classList.remove('is-open')">&times;</button>
+            </div>
+            <div class="bh-modal__body">
+                <div class="pos-modal-field">
+                    <label>Tên khách hàng <span style="color:#ef4444">*</span></label>
+                    <input type="text" id="newCustName" placeholder="Nhập tên khách hàng"/>
+                </div>
+                <div class="pos-modal-field">
+                    <label>Số điện thoại <span style="color:#ef4444">*</span></label>
+                    <input type="text" id="newCustPhone" placeholder="Nhập số điện thoại"/>
+                </div>
+                <div class="pos-modal-field">
+                    <label>Email</label>
+                    <input type="email" id="newCustEmail" placeholder="Nhập email (không bắt buộc)"/>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
+                    <button type="button" class="pos-modal-btn pos-modal-btn--ghost" onclick="document.getElementById('addCustomerModal').classList.remove('is-open')">Hủy</button>
+                    <button type="button" class="pos-modal-btn pos-modal-btn--primary" id="btnSaveCustomer">Lưu khách hàng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Barcode scanner modal -->
     <div class="bh-modal" id="scanModalPos" aria-hidden="true">
         <div class="bh-modal__overlay" id="scanModalPosOverlay"></div>
@@ -157,6 +194,85 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script>
         (function () {
+            /* ========== MULTI-TAB ORDER MANAGEMENT ========== */
+            var orders = [{ cart: [], customerName: '', customerPhone: '', note: '', cashGiven: 0 }];
+            var activeOrderIdx = 0;
+            var tabCounter = 1;
+
+            var orderTabsEl = document.getElementById('orderTabs');
+            var btnAddTab = document.getElementById('btnAddTab');
+
+            function renderTabs() {
+                var tabs = orderTabsEl.querySelectorAll('.pos-tab:not(.pos-tab--add)');
+                tabs.forEach(function(t) { t.remove(); });
+
+                orders.forEach(function(order, idx) {
+                    var tab = document.createElement('div');
+                    tab.className = 'pos-tab' + (idx === activeOrderIdx ? ' pos-tab--active' : '');
+                    tab.setAttribute('data-tab', idx);
+                    tab.innerHTML = '<span>Đơn hàng ' + (idx + 1) + '</span>'
+                        + (orders.length > 1 ? '<button type="button" class="pos-tab__close" title="Đóng">&times;</button>' : '');
+                    orderTabsEl.insertBefore(tab, btnAddTab);
+
+                    tab.addEventListener('click', function(e) {
+                        if (e.target.classList.contains('pos-tab__close')) {
+                            e.stopPropagation();
+                            closeTab(idx);
+                            return;
+                        }
+                        switchTab(idx);
+                    });
+                });
+            }
+
+            function saveCurrentOrder() {
+                orders[activeOrderIdx] = {
+                    cart: cart.slice(),
+                    customerName: document.getElementById('customerInput').value,
+                    customerPhone: document.getElementById('customerPhone').value,
+                    note: document.getElementById('orderNote').value,
+                    cashGiven: parseInt(document.getElementById('cashGiven').value) || 0
+                };
+            }
+
+            function loadOrder(idx) {
+                var order = orders[idx];
+                cart = order.cart.slice();
+                document.getElementById('customerInput').value = order.customerName || '';
+                document.getElementById('customerPhone').value = order.customerPhone || '';
+                document.getElementById('orderNote').value = order.note || '';
+                document.getElementById('cashGiven').value = order.cashGiven || 0;
+                renderCart();
+            }
+
+            function switchTab(idx) {
+                if (idx === activeOrderIdx) return;
+                saveCurrentOrder();
+                activeOrderIdx = idx;
+                loadOrder(idx);
+                renderTabs();
+            }
+
+            function closeTab(idx) {
+                if (orders.length <= 1) return;
+                orders.splice(idx, 1);
+                if (activeOrderIdx >= orders.length) activeOrderIdx = orders.length - 1;
+                else if (idx < activeOrderIdx) activeOrderIdx--;
+                else if (idx === activeOrderIdx) activeOrderIdx = Math.min(idx, orders.length - 1);
+                loadOrder(activeOrderIdx);
+                renderTabs();
+            }
+
+            btnAddTab.addEventListener('click', function() {
+                saveCurrentOrder();
+                orders.push({ cart: [], customerName: '', customerPhone: '', note: '', cashGiven: 0 });
+                tabCounter++;
+                activeOrderIdx = orders.length - 1;
+                loadOrder(activeOrderIdx);
+                renderTabs();
+            });
+
+            /* ========== CORE VARIABLES ========== */
             var cart = [];
             var searchInput = document.getElementById('productSearch');
             var productList = document.getElementById('productList');
@@ -363,26 +479,33 @@
             btnCheckout.addEventListener('click', function () {
                 if (!cart.length) return;
                 var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+                var promoId = document.getElementById('selectedPromotionId').value;
                 var payload = {
-                    tenKhachHang: document.getElementById('customerInput').value || 'Khach le',
+                    tenKhachHang: document.getElementById('customerInput').value || 'Khách lẻ',
                     sdtKhachHang: document.getElementById('customerPhone').value || '',
                     ghiChu: document.getElementById('orderNote').value || '',
                     phuongThucThanhToan: paymentMethod,
                     tienKhachDua: parseInt(cashGiven.value) || 0,
+                    promotionId: promoId ? parseInt(promoId) : null,
                     items: cart.map(function (c) {
                         return { sanPhamId: c.id, soLuong: c.soLuong };
                     })
                 };
                 btnCheckout.disabled = true;
+                btnCheckout.textContent = 'Đang xử lý...';
                 fetch('/ban-hang/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    if (data.success) {
-                        alert('Thanh toán thành công!\nMã hóa đơn: ' + data.hoaDonId + '\nTổng tiền: ' + formatMoney(data.tongTien));
+                .then(function (r) {
+                    return r.json().then(function(data) {
+                        return { ok: r.ok, data: data };
+                    });
+                })
+                .then(function (res) {
+                    if (res.ok && res.data.success) {
+                        alert('Thanh toán thành công!\nMã hóa đơn: ' + res.data.hoaDonId + '\nTổng tiền: ' + formatMoney(res.data.tongTien));
                         cart = [];
                         renderCart();
                         document.getElementById('customerInput').value = '';
@@ -391,21 +514,52 @@
                         cashGiven.value = '0';
                         searchInput.value = '';
                         productList.style.display = 'none';
+                        clearPromotion();
+                        // Also save the cleared state
+                        saveCurrentOrder();
                     } else {
-                        alert('Lỗi: ' + data.message);
+                        alert('Lỗi thanh toán: ' + (res.data.message || 'Không xác định'));
                         btnCheckout.disabled = false;
                     }
+                    btnCheckout.textContent = 'Thanh toán (F9)';
                 })
-                .catch(function () {
-                    alert('Lỗi kết nối server');
+                .catch(function (err) {
+                    alert('Lỗi kết nối server: ' + err.message);
                     btnCheckout.disabled = false;
+                    btnCheckout.textContent = 'Thanh toán (F9)';
                 });
+            });
+
+            /* ---------- ADD CUSTOMER MODAL ---------- */
+            var addCustModal = document.getElementById('addCustomerModal');
+            document.getElementById('btnAddCustomer').addEventListener('click', function() {
+                document.getElementById('newCustName').value = '';
+                document.getElementById('newCustPhone').value = '';
+                document.getElementById('newCustEmail').value = '';
+                addCustModal.classList.add('is-open');
+                setTimeout(function() { document.getElementById('newCustName').focus(); }, 100);
+            });
+
+            document.getElementById('btnSaveCustomer').addEventListener('click', function() {
+                var name = document.getElementById('newCustName').value.trim();
+                var phone = document.getElementById('newCustPhone').value.trim();
+                if (!name) { alert('Vui lòng nhập tên khách hàng'); return; }
+                if (!phone) { alert('Vui lòng nhập số điện thoại'); return; }
+
+                // Fill the customer fields in the POS form
+                document.getElementById('customerInput').value = name;
+                document.getElementById('customerPhone').value = phone;
+                addCustModal.classList.remove('is-open');
             });
 
             /* ---------- KEYBOARD SHORTCUTS ---------- */
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'F3') { e.preventDefault(); searchInput.focus(); }
+                if (e.key === 'F4') { e.preventDefault(); document.getElementById('customerInput').focus(); }
                 if (e.key === 'F9') { e.preventDefault(); btnCheckout.click(); }
+                if (e.key === 'Escape') {
+                    addCustModal.classList.remove('is-open');
+                }
             });
 
             /* ---------- BARCODE SCANNER ---------- */
@@ -435,8 +589,93 @@
             document.getElementById('btnCloseScanPos').addEventListener('click', closeScanPos);
             document.getElementById('scanModalPosOverlay').addEventListener('click', closeScanPos);
 
+            /* ---------- PROMOTION / COUPON ---------- */
+            var btnApplyPromo = document.getElementById('btnApplyPromo');
+            var btnRemovePromo = document.getElementById('btnRemovePromo');
+            var couponInput = document.getElementById('couponInput');
+            var promoResult = document.getElementById('promoResult');
+            var promoName = document.getElementById('promoName');
+            var promoDiscount = document.getElementById('promoDiscount');
+            var selectedPromotionId = document.getElementById('selectedPromotionId');
+
+            if (btnApplyPromo) {
+                btnApplyPromo.addEventListener('click', function() {
+                    var code = couponInput.value.trim();
+                    if (!code) { alert('Vui lòng nhập mã khuyến mại'); return; }
+                    fetch('/api/chuong-trinh-khuyen-mai/code/' + encodeURIComponent(code))
+                        .then(function(r) { return r.json(); })
+                        .then(function(result) {
+                            if (result.success && result.data) {
+                                var promo = result.data;
+                                if (promo.trangThai !== 1) {
+                                    alert('Chương trình khuyến mại này đã ngừng hoạt động');
+                                    return;
+                                }
+                                selectedPromotionId.value = promo.id;
+                                promoName.textContent = promo.tenChuongTrinh;
+                                // Calculate discount preview
+                                var total = getCartTotal();
+                                if (total > 0 && promo.loaiKhuyenMai === 1) {
+                                    fetch('/api/chuong-trinh-khuyen-mai/' + promo.id + '/calculate-discount?orderTotal=' + total)
+                                        .then(function(r) { return r.json(); })
+                                        .then(function(res) {
+                                            if (res.success) {
+                                                promoDiscount.textContent = '-' + formatMoney(res.data);
+                                            } else {
+                                                promoDiscount.textContent = res.message;
+                                            }
+                                        });
+                                } else {
+                                    promoDiscount.textContent = promo.loaiGiam === 1
+                                        ? 'Giảm ' + promo.giaTriGiam + '%'
+                                        : 'Giảm ' + formatMoney(promo.giaTriGiam);
+                                }
+                                promoResult.style.display = 'flex';
+                                couponInput.style.display = 'none';
+                                btnApplyPromo.style.display = 'none';
+                            } else {
+                                alert('Không tìm thấy mã khuyến mại: ' + code);
+                            }
+                        })
+                        .catch(function(err) {
+                            alert('Lỗi tìm mã: ' + err.message);
+                        });
+                });
+            }
+
+            if (btnRemovePromo) {
+                btnRemovePromo.addEventListener('click', function() {
+                    clearPromotion();
+                });
+            }
+
+            // Enter key on coupon input
+            if (couponInput) {
+                couponInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (btnApplyPromo) btnApplyPromo.click();
+                    }
+                });
+            }
+
+            function clearPromotion() {
+                selectedPromotionId.value = '';
+                promoResult.style.display = 'none';
+                couponInput.style.display = '';
+                couponInput.value = '';
+                if (btnApplyPromo) btnApplyPromo.style.display = '';
+            }
+
+            function getCartTotal() {
+                var total = 0;
+                cart.forEach(function(c) { total += c.giaBan * c.soLuong; });
+                return total;
+            }
+
             /* ---------- INIT ---------- */
             renderCart();
+            renderTabs();
         })();
     </script>
 </div>

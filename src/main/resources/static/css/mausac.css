@@ -1,7 +1,9 @@
+/* ===== Mau sac — unified with admin base ===== */
 .ms-wrap{
     display:flex;
     flex-direction:column;
     gap:16px;
+    animation: adminFadeIn .3s ease;
 }
 
 .ms-toolbar{
@@ -16,10 +18,20 @@
     display:flex;
     align-items:center;
     gap:10px;
-    background:#fff;
-    border:1px solid #e5e7eb;
+    background: var(--admin-card);
+    border:1px solid var(--admin-border);
     border-radius:8px;
     padding:10px 12px;
+    transition: var(--admin-transition);
+}
+.ms-search:focus-within{
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.08);
+}
+
+.ms-search__icon{
+    font-size:15px;
+    color: var(--admin-text-secondary);
 }
 
 .ms-search input{
@@ -27,6 +39,8 @@
     border:none;
     outline:none;
     background:transparent;
+    font-size:14px;
+    color: var(--admin-text);
 }
 
 .ms-actions{
@@ -36,10 +50,11 @@
 }
 
 .ms-card{
-    background:#fff;
-    border:1px solid #e5e7eb;
-    border-radius:10px;
+    background: var(--admin-card);
+    border:1px solid var(--admin-border);
+    border-radius: var(--admin-radius-lg);
     overflow:hidden;
+    box-shadow: var(--admin-shadow);
 }
 
 .ms-tablewrap{
@@ -52,54 +67,105 @@
 }
 
 .ms-table thead th{
-    background:#f3f4f6;
+    background:#f8fafc;
     text-align:left;
-    padding:12px;
-    border-bottom:1px solid #e5e7eb;
-    font-size:14px;
+    padding:12px 14px;
+    border-bottom:1px solid var(--admin-border);
+    font-size:11px;
+    font-weight:700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--admin-text-secondary);
 }
 
 .ms-table tbody td{
-    padding:12px;
-    border-bottom:1px solid #edf1f7;
+    padding:12px 14px;
+    border-bottom:1px solid #f1f5f9;
     font-size:14px;
+    color: var(--admin-text);
+}
+
+.ms-table tbody tr{
+    transition: background .15s ease;
+}
+
+.ms-table tbody tr:hover{
+    background: #f8fafc;
+}
+
+.ms-table tbody tr:last-child td{
+    border-bottom: none;
 }
 
 .ms-btn{
-    border:1px solid #d1d5db;
-    background:#fff;
-    padding:10px 14px;
+    border:1px solid var(--admin-border);
+    background: var(--admin-card);
+    padding:9px 14px;
     border-radius:8px;
     cursor:pointer;
     font-weight:600;
+    font-size:13px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition: var(--admin-transition);
+}
+.ms-btn:hover{
+    background: #f8fafc;
+    border-color: #cbd5e1;
 }
 
 .ms-btn--primary{
-    background:#2563eb;
-    border-color:#2563eb;
+    background: var(--admin-primary);
+    border-color: var(--admin-primary);
     color:#fff;
+}
+.ms-btn--primary:hover{
+    background: var(--admin-primary-hover);
+    border-color: var(--admin-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79,70,229,.25);
 }
 
 .ms-btn--outline{
     background:#fff;
-    color:#2563eb;
-    border-color:#93c5fd;
+    color: var(--admin-primary);
+    border-color: var(--admin-primary);
+}
+.ms-btn--outline:hover{
+    background: var(--admin-primary-light);
 }
 
 .ms-btn--ghost{
-    background:#fff;
-    border-color:#d1d5db;
+    background: #f8fafc;
+    border-color: var(--admin-border);
+    color: var(--admin-text-secondary);
+}
+.ms-btn--ghost:hover{
+    background: var(--admin-border);
 }
 
 .ms-action{
     text-decoration:none;
-    color:#2563eb;
+    color: var(--admin-primary);
     margin-left:10px;
     font-weight:600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    transition: var(--admin-transition);
+}
+.ms-action:hover{
+    background: var(--admin-primary-light);
 }
 
 .ms-action--danger{
-    color:#ef4444;
+    color: var(--admin-danger);
+}
+.ms-action--danger:hover{
+    background: var(--admin-danger-light);
 }
 
 .ms-color-box{
@@ -107,37 +173,14 @@
     width:28px;
     height:28px;
     border-radius:6px;
-    border:1px solid #d1d5db;
+    border:1px solid var(--admin-border);
     vertical-align:middle;
-}
-
-.mono{
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
-
-.pill{
-    display:inline-flex;
-    align-items:center;
-    padding:6px 10px;
-    border-radius:999px;
-    font-size:12px;
-    font-weight:700;
-}
-
-.pill--ok{
-    background:#eaf7ea;
-    color:#15803d;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
 }
 
 .pill--off{
-    background:#f3f4f6;
-    color:#6b7280;
-}
-
-.empty{
-    text-align:center;
-    color:#6b7280;
-    padding:22px !important;
+    background: #f1f5f9;
+    color: var(--admin-text-secondary);
 }
 
 /* modal */
@@ -146,41 +189,47 @@
     inset:0;
     display:none;
     z-index:2000;
+    align-items:center;
+    justify-content:center;
 }
 
 .ms-modal.is-open{
-    display:block;
+    display:flex;
 }
 
 .ms-modal__overlay{
     position:absolute;
     inset:0;
-    background:rgba(17,24,39,.55);
+    background:rgba(15,23,42,.5);
+    backdrop-filter: blur(4px);
+    animation: adminFadeIn .2s ease;
 }
 
 .ms-modal__dialog{
     position:relative;
     width:520px;
     max-width:calc(100vw - 24px);
-    background:#fff;
-    border-radius:10px;
-    border:1px solid #e5e7eb;
-    margin:90px auto 0;
+    background: var(--admin-card);
+    border-radius: var(--admin-radius-lg);
+    border:1px solid var(--admin-border);
+    margin:0;
     overflow:hidden;
-    box-shadow:0 12px 40px rgba(0,0,0,.25);
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    animation: adminSlideUp .3s ease;
 }
 
 .ms-modal__header{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:14px 16px;
-    border-bottom:1px solid #eef2f7;
+    padding:16px 20px;
+    border-bottom:1px solid #f1f5f9;
 }
 
 .ms-modal__title{
-    font-weight:700;
+    font-weight:800;
     font-size:16px;
+    color: var(--admin-text);
 }
 
 .ms-modal__close{
@@ -188,38 +237,57 @@
     background:transparent;
     font-size:22px;
     cursor:pointer;
+    color: #94a3b8;
+    width:32px; height:32px;
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: var(--admin-transition);
+}
+.ms-modal__close:hover{
+    color: var(--admin-danger);
+    background: var(--admin-danger-light);
 }
 
 .ms-modal__body{
-    padding:14px 16px;
+    padding:20px;
     display:flex;
     flex-direction:column;
-    gap:12px;
+    gap:14px;
 }
 
 .ms-field label{
     display:block;
-    font-size:13px;
-    font-weight:600;
+    font-size:11.5px;
+    font-weight:700;
+    color: var(--admin-text-secondary);
     margin-bottom:6px;
+    text-transform: uppercase;
+    letter-spacing: .3px;
 }
 
 .ms-field input,
 .ms-field select{
     width:100%;
     padding:10px 12px;
-    border:1px solid #d1d5db;
+    border:1px solid var(--admin-border);
     border-radius:8px;
     outline:none;
+    background: #f8fafc;
+    transition: var(--admin-transition);
+}
+
+.ms-field input:focus,
+.ms-field select:focus{
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+    background: #fff;
 }
 
 .ms-modal__footer{
-    padding:12px 16px 16px;
+    padding:14px 20px 18px;
     display:flex;
     justify-content:flex-end;
     gap:10px;
-}
-
-.req{
-    color:#ef4444;
 }

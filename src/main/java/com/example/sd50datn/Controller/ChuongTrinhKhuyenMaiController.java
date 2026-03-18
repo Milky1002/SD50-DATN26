@@ -3,9 +3,9 @@ package com.example.sd50datn.Controller;
 import com.example.sd50datn.Dto.ApiResponse;
 import com.example.sd50datn.Dto.ChuongTrinhKhuyenMaiDTO;
 import com.example.sd50datn.Dto.ChuongTrinhKhuyenMaiRequest;
+import com.example.sd50datn.Dto.LichSuApDungKhuyenMaiDTO;
 import com.example.sd50datn.Service.ChuongTrinhKhuyenMaiService;
-import com.example.sd50datn.Dto.*;
-import com.example.sd50datn.Service.ChuongTrinhKhuyenMaiService;
+import com.example.sd50datn.Service.LichSuApDungKhuyenMaiService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,6 +14,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +27,7 @@ import java.util.stream.Collectors;
 public class ChuongTrinhKhuyenMaiController {
 
     private final ChuongTrinhKhuyenMaiService service;
+    private final LichSuApDungKhuyenMaiService lichSuService;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ChuongTrinhKhuyenMaiDTO>>> getAllPromotions() {
@@ -207,6 +211,57 @@ public class ChuongTrinhKhuyenMaiController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("Lỗi khi tính toán: " + e.getMessage()));
+        }
+    }
+
+    // ======================== HISTORY ENDPOINTS ========================
+
+    @GetMapping("/history")
+    public ResponseEntity<ApiResponse<List<LichSuApDungKhuyenMaiDTO>>> getHistory(
+            @RequestParam(required = false) Integer promotionId,
+            @RequestParam(required = false) Integer hoaDonId,
+            @RequestParam(required = false) String fromDate,
+            @RequestParam(required = false) String toDate) {
+        try {
+            LocalDateTime from = fromDate != null ? LocalDate.parse(fromDate).atStartOfDay() : null;
+            LocalDateTime to = toDate != null ? LocalDate.parse(toDate).atTime(LocalTime.MAX) : null;
+
+            List<LichSuApDungKhuyenMaiDTO> history;
+            if (promotionId == null && hoaDonId == null && from == null && to == null) {
+                history = lichSuService.getAll();
+            } else {
+                history = lichSuService.getWithFilters(promotionId, hoaDonId, from, to);
+            }
+            return ResponseEntity.ok(ApiResponse.success("Lấy lịch sử áp dụng thành công", history));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Lỗi khi lấy lịch sử: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/history/{id}")
+    public ResponseEntity<ApiResponse<LichSuApDungKhuyenMaiDTO>> getHistoryById(@PathVariable Integer id) {
+        try {
+            LichSuApDungKhuyenMaiDTO dto = lichSuService.getById(id);
+            return ResponseEntity.ok(ApiResponse.success("Lấy chi tiết lịch sử thành công", dto));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Lỗi khi lấy chi tiết: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{promotionId}/history")
+    public ResponseEntity<ApiResponse<List<LichSuApDungKhuyenMaiDTO>>> getHistoryByPromotion(
+            @PathVariable Integer promotionId) {
+        try {
+            List<LichSuApDungKhuyenMaiDTO> history = lichSuService.getByPromotionId(promotionId);
+            return ResponseEntity.ok(ApiResponse.success("Lấy lịch sử áp dụng theo CTKM thành công", history));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Lỗi khi lấy lịch sử: " + e.getMessage()));
         }
     }
 }

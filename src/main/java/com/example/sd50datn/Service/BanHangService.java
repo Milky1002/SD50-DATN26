@@ -1,11 +1,7 @@
 package com.example.sd50datn.Service;
 
-import com.example.sd50datn.Entity.HoaDon;
-import com.example.sd50datn.Entity.HoaDonChiTiet;
-import com.example.sd50datn.Entity.SanPham;
-import com.example.sd50datn.Repository.HoaDonChiTietRepository;
-import com.example.sd50datn.Repository.InvoiceRepository;
-import com.example.sd50datn.Repository.SanPhamRepository;
+import com.example.sd50datn.Entity.*;
+import com.example.sd50datn.Repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,44 +18,40 @@ public class BanHangService {
     private final InvoiceRepository hoaDonRepo;
     private final HoaDonChiTietRepository hoaDonChiTietRepo;
     private final SanPhamRepository sanPhamRepo;
+    private final HinhThucThanhToanRepository hinhThucThanhToanRepo;
+    private final ChuongTrinhKhuyenMaiRepository chuongTrinhKhuyenMaiRepo;
+    private final LichSuApDungKhuyenMaiRepository lichSuApDungRepo;
 
     @Transactional
     public HoaDon checkout(String tenKhachHang, String sdtKhachHang,
                            String ghiChu, String phuongThucThanhToan,
                            int tienKhachDua,
-                           List<Map<String, Object>> items) {
+                           List<Map<String, Object>> items,
+                           Integer promotionId) {
 
         if (items == null || items.isEmpty()) {
-            throw new IllegalArgumentException("Gio hang trong");
+            throw new IllegalArgumentException("Giỏ hàng trống");
         }
 
         BigDecimal tongTien = BigDecimal.ZERO;
 
+        // Validate stock first
         for (Map<String, Object> item : items) {
             int spId = ((Number) item.get("sanPhamId")).intValue();
             int soLuong = ((Number) item.get("soLuong")).intValue();
             SanPham sp = sanPhamRepo.findById(spId)
-                    .orElseThrow(() -> new IllegalArgumentException("San pham khong ton tai: " + spId));
+                    .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại: " + spId));
             if (sp.getSoLuongTon() < soLuong) {
-                throw new IllegalArgumentException("San pham " + sp.getTenSanPham() + " khong du ton kho");
+                throw new IllegalArgumentException("Sản phẩm " + sp.getTenSanPham() + " không đủ tồn kho");
             }
         }
 
-        // Map payment method to hinhThucThanhToanId
-        Integer hinhThucThanhToanId = null;
-        if (phuongThucThanhToan != null) {
-            switch (phuongThucThanhToan) {
-                case "cash": hinhThucThanhToanId = 1; break;
-                case "transfer": hinhThucThanhToanId = 2; break;
-                case "card": hinhThucThanhToanId = 3; break;
-                case "ewallet": hinhThucThanhToanId = 4; break;
-                default: hinhThucThanhToanId = 1; break;
-            }
-        }
+        // Resolve payment method from DB instead of hardcoded IDs
+        Integer hinhThucThanhToanId = resolvePaymentMethodId(phuongThucThanhToan);
 
         HoaDon hoaDon = new HoaDon();
         hoaDon.setNhanVienId(1);
-        hoaDon.setTenKhachHang(tenKhachHang != null && !tenKhachHang.isBlank() ? tenKhachHang : "Khach le");
+        hoaDon.setTenKhachHang(tenKhachHang != null && !tenKhachHang.isBlank() ? tenKhachHang : "Khách lẻ");
         hoaDon.setSdtKhachHang(sdtKhachHang);
         hoaDon.setGhiChu(ghiChu);
         hoaDon.setHinhThucThanhToanId(hinhThucThanhToanId);
@@ -70,6 +62,7 @@ public class BanHangService {
 
         hoaDon = hoaDonRepo.save(hoaDon);
 
+        // Save line items
         for (Map<String, Object> item : items) {
             int spId = ((Number) item.get("sanPhamId")).intValue();
             int soLuong = ((Number) item.get("soLuong")).intValue();
@@ -90,9 +83,114 @@ public class BanHangService {
             sanPhamRepo.save(sp);
         }
 
-        hoaDon.setTongTienSauKhiGiam(tongTien);
+        // Apply promotion discount
+        BigDecimal discount = BigDecimal.ZERO;
+        ChuongTrinhKhuyenMai appliedPromotion = null;
+
+        if (promotionId != null) {
+            // Manual promotion selected
+            appliedPromotion = chuongTrinhKhuyenMaiRepo.findById(promotionId).orElse(null);
+            if (appliedPromotion != null) {
+                discount = calculateDiscount(appliedPromotion, tongTien);
+            }
+        } else {
+            // Try auto-apply: find best active invoice-level promotion with tuDongApDung=true
+            List<ChuongTrinhKhuyenMai> autoPromotions = chuongTrinhKhuyenMaiRepo
+                    .findActivePromotionsByType(LocalDateTime.now(), 1); // loaiKhuyenMai=1 (invoice)
+            BigDecimal bestDiscount = BigDecimal.ZERO;
+            for (ChuongTrinhKhuyenMai promo : autoPromotions) {
+                if (Boolean.TRUE.equals(promo.getTuDongApDung())) {
+                    if (promo.getDonHangToiThieu() == null || tongTien.compareTo(promo.getDonHangToiThieu()) >= 0) {
+                        BigDecimal d = calculateDiscount(promo, tongTien);
+                        if (d.compareTo(bestDiscount) > 0) {
+                            bestDiscount = d;
+                            appliedPromotion = promo;
+                        }
+                    }
+                }
+            }
+            discount = bestDiscount;
+        }
+
+        BigDecimal tongTienSauGiam = tongTien.subtract(discount);
+        if (tongTienSauGiam.compareTo(BigDecimal.ZERO) < 0) {
+            tongTienSauGiam = BigDecimal.ZERO;
+        }
+        hoaDon.setTongTienSauKhiGiam(tongTienSauGiam);
         hoaDonRepo.save(hoaDon);
 
+        // Log promotion application history
+        if (appliedPromotion != null && discount.compareTo(BigDecimal.ZERO) > 0) {
+            LichSuApDungKhuyenMai lichSu = new LichSuApDungKhuyenMai();
+            lichSu.setChuongTrinhKhuyenMai(appliedPromotion);
+            lichSu.setHoaDon(hoaDon);
+            lichSu.setGiaTriGiam(discount);
+            lichSu.setNgayApDung(LocalDateTime.now());
+            lichSuApDungRepo.save(lichSu);
+        }
+
         return hoaDon;
+    }
+
+    /**
+     * Backward-compatible checkout without promotionId
+     */
+    @Transactional
+    public HoaDon checkout(String tenKhachHang, String sdtKhachHang,
+                           String ghiChu, String phuongThucThanhToan,
+                           int tienKhachDua,
+                           List<Map<String, Object>> items) {
+        return checkout(tenKhachHang, sdtKhachHang, ghiChu, phuongThucThanhToan, tienKhachDua, items, null);
+    }
+
+    /**
+     * Resolve payment method string to DB ID.
+     * Falls back to first available payment method if lookup fails.
+     */
+    private Integer resolvePaymentMethodId(String phuongThucThanhToan) {
+        if (phuongThucThanhToan == null || phuongThucThanhToan.isBlank()) {
+            return getDefaultPaymentMethodId();
+        }
+
+        String tenHinhThuc;
+        switch (phuongThucThanhToan.toLowerCase()) {
+            case "cash":      tenHinhThuc = "Tien mat"; break;
+            case "transfer":  tenHinhThuc = "Chuyen khoan"; break;
+            case "card":      tenHinhThuc = "The tin dung"; break;
+            case "ewallet":   tenHinhThuc = "Vi dien tu"; break;
+            default:          tenHinhThuc = phuongThucThanhToan; break;
+        }
+
+        return hinhThucThanhToanRepo.findByTenHinhThuc(tenHinhThuc)
+                .map(HinhThucThanhToan::getId)
+                .orElseGet(this::getDefaultPaymentMethodId);
+    }
+
+    private Integer getDefaultPaymentMethodId() {
+        List<HinhThucThanhToan> all = hinhThucThanhToanRepo.findAll();
+        return all.isEmpty() ? null : all.get(0).getId();
+    }
+
+    /**
+     * Calculate discount for a promotion based on order total.
+     * Reuses same logic as ChuongTrinhKhuyenMaiService.calculateDiscountForInvoice.
+     */
+    private BigDecimal calculateDiscount(ChuongTrinhKhuyenMai promotion, BigDecimal orderTotal) {
+        if (promotion.getLoaiKhuyenMai() != 1) {
+            return BigDecimal.ZERO; // Only invoice-level promotions supported here
+        }
+
+        BigDecimal discount;
+        if (promotion.getLoaiGiam() == 1) { // Percentage
+            discount = orderTotal.multiply(promotion.getGiaTriGiam())
+                    .divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
+            if (promotion.getGiamToiDa() != null && discount.compareTo(promotion.getGiamToiDa()) > 0) {
+                discount = promotion.getGiamToiDa();
+            }
+        } else { // Fixed amount
+            discount = promotion.getGiaTriGiam();
+        }
+
+        return discount.min(orderTotal);
     }
 }

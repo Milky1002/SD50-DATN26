@@ -1,0 +1,190 @@
+/* ───── Nhân Viên Page ───── */
+.nv-wrap { padding: 0; }
+
+/* Toolbar */
+.nv-toolbar {
+    display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; gap: 12px; margin-bottom: 18px;
+}
+.nv-search {
+    display: flex; align-items: center; gap: 8px;
+    background: #fff; border: 1px solid var(--admin-border);
+    border-radius: 8px; padding: 6px 12px; flex: 1; max-width: 700px;
+    transition: var(--admin-transition);
+}
+.nv-search:focus-within {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.08);
+}
+.nv-search__icon { font-size: 14px; color: #94a3b8; }
+.nv-search input[type="text"] {
+    border: none; outline: none; flex: 1; padding: 6px 8px;
+    font-size: 14px; background: transparent;
+}
+.nv-select {
+    border: 1px solid var(--admin-border); border-radius: 6px;
+    padding: 6px 10px; font-size: 13px; background: #f8fafc;
+    outline: none; cursor: pointer;
+}
+.nv-select:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.08);
+}
+.nv-actions {
+    display: flex; align-items: center; gap: 8px;
+}
+
+/* Buttons */
+.nv-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 8px; font-weight: 600;
+    font-size: 13px; cursor: pointer; border: none; white-space: nowrap;
+    text-decoration: none; transition: var(--admin-transition);
+}
+.nv-btn--primary { background: var(--admin-primary); color: #fff; }
+.nv-btn--primary:hover { background: var(--admin-primary-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,.25); }
+.nv-btn--search { background: #334155; color: #fff; }
+.nv-btn--search:hover { background: #1e293b; }
+.nv-btn--ghost { background: #f1f5f9; color: #64748b; }
+.nv-btn--ghost:hover { background: var(--admin-border); }
+.nv-btn--success { background: #059669; color: #fff; }
+.nv-btn--success:hover { background: #047857; transform: translateY(-1px); }
+
+/* Card & Table */
+.nv-card {
+    background: #fff; border-radius: var(--admin-radius-lg);
+    border: 1px solid var(--admin-border);
+    box-shadow: var(--admin-shadow);
+    animation: adminFadeInScale .25s ease;
+}
+.nv-tablewrap { overflow-x: auto; }
+.nv-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.nv-table th {
+    background: #f8fafc; font-weight: 700; text-transform: uppercase;
+    font-size: 11px; letter-spacing: .5px; color: #64748b;
+    padding: 12px 14px; border-bottom: 1px solid var(--admin-border); text-align: left;
+}
+.nv-table td {
+    padding: 12px 14px; border-bottom: 1px solid #f1f5f9; color: #334155;
+    vertical-align: middle;
+}
+.nv-table tbody tr {
+    transition: background .15s ease;
+}
+.nv-table tbody tr:hover { background: #f8fafc; }
+.nv-stt { text-align: center; color: #94a3b8; font-weight: 600; }
+
+/* User cell */
+.nv-user {
+    display: flex; align-items: center; gap: 10px;
+}
+.nv-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--admin-primary-light); color: var(--admin-primary);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; flex-shrink: 0;
+    text-transform: uppercase;
+}
+.nv-user__name { font-weight: 600; color: #1e293b; }
+.nv-user__sub { font-size: 11.5px; color: #94a3b8; margin-top: 1px; }
+
+/* Contact */
+.nv-contact {
+    display: flex; flex-direction: column; gap: 2px; font-size: 12.5px;
+}
+.nv-contact i { font-size: 11px; color: #94a3b8; margin-right: 4px; }
+.nv-contact__email { color: #94a3b8; }
+
+/* Role badge */
+.nv-role {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #f0f4ff;
+    color: #4f46e5;
+}
+
+/* Status */
+.nv-status-link { text-decoration: none; }
+.nv-dot { font-size: 6px; }
+
+/* Actions */
+.nv-action {
+    background: none; border: none; cursor: pointer;
+    font-size: 12px; font-weight: 600; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 10px; border-radius: 6px;
+    transition: var(--admin-transition);
+}
+.nv-action--edit { color: var(--admin-primary); }
+.nv-action--edit:hover { background: var(--admin-primary-light); }
+
+/* ───── Modal ───── */
+.nv-modal {
+    display: none; position: fixed; inset: 0; z-index: 1000;
+    align-items: center; justify-content: center;
+}
+.nv-modal.is-open { display: flex; }
+.nv-modal__overlay {
+    position: absolute; inset: 0;
+    background: rgba(15,23,42,.5);
+    backdrop-filter: blur(4px);
+    animation: adminFadeIn .2s ease;
+}
+.nv-modal__dialog {
+    position: relative; background: #fff; border-radius: var(--admin-radius-lg);
+    width: 620px; max-width: 96vw; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    animation: adminSlideUp .3s ease;
+}
+.nv-modal__header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 24px; border-bottom: 1px solid #f1f5f9;
+}
+.nv-modal__title { font-size: 17px; font-weight: 800; color: #1e293b; }
+.nv-modal__close {
+    background: none; border: none; font-size: 22px;
+    color: #94a3b8; cursor: pointer; line-height: 1;
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    transition: var(--admin-transition);
+}
+.nv-modal__close:hover { color: #dc2626; background: #fef2f2; }
+.nv-modal__body { padding: 24px; }
+.nv-modal__footer {
+    display: flex; justify-content: flex-end; gap: 10px;
+    padding: 16px 24px; border-top: 1px solid #f1f5f9;
+}
+
+/* Form grid */
+.nv-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.nv-field { display: flex; flex-direction: column; gap: 5px; }
+.nv-field--full { grid-column: 1 / -1; }
+.nv-field label {
+    font-size: 11.5px; font-weight: 700; color: #64748b;
+    text-transform: uppercase; letter-spacing: .3px;
+    display: flex; align-items: center; gap: 4px;
+}
+.nv-field input, .nv-field select, .nv-field textarea {
+    padding: 9px 12px; border: 1px solid var(--admin-border); border-radius: 8px;
+    font-size: 14px; outline: none; background: #f8fafc;
+    transition: var(--admin-transition); font-family: inherit;
+}
+.nv-field input:focus, .nv-field select:focus, .nv-field textarea:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+    background: #fff;
+}
+
+/* Account box */
+.nv-account-box {
+    background: #f0f4ff; border: 1px solid #e0e7ff;
+    border-radius: 10px; padding: 14px 16px;
+}
+.nv-account-box label { color: var(--admin-primary); }
+.nv-hint {
+    font-size: 11px; color: var(--admin-primary);
+    font-style: italic; margin-top: 4px;
+}

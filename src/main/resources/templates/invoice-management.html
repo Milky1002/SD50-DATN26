@@ -1,23 +1,22 @@
 <div th:fragment="content">
-    <section class="content">
     <link rel="stylesheet" th:href="@{/css/invoice-management.css}"/>
 
     <div class="invoice-layout">
         <div class="invoice-stats">
             <div class="invoice-stat-card">
-                <div class="invoice-stat-card__label">Tổng hóa đơn</div>
+                <div class="invoice-stat-card__label"><i class="bi bi-receipt"></i> Tổng hóa đơn</div>
                 <div class="invoice-stat-card__value"
                      th:text="${#numbers.formatInteger(stats.totalInvoices, 0, 'POINT')}">1,284
                 </div>
             </div>
             <div class="invoice-stat-card">
-                <div class="invoice-stat-card__label">Chờ thanh toán</div>
+                <div class="invoice-stat-card__label"><i class="bi bi-hourglass-split"></i> Chờ thanh toán</div>
                 <div class="invoice-stat-card__value"
                      th:text="${#numbers.formatInteger(stats.waitingPayment, 0, 'POINT')}">42
                 </div>
             </div>
             <div class="invoice-stat-card">
-                <div class="invoice-stat-card__label">Đơn hoàn tất</div>
+                <div class="invoice-stat-card__label"><i class="bi bi-check-circle"></i> Đơn hoàn tất</div>
                 <div class="invoice-stat-card__value"
                      th:text="${#numbers.formatInteger(stats.completed, 0, 'POINT')}">1,120
                 </div>
@@ -29,7 +28,7 @@
                 <input id="invoiceSearchInput" class="invoice-input" type="text" name="q"
                        th:value="${searchQuery}"
                        placeholder="Tìm kiếm mã hóa đơn, tên khách hàng...">
-                <button class="btn btn--secondary" type="submit">Tìm</button>
+                <button class="admin-btn admin-btn--primary" type="submit"><i class="bi bi-search"></i> Tìm</button>
             </form>
             <div class="invoice-filters__right">
                 <select id="invoiceStatusFilter" class="invoice-input">
@@ -40,7 +39,7 @@
                 </select>
                 <input id="invoiceDateFrom" class="invoice-input" type="date">
                 <input id="invoiceDateTo" class="invoice-input" type="date">
-                <button id="invoiceFilterReset" class="btn btn--ghost" type="button">Bỏ lọc</button>
+                <button id="invoiceFilterReset" class="admin-btn admin-btn--ghost" type="button"><i class="bi bi-arrow-counterclockwise"></i> Bỏ lọc</button>
             </div>
         </div>
 
@@ -58,9 +57,11 @@
                 </thead>
                 <tbody id="invoiceTableBody">
                 <tr th:each="inv : ${invoices}"
-                    th:attr="data-status=${inv.displayPaymentStatus}">
+                    th:attr="data-status=${inv.displayPaymentStatus},data-id=${inv.id}">
                     <td>
-                        <a href="#" class="invoice-code" th:text="${inv.code}">#INV-00001</a>
+                        <a href="javascript:void(0)" class="invoice-code"
+                           th:text="${inv.code}" th:attr="data-id=${inv.id}"
+                           onclick="viewInvoiceDetail(this.getAttribute('data-id'))">#INV-00001</a>
                     </td>
                     <td>
                         <div class="invoice-row__customer">
@@ -95,8 +96,12 @@
                         </span>
                     </td>
                     <td class="invoice-table__col-center">
-                        <button class="icon-btn icon-btn--ghost" type="button">👁</button>
-                        <button class="icon-btn icon-btn--ghost" type="button">✏️</button>
+                        <button class="admin-action admin-action--edit" type="button"
+                                th:attr="data-id=${inv.id}"
+                                onclick="viewInvoiceDetail(this.getAttribute('data-id'))"
+                                title="Xem chi tiết">
+                            <i class="bi bi-eye"></i> Xem
+                        </button>
                     </td>
                 </tr>
                 </tbody>
@@ -109,15 +114,111 @@
                 <span th:text="${#lists.size(invoices)}">0</span>
                 hóa đơn
             </div>
-            <div class="pagination">
-                <button class="pagination__item" type="button">&lt;</button>
-                <button class="pagination__item is-active" type="button">1</button>
-                <button class="pagination__item" type="button">2</button>
-                <button class="pagination__item" type="button">3</button>
-                <button class="pagination__item" type="button">&gt;</button>
+        </div>
+    </div>
+
+    <!-- Invoice Detail Modal -->
+    <div class="admin-modal" id="invoiceDetailModal">
+        <div class="admin-modal__overlay" onclick="closeInvoiceModal()"></div>
+        <div class="admin-modal__dialog" style="width:700px;max-width:96vw;">
+            <div class="admin-modal__header">
+                <div class="admin-modal__title" id="invoiceModalTitle">Chi tiết hóa đơn</div>
+                <button class="admin-modal__close" type="button" onclick="closeInvoiceModal()">&times;</button>
+            </div>
+            <div class="admin-modal__body" id="invoiceModalBody">
+                <div style="text-align:center;padding:40px;color:#94a3b8;">Đang tải...</div>
             </div>
         </div>
     </div>
-    </section>
+
     <script th:src="@{/js/invoice-management.js}"></script>
+    <script>
+        function formatMoneyVN(n) {
+            return Number(n || 0).toLocaleString('vi-VN') + '₫';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '--';
+            var d = new Date(dateStr);
+            return d.toLocaleDateString('vi-VN') + ' ' + d.toLocaleTimeString('vi-VN', {hour:'2-digit',minute:'2-digit'});
+        }
+
+        function viewInvoiceDetail(id) {
+            var modal = document.getElementById('invoiceDetailModal');
+            var body = document.getElementById('invoiceModalBody');
+            var title = document.getElementById('invoiceModalTitle');
+
+            body.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;"><i class="bi bi-hourglass-split" style="font-size:24px"></i><br>Đang tải...</div>';
+            modal.classList.add('is-open');
+
+            fetch('/invoices/api/detail/' + id)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.error) {
+                        body.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;">' + data.error + '</div>';
+                        return;
+                    }
+
+                    title.textContent = 'Chi tiết hóa đơn ' + data.code;
+
+                    var statusLabel = 'Chưa xác định';
+                    var statusClass = 'badge--waiting-payment';
+                    if (data.trangThai === 1) { statusLabel = 'Đã thanh toán'; statusClass = 'badge--paid'; }
+                    else if (data.trangThai === 0) { statusLabel = 'Chờ xử lý'; statusClass = 'badge--waiting-payment'; }
+
+                    var html = '<div class="inv-detail-grid">'
+                        + '<div class="inv-detail-section">'
+                        + '<h4><i class="bi bi-person"></i> Thông tin khách hàng</h4>'
+                        + '<div class="inv-detail-row"><span>Tên:</span><strong>' + (data.tenKhachHang || 'Khách lẻ') + '</strong></div>'
+                        + '<div class="inv-detail-row"><span>SĐT:</span><strong>' + (data.sdtKhachHang || '--') + '</strong></div>'
+                        + '<div class="inv-detail-row"><span>Email:</span><strong>' + (data.emailKhachHang || '--') + '</strong></div>'
+                        + (data.diaChiKhachHang ? '<div class="inv-detail-row"><span>Địa chỉ:</span><strong>' + data.diaChiKhachHang + '</strong></div>' : '')
+                        + '</div>'
+                        + '<div class="inv-detail-section">'
+                        + '<h4><i class="bi bi-receipt"></i> Thông tin hóa đơn</h4>'
+                        + '<div class="inv-detail-row"><span>Mã:</span><strong class="mono">' + data.code + '</strong></div>'
+                        + '<div class="inv-detail-row"><span>Ngày tạo:</span><strong>' + formatDate(data.ngayTao) + '</strong></div>'
+                        + '<div class="inv-detail-row"><span>Loại:</span><strong>' + (data.loaiHoaDon || '--') + '</strong></div>'
+                        + '<div class="inv-detail-row"><span>Trạng thái:</span><span class="badge ' + statusClass + '">' + statusLabel + '</span></div>'
+                        + (data.ghiChu ? '<div class="inv-detail-row"><span>Ghi chú:</span><strong>' + data.ghiChu + '</strong></div>' : '')
+                        + '</div>'
+                        + '</div>';
+
+                    // Items table
+                    if (data.items && data.items.length > 0) {
+                        html += '<h4 style="margin:16px 0 8px"><i class="bi bi-box-seam"></i> Chi tiết sản phẩm</h4>'
+                            + '<table class="invoice-table" style="border:1px solid var(--admin-border);border-radius:8px;overflow:hidden;">'
+                            + '<thead><tr><th>STT</th><th>Sản phẩm</th><th style="text-align:center">SL</th><th style="text-align:right">Đơn giá</th><th style="text-align:right">Thành tiền</th></tr></thead>'
+                            + '<tbody>';
+                        data.items.forEach(function(item, idx) {
+                            html += '<tr>'
+                                + '<td>' + (idx + 1) + '</td>'
+                                + '<td><strong>' + item.tenSanPham + '</strong><br><span class="muted">' + (item.maSanPham || '') + '</span></td>'
+                                + '<td style="text-align:center">' + item.soLuong + '</td>'
+                                + '<td style="text-align:right">' + formatMoneyVN(item.gia) + '</td>'
+                                + '<td style="text-align:right"><strong>' + formatMoneyVN(item.thanhTien) + '</strong></td>'
+                                + '</tr>';
+                        });
+                        html += '</tbody></table>';
+                    } else {
+                        html += '<div style="text-align:center;padding:20px;color:#94a3b8;">Không có sản phẩm trong hóa đơn</div>';
+                    }
+
+                    // Total
+                    html += '<div class="inv-detail-total">'
+                        + '<span>Tổng cộng:</span>'
+                        + '<span class="inv-detail-total__amount">' + formatMoneyVN(data.tongTien) + '</span>'
+                        + '</div>';
+
+                    body.innerHTML = html;
+                })
+                .catch(function(err) {
+                    body.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;">Lỗi khi tải: ' + err.message + '</div>';
+                });
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById('invoiceDetailModal').classList.remove('is-open');
+        }
+    </script>
 </div>

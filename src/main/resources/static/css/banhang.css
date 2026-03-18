@@ -17,8 +17,8 @@
 .pos-container{
     display:flex;
     flex-direction:column;
-    height:calc(100vh - 80px);
-    margin:-16px -20px;
+    height:calc(100vh - 76px);
+    margin:-20px;
 }
 
 /* ---------- ORDER TABS ---------- */
@@ -376,7 +376,7 @@
     color:var(--pos-text);
 }
 
-/* Coupon */
+/* Coupon / Promotion */
 .pos-coupon-row{
     display:flex;
     align-items:center;
@@ -396,6 +396,46 @@
 
 .pos-coupon-row input:focus{
     border-color:#93c5fd;
+}
+
+.pos-promo-result{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:#ecfdf5;
+    border:1px solid #a7f3d0;
+    border-radius:8px;
+    padding:8px 12px;
+    margin-top:6px;
+}
+
+.pos-promo-name{
+    flex:1;
+    font-size:12px;
+    font-weight:600;
+    color:#065f46;
+}
+
+.pos-promo-discount{
+    font-size:13px;
+    font-weight:700;
+    color:#dc2626;
+}
+
+.pos-promo-remove{
+    background:none;
+    border:none;
+    color:#94a3b8;
+    cursor:pointer;
+    font-size:14px;
+    padding:2px 4px;
+    border-radius:4px;
+    transition:all .15s ease;
+}
+
+.pos-promo-remove:hover{
+    color:#dc2626;
+    background:#fef2f2;
 }
 
 /* Payment */
@@ -580,3 +620,67 @@
 .bh-modal__close:hover{ opacity:1; }
 
 .bh-modal__body{ padding:14px 16px; }
+
+/* ---------- ADD CUSTOMER MODAL FIELDS ---------- */
+.pos-modal-field{
+    margin-bottom:12px;
+}
+.pos-modal-field label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    color:#374151;
+    margin-bottom:5px;
+}
+.pos-modal-field input{
+    width:100%;
+    border:1px solid var(--pos-border-2);
+    border-radius:8px;
+    padding:9px 12px;
+    font-size:14px;
+    outline:none;
+}
+.pos-modal-field input:focus{
+    border-color:#93c5fd;
+    box-shadow:0 0 0 3px rgba(147,197,253,.35);
+}
+.pos-modal-btn{
+    padding:9px 16px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    border:1px solid var(--pos-border-2);
+    transition:all .15s;
+}
+.pos-modal-btn--ghost{
+    background:#fff;
+    color:var(--pos-text);
+}
+.pos-modal-btn--ghost:hover{ background:#f3f4f6; }
+.pos-modal-btn--primary{
+    background:var(--pos-primary);
+    border-color:var(--pos-primary);
+    color:#fff;
+}
+.pos-modal-btn--primary:hover{ background:var(--pos-primary-2); }
+
+/* ---------- CUSTOMER SUGGESTIONS ---------- */
+.pos-customer-suggestions{
+    position:relative;
+    background:#fff;
+    border:1px solid var(--pos-border);
+    border-radius:8px;
+    max-height:160px;
+    overflow-y:auto;
+    box-shadow:0 4px 12px rgba(0,0,0,.1);
+    margin-top:4px;
+}
+.pos-customer-suggestions__item{
+    padding:8px 12px;
+    cursor:pointer;
+    font-size:13px;
+    border-bottom:1px solid #f3f4f6;
+}
+.pos-customer-suggestions__item:hover{ background:#f6f9ff; }
+.pos-customer-suggestions__item:last-child{ border-bottom:none; }

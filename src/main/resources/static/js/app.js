@@ -1,22 +1,21 @@
 (function () {
-    const sidebar = document.getElementById("sidebar");
-    const btn = document.getElementById("toggleSidebar");
+    var sidebar = document.getElementById("sidebar");
+    var btn = document.getElementById("toggleSidebar");
 
     if (!sidebar || !btn) return;
 
-    // restore
-    const saved = localStorage.getItem("sidebar_collapsed");
+    // restore collapsed state
+    var saved = localStorage.getItem("sidebar_collapsed");
     if (saved === "1") {
         sidebar.classList.add("is-collapsed");
-        btn.textContent = "›";
+        var icon = btn.querySelector("i");
+        if (icon) icon.className = "bi bi-chevron-right";
     }
 
     btn.addEventListener("click", function () {
-        const collapsed = sidebar.classList.toggle("is-collapsed");
-        btn.textContent = collapsed ? "›" : "‹";
+        var collapsed = sidebar.classList.toggle("is-collapsed");
+        var icon = btn.querySelector("i");
+        if (icon) icon.className = collapsed ? "bi bi-chevron-right" : "bi bi-chevron-left";
         localStorage.setItem("sidebar_collapsed", collapsed ? "1" : "0");
     });
-
-
-
 })();

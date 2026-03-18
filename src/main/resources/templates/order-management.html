@@ -4,21 +4,21 @@
     <div class="card order-card">
         <div class="order-card__header">
             <div>
-                <h2>Danh sách đơn hàng</h2>
+                <h2 class="order-card__title"><i class="bi bi-bag-check"></i> Danh sách đơn hàng</h2>
                 <p class="order-card__subtitle">Quản lý, theo dõi và xử lý các đơn hàng của cửa hàng</p>
             </div>
             <div class="order-card__header-actions">
-                <button id="btnExport" class="btn btn--secondary" type="button">Xuất file</button>
-                <button id="btnCreateOrder" class="btn btn--primary" type="button">Tạo đơn hàng</button>
+                <button id="btnExport" class="admin-btn admin-btn--outline" type="button"><i class="bi bi-download"></i> Xuất file</button>
+                <button id="btnCreateOrder" class="admin-btn admin-btn--primary" type="button"><i class="bi bi-plus-lg"></i> Tạo đơn hàng</button>
             </div>
         </div>
 
         <div class="order-tabs">
-            <button class="order-tabs__item is-active" type="button" data-order-tab="all">Tất cả đơn hàng</button>
-            <button class="order-tabs__item" type="button" data-order-tab="waiting">Chờ xác nhận</button>
-            <button class="order-tabs__item" type="button" data-order-tab="shipping">Đang giao hàng</button>
-            <button class="order-tabs__item" type="button" data-order-tab="done">Hoàn tất</button>
-            <button class="order-tabs__item" type="button" data-order-tab="cancelled">Đã hủy</button>
+            <button class="order-tabs__item is-active" type="button" data-order-tab="all"><i class="bi bi-list-ul"></i> Tất cả</button>
+            <button class="order-tabs__item" type="button" data-order-tab="waiting"><i class="bi bi-hourglass-split"></i> Chờ xác nhận</button>
+            <button class="order-tabs__item" type="button" data-order-tab="shipping"><i class="bi bi-truck"></i> Đang giao</button>
+            <button class="order-tabs__item" type="button" data-order-tab="done"><i class="bi bi-check-circle"></i> Hoàn tất</button>
+            <button class="order-tabs__item" type="button" data-order-tab="cancelled"><i class="bi bi-x-circle"></i> Đã hủy</button>
         </div>
 
         <div class="order-table-wrapper">
@@ -36,7 +36,7 @@
                 </tr>
                 </thead>
                 <tbody id="orderTableBody">
-                <tr th:each="order : ${orders}" th:attr="data-status=${order.tabKey}">
+                <tr th:each="order : ${orders}" th:attr="data-status=${order.tabKey}" class="order-row">
                     <td class="order-code">
                         <a href="#" class="order-code__link" th:text="${order.code}">#DH00000</a>
                     </td>
@@ -57,7 +57,7 @@
                     </td>
                     <td>
                         <div class="order-row__product">
-                            <div class="order-row__product-img"></div>
+                            <div class="order-row__product-img"><i class="bi bi-box-seam"></i></div>
                             <div class="order-row__product-meta">
                                 <div class="order-row__product-name" th:text="${order.productName}">Tên sản phẩm</div>
                                 <div class="order-row__sub">
@@ -66,7 +66,7 @@
                             </div>
                         </div>
                     </td>
-                    <td class="order-table__col-right"
+                    <td class="order-table__col-right order-total"
                         th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">
                         0₫
                     </td>
@@ -93,24 +93,113 @@
                         <form th:action="@{'/orders/' + ${order.id} + '/delete'}"
                               method="post"
                               onsubmit="return confirm('Bạn có chắc muốn xóa đơn hàng này?');">
-                            <button class="icon-btn icon-btn--ghost" type="submit">🗑</button>
+                            <button class="admin-action admin-action--danger" type="submit"><i class="bi bi-trash3"></i></button>
                         </form>
                     </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(orders)}">
+                    <td colspan="8" class="empty">Chưa có đơn hàng nào</td>
                 </tr>
                 </tbody>
             </table>
         </div>
 
-        <div class="order-footer">
-            <div class="pagination">
-                <button class="pagination__item" type="button">&lt;</button>
-                <button class="pagination__item is-active" type="button">1</button>
-                <button class="pagination__item" type="button">2</button>
-                <button class="pagination__item" type="button">3</button>
-                <button class="pagination__item" type="button">&gt;</button>
+        <div class="order-footer" id="orderPagination">
+            <div class="order-footer__info">
+                Hiển thị <span id="orderShowRange">0</span> / <span id="orderTotalCount">0</span> đơn hàng
+            </div>
+            <div class="pagination" id="paginationControls">
+                <!-- JS will fill pagination buttons -->
             </div>
         </div>
     </div>
 
-    <script th:src="@{/js/order-management.js}"></script>
+    <script>
+    (function () {
+        /* ===== Tab filtering ===== */
+        var allRows = Array.from(document.querySelectorAll('#orderTableBody tr.order-row'));
+        var tabs = Array.from(document.querySelectorAll('[data-order-tab]'));
+        var currentTab = 'all';
+
+        function getVisibleRows() {
+            return allRows.filter(function(row) {
+                var rowStatus = row.getAttribute('data-status') || 'all';
+                return currentTab === 'all' || rowStatus === currentTab;
+            });
+        }
+
+        function filterByTab(status) {
+            currentTab = status;
+            currentPage = 1;
+            renderPagination();
+        }
+
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                tabs.forEach(function(t) { t.classList.toggle('is-active', t === tab); });
+                filterByTab(tab.getAttribute('data-order-tab'));
+            });
+        });
+
+        /* ===== Pagination ===== */
+        var pageSize = 10;
+        var currentPage = 1;
+
+        function renderPagination() {
+            var visibleRows = getVisibleRows();
+            var totalRows = visibleRows.length;
+            var totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            var start = (currentPage - 1) * pageSize;
+            var end = Math.min(start + pageSize, totalRows);
+
+            // Hide all rows first
+            allRows.forEach(function(r) { r.style.display = 'none'; });
+
+            // Show only rows for current page
+            visibleRows.forEach(function(r, i) {
+                r.style.display = (i >= start && i < end) ? '' : 'none';
+            });
+
+            // Update info
+            document.getElementById('orderShowRange').textContent = totalRows > 0 ? (start + 1) + ' - ' + end : '0';
+            document.getElementById('orderTotalCount').textContent = totalRows;
+
+            // Build pagination buttons
+            var controls = document.getElementById('paginationControls');
+            var html = '';
+
+            // Previous button
+            html += '<button class="admin-page-btn" type="button" data-page="prev"' + (currentPage <= 1 ? ' disabled' : '') + '><i class="bi bi-chevron-left"></i></button>';
+
+            // Page numbers
+            for (var p = 1; p <= totalPages; p++) {
+                if (totalPages <= 7 || p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) {
+                    html += '<button class="admin-page-btn' + (p === currentPage ? ' is-active' : '') + '" type="button" data-page="' + p + '">' + p + '</button>';
+                } else if (Math.abs(p - currentPage) === 2) {
+                    html += '<span class="pagination-dots">...</span>';
+                }
+            }
+
+            // Next button
+            html += '<button class="admin-page-btn" type="button" data-page="next"' + (currentPage >= totalPages ? ' disabled' : '') + '><i class="bi bi-chevron-right"></i></button>';
+
+            controls.innerHTML = html;
+
+            // Bind events
+            controls.querySelectorAll('.admin-page-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var page = this.getAttribute('data-page');
+                    if (page === 'prev' && currentPage > 1) currentPage--;
+                    else if (page === 'next' && currentPage < totalPages) currentPage++;
+                    else if (page !== 'prev' && page !== 'next') currentPage = parseInt(page);
+                    renderPagination();
+                });
+            });
+        }
+
+        renderPagination();
+    })();
+    </script>
 </div>

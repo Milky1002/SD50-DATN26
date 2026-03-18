@@ -45,6 +45,7 @@ StaffController {
         model.addAttribute("pageHeading", "Quản lý nhân viên");
         model.addAttribute("activeMenu", "nhanvien");
         model.addAttribute("content", "QlyNhanVien/Staff");
+        model.addAttribute("pageCss", "/css/nhanvien.css");
 
         return "layout";
     }

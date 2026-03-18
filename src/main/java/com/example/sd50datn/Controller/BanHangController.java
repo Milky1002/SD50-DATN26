@@ -61,10 +61,11 @@ public class BanHangController {
             String ghiChu = (String) request.get("ghiChu");
             String phuongThucThanhToan = (String) request.get("phuongThucThanhToan");
             int tienKhachDua = request.get("tienKhachDua") != null ? ((Number) request.get("tienKhachDua")).intValue() : 0;
+            Integer promotionId = request.get("promotionId") != null ? ((Number) request.get("promotionId")).intValue() : null;
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> items = (List<Map<String, Object>>) request.get("items");
 
-            HoaDon hoaDon = banHangService.checkout(tenKhachHang, sdtKhachHang, ghiChu, phuongThucThanhToan, tienKhachDua, items);
+            HoaDon hoaDon = banHangService.checkout(tenKhachHang, sdtKhachHang, ghiChu, phuongThucThanhToan, tienKhachDua, items, promotionId);
 
             Map<String, Object> result = new HashMap<>();
             result.put("success", true);

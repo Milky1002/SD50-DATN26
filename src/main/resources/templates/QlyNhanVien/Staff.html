@@ -1,229 +1,216 @@
 <div th:fragment="content">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/nhanvien.css}">
 
-<div class="max-w-6xl mx-auto" style="padding: 1rem;">
-
-    <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:2rem;">
-        <div>
-            <h1 class="text-3xl font-extrabold text-slate-800 tracking-tight">Quan ly nhan vien</h1>
-            <p class="text-slate-500 font-medium">Quan ly danh sach nhan vien va quyen truy cap</p>
-        </div>
-
-        <div style="display:flex; align-items:center; gap:0.75rem;">
-            <button type="button" onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-2 rounded-xl font-bold flex items-center justify-center transition-all shadow-lg shadow-emerald-100">
-                <i class="fa-solid fa-file-excel" style="font-size:1.2rem;"></i>
-            </button>
-
-            <button onclick="openAddModal()" class="bg-indigo-500 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-2xl flex items-center gap-2 shadow-xl shadow-indigo-200 transition-all active:scale-95">
-                <i class="fa-solid fa-user-plus"></i>
-                <span class="font-bold text-sm">Them nhan vien moi</span>
-            </button>
-        </div>
-    </div>
-
-    <div class="bg-white p-2 rounded-[2rem] shadow-sm border border-slate-200 mb-6">
-        <form th:action="@{/nhan-vien}" method="get" class="flex flex-col md:flex-row gap-4">
-            <div class="flex-1 relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                <input type="text" name="keyword" th:value="${keyword}"
-                       placeholder="Tim theo ten hoac so dien thoai..."
-                       class="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-medium text-slate-600">
-            </div>
-
-            <div>
-                <select name="status" class="bg-slate-50 border-none rounded-xl px-4 py-3 font-medium text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none">
-                    <option value="">Tat ca trang thai</option>
-                    <option value="1" th:selected="${status == 1}">Dang lam</option>
-                    <option value="0" th:selected="${status == 0}">Nghi viec</option>
+    <div class="nv-wrap">
+        <!-- TOOLBAR -->
+        <div class="nv-toolbar">
+            <form class="nv-search" th:action="@{/nhan-vien}" method="get">
+                <span class="nv-search__icon"><i class="bi bi-search"></i></span>
+                <input name="keyword" th:value="${keyword}" placeholder="Tìm theo tên hoặc số điện thoại..."/>
+                <select name="status" class="nv-select">
+                    <option value="">Tất cả trạng thái</option>
+                    <option value="1" th:selected="${status == 1}">Đang làm</option>
+                    <option value="0" th:selected="${status == 0}">Nghỉ việc</option>
                 </select>
-            </div>
+                <button type="submit" class="nv-btn nv-btn--search"><i class="bi bi-funnel"></i> Lọc</button>
+                <a th:href="@{/nhan-vien}" class="nv-btn nv-btn--ghost"><i class="bi bi-arrow-clockwise"></i></a>
+            </form>
 
-            <div class="flex gap-2">
-                <button type="submit" class="bg-slate-800 hover:bg-black text-white px-6 py-3 rounded-xl font-bold transition-all">
-                    Loc ket qua
+            <div class="nv-actions">
+                <button type="button" onclick="exportToExcel()" class="nv-btn nv-btn--success" title="Xuất Excel">
+                    <i class="bi bi-file-earmark-excel"></i> Xuất Excel
                 </button>
-                <a th:href="@{/nhan-vien}" class="bg-slate-100 hover:bg-slate-200 text-slate-500 px-4 py-3 rounded-xl flex items-center justify-center transition-all">
-                    <i class="fa-solid fa-rotate-right"></i>
-                </a>
+                <button type="button" onclick="openAddModal()" class="nv-btn nv-btn--primary">
+                    <i class="bi bi-person-plus-fill"></i> Thêm nhân viên
+                </button>
             </div>
-        </form>
-    </div>
-
-    <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-        <table class="w-full text-left">
-            <thead class="bg-slate-50 border-b border-slate-100">
-            <tr>
-                <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Nhan vien</th>
-                <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Lien he</th>
-                <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">Trang thai</th>
-                <th class="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center">Hanh dong</th>
-            </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-50">
-            <tr th:each="nv : ${listNhanVien}" class="hover:bg-slate-50/80 transition-colors group">
-                <td class="px-6 py-5">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold"
-                             th:text="${nv.hoTen != null and !#strings.isEmpty(nv.hoTen)} ? ${#strings.substring(nv.hoTen,0,1)} : '?'"></div>
-                        <div>
-                            <div class="font-bold text-slate-700 group-hover:text-indigo-600 transition-colors" th:text="${nv.hoTen}"></div>
-                            <div class="text-xs font-bold text-slate-400" th:text="${nv.tenChucVu}"></div>
-                        </div>
-                    </div>
-                </td>
-                <td class="px-6 py-5">
-                    <div class="text-sm text-slate-600 font-medium" th:text="${nv.email}"></div>
-                    <div class="text-xs text-slate-400" th:text="${nv.sdt}"></div>
-                </td>
-                <td class="px-6 py-5">
-                    <a th:href="@{/nhan-vien/toggle/{id}(id=${nv.id})}" class="inline-flex">
-                        <span th:if="${nv.trangThai == 1}" class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-tighter flex items-center gap-1.5 border border-emerald-100">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Dang lam
-                        </span>
-                        <span th:unless="${nv.trangThai == 1}" class="bg-rose-50 text-rose-600 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-tighter flex items-center gap-1.5 border border-rose-100">
-                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Nghi viec
-                        </span>
-                    </a>
-                </td>
-                <td class="px-6 py-5 text-center">
-                    <button th:onclick="'openEditModal(' + ${nv.id} + ')'" class="w-9 h-9 rounded-xl text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(listNhanVien)}">
-                <td colspan="4" class="px-6 py-10 text-center text-slate-400">Khong co du lieu</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- MODAL ADD/EDIT -->
-<div id="staffModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4 overflow-y-auto">
-    <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl transform transition-all scale-95 opacity-0 duration-300" id="modalContainer">
-        <div class="px-10 py-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
-            <h2 id="modalTitle" class="text-2xl font-black text-slate-800">Cap nhat nhan su</h2>
-            <button onclick="closeModal()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white text-slate-400 hover:text-rose-500 transition-all text-2xl">&times;</button>
         </div>
 
-        <form id="staffForm" th:action="@{/nhan-vien/save}" method="post" class="p-10">
-            <input type="hidden" name="id" id="f_id">
-            <input type="hidden" name="trangThai" id="f_trangThai">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">Ho ten nhan vien *</label>
-                    <input type="text" name="hoTen" id="f_hoTen" required class="w-full bg-slate-100 border-none rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 transition-all outline-none font-bold text-slate-700">
-                </div>
+        <!-- TABLE -->
+        <div class="nv-card nv-tablewrap">
+            <table class="nv-table">
+                <thead>
+                <tr>
+                    <th style="width:60px">STT</th>
+                    <th>Nhân viên</th>
+                    <th style="width:200px">Liên hệ</th>
+                    <th style="width:120px">Giới tính</th>
+                    <th style="width:140px">Chức vụ</th>
+                    <th style="width:140px">Trạng thái</th>
+                    <th style="width:120px;text-align:center">Chức năng</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="nv, stat : ${listNhanVien}">
+                    <td class="nv-stt" th:text="${stat.index + 1}"></td>
+                    <td>
+                        <div class="nv-user">
+                            <div class="nv-avatar"
+                                 th:text="${nv.hoTen != null and !#strings.isEmpty(nv.hoTen)} ? ${#strings.substring(nv.hoTen,0,1)} : '?'"></div>
+                            <div class="nv-user__info">
+                                <div class="nv-user__name" th:text="${nv.hoTen}"></div>
+                                <div class="nv-user__sub" th:text="${nv.email}"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="nv-contact">
+                            <span th:if="${nv.sdt != null}"><i class="bi bi-telephone"></i> <span th:text="${nv.sdt}"></span></span>
+                            <span th:if="${nv.email != null}" class="nv-contact__email"><i class="bi bi-envelope"></i> <span th:text="${nv.email}"></span></span>
+                        </div>
+                    </td>
+                    <td th:text="${nv.gioiTinh ?: '--'}"></td>
+                    <td>
+                        <span class="nv-role" th:text="${nv.tenChucVu}"></span>
+                    </td>
+                    <td>
+                        <a th:href="@{/nhan-vien/toggle/{id}(id=${nv.id})}" class="nv-status-link">
+                            <span th:if="${nv.trangThai == 1}" class="pill pill--ok">
+                                <i class="bi bi-circle-fill nv-dot"></i> Đang làm
+                            </span>
+                            <span th:unless="${nv.trangThai == 1}" class="pill pill--off">
+                                <i class="bi bi-circle-fill nv-dot"></i> Nghỉ việc
+                            </span>
+                        </a>
+                    </td>
+                    <td style="text-align:center">
+                        <button type="button" class="nv-action nv-action--edit" th:onclick="'openEditModal(' + ${nv.id} + ')'">
+                            <i class="bi bi-pencil-square"></i> Sửa
+                        </button>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(listNhanVien)}">
+                    <td colspan="7" class="empty">Không có dữ liệu nhân viên</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-                <div>
-                    <label class="block text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">Email lien he</label>
-                    <input type="email" name="email" id="f_email" class="w-full bg-slate-100 border-none rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
-                </div>
+    <!-- MODAL ADD/EDIT -->
+    <div class="nv-modal" id="staffModal" aria-hidden="true">
+        <div class="nv-modal__overlay" id="staffModalOverlay"></div>
+        <div class="nv-modal__dialog">
+            <div class="nv-modal__header">
+                <div class="nv-modal__title" id="modalTitle">Thêm nhân viên</div>
+                <button type="button" class="nv-modal__close" id="btnCloseModal">&times;</button>
+            </div>
+            <form id="staffForm" th:action="@{/nhan-vien/save}" method="post">
+                <input type="hidden" name="id" id="f_id"/>
+                <input type="hidden" name="trangThai" id="f_trangThai" value="1"/>
+                <div class="nv-modal__body">
+                    <div class="nv-form-grid">
+                        <div class="nv-field nv-field--full">
+                            <label>Họ tên nhân viên <span class="req">*</span></label>
+                            <input type="text" name="hoTen" id="f_hoTen" placeholder="Nhập họ tên nhân viên" required/>
+                        </div>
+                        <div class="nv-field">
+                            <label>Email liên hệ</label>
+                            <input type="email" name="email" id="f_email" placeholder="email@example.com"/>
+                        </div>
+                        <div class="nv-field">
+                            <label>Số điện thoại</label>
+                            <input type="text" name="sdt" id="f_sdt" placeholder="0123456789"/>
+                        </div>
+                        <div class="nv-field">
+                            <label>Giới tính</label>
+                            <select name="gioiTinh" id="f_gioiTinh">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+                        <div class="nv-field">
+                            <label>Ngày sinh</label>
+                            <input type="date" name="ngaySinh" id="f_ngaySinh"/>
+                        </div>
+                        <div class="nv-field">
+                            <label>Chức vụ <span class="req">*</span></label>
+                            <select name="chucVuId" id="f_chucVu" required>
+                                <option th:each="pos : ${listPositions}" th:value="${pos.id}" th:text="${pos.tenChucVu}"></option>
+                            </select>
+                        </div>
 
-                <div>
-                    <label class="block text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">So dien thoai</label>
-                    <input type="text" name="sdt" id="f_sdt" class="w-full bg-slate-100 border-none rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 transition-all outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">Gioi tinh</label>
-                    <select name="gioiTinh" id="f_gioiTinh" class="w-full bg-slate-100 border-none rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 transition-all outline-none font-bold text-slate-700">
-                        <option value="Nam">Nam</option>
-                        <option value="Nu">Nu</option>
-                        <option value="Khac">Khac</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">Ngay sinh</label>
-                    <input type="date" name="ngaySinh" id="f_ngaySinh" class="w-full bg-slate-100 border-none rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">Chuc vu *</label>
-                    <select name="chucVuId" id="f_chucVu" required class="w-full bg-slate-100 border-none rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-600">
-                        <option th:each="pos : ${listPositions}" th:value="${pos.id}" th:text="${pos.tenChucVu}"></option>
-                    </select>
-                </div>
+                        <!-- Account section -->
+                        <div class="nv-field nv-field--full nv-account-box" id="acc_box">
+                            <label><i class="bi bi-shield-lock"></i> Tài khoản hệ thống (tùy chọn)</label>
+                            <input type="text" name="username" id="f_username" placeholder="Tên đăng nhập..."/>
+                            <span class="nv-hint">* Mật khẩu mặc định sẽ là 123456</span>
+                        </div>
 
-                <div id="acc_box" class="md:col-span-2 p-6 bg-indigo-50 rounded-3xl border border-indigo-100">
-                    <label class="block text-xs font-black text-indigo-400 uppercase mb-2 tracking-widest">Cap tai khoan he thong (Tuy chon)</label>
-                    <div class="flex gap-2">
-                        <div class="relative flex-1">
-                            <i class="fa-solid fa-at absolute left-4 top-1/2 -translate-y-1/2 text-indigo-300"></i>
-                            <input type="text" name="username" id="f_username" placeholder="Ten dang nhap..." class="w-full bg-white border-none rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-indigo-400">
+                        <div class="nv-field nv-field--full">
+                            <label>Địa chỉ cư trú</label>
+                            <textarea name="diaChi" id="f_diaChi" rows="2" placeholder="Nhập địa chỉ"></textarea>
                         </div>
                     </div>
-                    <p class="text-[10px] text-indigo-400 mt-2 font-bold italic">* Mat khau mac dinh se la 123456</p>
                 </div>
-
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-black text-slate-400 uppercase mb-2 tracking-widest">Dia chi cu tru</label>
-                    <textarea name="diaChi" id="f_diaChi" rows="2" class="w-full bg-slate-100 border-none rounded-2xl px-5 py-3.5 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+                <div class="nv-modal__footer">
+                    <button type="button" class="nv-btn nv-btn--ghost" id="btnCancelModal">Hủy</button>
+                    <button type="submit" class="nv-btn nv-btn--primary"><i class="bi bi-check-lg"></i> Lưu</button>
                 </div>
-            </div>
-
-            <div class="mt-10 flex gap-4">
-                <button type="button" onclick="closeModal()" class="flex-1 px-6 py-4 rounded-2xl font-black text-slate-400 hover:bg-slate-100 transition-all uppercase tracking-widest text-xs">Huy bo</button>
-                <button type="submit" class="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-indigo-100 transition-all active:scale-95">Xac nhan luu</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
-<script th:inline="javascript">
-    const modal = document.getElementById('staffModal');
-    const container = document.getElementById('modalContainer');
-    const staffForm = document.getElementById('staffForm');
+    <script th:inline="javascript">
+        var modal = document.getElementById('staffModal');
+        var overlay = document.getElementById('staffModalOverlay');
+        var btnClose = document.getElementById('btnCloseModal');
+        var btnCancel = document.getElementById('btnCancelModal');
+        var staffForm = document.getElementById('staffForm');
 
-    function openAddModal() {
-        document.getElementById('modalTitle').innerText = "Them nhan vien";
-        staffForm.reset();
-        document.getElementById('f_id').value = "";
-        document.getElementById('f_trangThai').value = 1;
-        document.getElementById('f_username').value = "";
-        document.getElementById('acc_box').style.display = 'block';
-        showModal();
-    }
+        function openModal() {
+            modal.classList.add('is-open');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+        function closeModal() {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
 
-    function openEditModal(id) {
-        fetch('/nhan-vien/edit/' + id)
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('modalTitle').innerText = "Sua: " + data.hoTen;
-                document.getElementById('f_id').value = data.id;
-                document.getElementById('f_hoTen').value = data.hoTen || '';
-                document.getElementById('f_email').value = data.email || '';
-                document.getElementById('f_sdt').value = data.sdt || '';
-                document.getElementById('f_ngaySinh').value = data.ngaySinh || '';
-                document.getElementById('f_gioiTinh').value = data.gioiTinh || 'Nam';
-                document.getElementById('f_chucVu').value = data.chucVuId || '';
-                document.getElementById('f_diaChi').value = data.diaChi || '';
-                document.getElementById('f_trangThai').value = data.trangThai;
-                document.getElementById('acc_box').style.display = 'none';
-                showModal();
-            });
-    }
+        window.openAddModal = function() {
+            document.getElementById('modalTitle').textContent = 'Thêm nhân viên';
+            staffForm.reset();
+            document.getElementById('f_id').value = '';
+            document.getElementById('f_trangThai').value = 1;
+            document.getElementById('f_username').value = '';
+            document.getElementById('acc_box').style.display = '';
+            openModal();
+        };
 
-    function showModal() {
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            container.classList.remove('scale-95', 'opacity-0');
-            container.classList.add('scale-100', 'opacity-100');
-        }, 10);
-    }
+        window.openEditModal = function(id) {
+            fetch('/nhan-vien/edit/' + id)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    document.getElementById('modalTitle').textContent = 'Sửa nhân viên: ' + data.hoTen;
+                    document.getElementById('f_id').value = data.id;
+                    document.getElementById('f_hoTen').value = data.hoTen || '';
+                    document.getElementById('f_email').value = data.email || '';
+                    document.getElementById('f_sdt').value = data.sdt || '';
+                    document.getElementById('f_ngaySinh').value = data.ngaySinh || '';
+                    document.getElementById('f_gioiTinh').value = data.gioiTinh || 'Nam';
+                    document.getElementById('f_chucVu').value = data.chucVuId || '';
+                    document.getElementById('f_diaChi').value = data.diaChi || '';
+                    document.getElementById('f_trangThai').value = data.trangThai;
+                    document.getElementById('acc_box').style.display = 'none';
+                    openModal();
+                });
+        };
 
-    function closeModal() {
-        container.classList.remove('scale-100', 'opacity-100');
-        container.classList.add('scale-95', 'opacity-0');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
-    }
+        btnClose.addEventListener('click', closeModal);
+        btnCancel.addEventListener('click', closeModal);
+        overlay.addEventListener('click', closeModal);
 
-    function exportToExcel() {
-        const keyword = document.getElementsByName('keyword')[0]?.value || '';
-        const status = document.getElementsByName('status')[0]?.value || '';
-        window.location.href = '/nhan-vien/export?keyword=' + encodeURIComponent(keyword) + '&status=' + encodeURIComponent(status);
-    }
-</script>
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        window.exportToExcel = function() {
+            var keyword = document.getElementsByName('keyword')[0];
+            var status = document.getElementsByName('status')[0];
+            var kw = keyword ? keyword.value : '';
+            var st = status ? status.value : '';
+            window.location.href = '/nhan-vien/export?keyword=' + encodeURIComponent(kw) + '&status=' + encodeURIComponent(st);
+        };
+    </script>
 </div>

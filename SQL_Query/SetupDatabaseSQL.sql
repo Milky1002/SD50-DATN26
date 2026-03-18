@@ -482,7 +482,9 @@ GO
 -- 7.2 Sample HinhThucThanhToan
 INSERT INTO [dbo].[HinhThucThanhToan] ([Ten_hinh_thuc], [Mo_ta])
 VALUES (N'Tien mat', N'Thanh toan bang tien mat'),
-       (N'Chuyen khoan', N'Chuyen khoan ngan hang');
+       (N'Chuyen khoan', N'Chuyen khoan ngan hang'),
+       (N'The tin dung', N'Thanh toan bang the tin dung'),
+       (N'Vi dien tu', N'Thanh toan qua vi dien tu');
 GO
 
 -- 7.3 Sample Danh muc san pham

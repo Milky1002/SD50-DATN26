@@ -152,7 +152,7 @@ public class StaffService {
                 row.createCell(4).setCellValue(nv.getDiaChi() != null ? nv.getDiaChi() : "");
                 row.createCell(5).setCellValue(nv.getEmail() != null ? nv.getEmail() : "");
                 row.createCell(6).setCellValue(nv.getTenChucVu() != null ? nv.getTenChucVu() : "");
-                row.createCell(7).setCellValue(nv.getTrangThai() != null && nv.getTrangThai() == 1 ? "Dang lam" : "Nghi viec");
+                row.createCell(7).setCellValue(nv.getTrangThai() != null && nv.getTrangThai() == 1 ? "Đang làm" : "Nghỉ việc");
             }
 
             // Tự động căn chỉnh độ rộng cột

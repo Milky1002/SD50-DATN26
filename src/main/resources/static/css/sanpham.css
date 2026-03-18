@@ -634,3 +634,49 @@
     padding:4px;
     font-size:13px;
 }
+
+/* ==================== KiotViet-style bordered sections ==================== */
+.sp-section-panel{
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:18px 20px 14px;
+    margin-bottom:16px;
+    background:#fff;
+}
+.sp-section-panel .sp-section-title{
+    margin-top:0;
+    padding-top:0;
+    border-bottom:none;
+    margin-bottom:12px;
+    font-size:13px;
+    font-weight:900;
+    color:#1e293b;
+    letter-spacing:.8px;
+}
+.sp-section-panel .sp-form-grid{
+    gap:14px 20px;
+}
+
+/* ==================== Barcode in table ==================== */
+.sp-barcode-cell svg{
+    max-width:120px;
+    height:30px;
+}
+.sp-barcode-cell{
+    text-align:center;
+    padding:4px 8px;
+}
+
+/* ==================== Barcode preview in add modal ==================== */
+.sp-barcode-inline{
+    background:#f9fafb;
+    border:1px dashed #d1d5db;
+    border-radius:8px;
+    padding:10px;
+    text-align:center;
+    margin-top:6px;
+}
+.sp-barcode-inline svg{
+    max-width:200px;
+    height:50px;
+}
