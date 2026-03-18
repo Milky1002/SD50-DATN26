@@ -463,9 +463,24 @@ SET IDENTITY_INSERT [dbo].[ChucVu] ON;
 IF NOT EXISTS (SELECT 1 FROM [dbo].[ChucVu] WHERE [Chuc_vu_id] = 1)
 BEGIN
     INSERT INTO [dbo].[ChucVu] ([Chuc_vu_id], [Ten_chuc_vu], [Mo_ta_chuc_vu])
-    VALUES (1, N'Quan ly', N'Nhan vien quan ly he thong');
+    VALUES (1, N'Quản lý', N'Nhân viên quản lý hệ thống');
+END;
+IF NOT EXISTS (SELECT 1 FROM [dbo].[ChucVu] WHERE [Chuc_vu_id] = 2)
+BEGIN
+    INSERT INTO [dbo].[ChucVu] ([Chuc_vu_id], [Ten_chuc_vu], [Mo_ta_chuc_vu])
+    VALUES (2, N'Nhân viên', N'Nhân viên bán hàng');
 END;
 SET IDENTITY_INSERT [dbo].[ChucVu] OFF;
+GO
+
+-- 7.1b Admin account (password "123456" — plaintext, will be auto-hashed on first login)
+SET IDENTITY_INSERT [dbo].[TaiKhoan] ON;
+IF NOT EXISTS (SELECT 1 FROM [dbo].[TaiKhoan] WHERE [Tai_khoan_id] = 1)
+BEGIN
+    INSERT INTO [dbo].[TaiKhoan] ([Tai_khoan_id], [User_name], [Pass_word], [Trang_thai])
+    VALUES (1, N'admin', N'123456', 1);
+END;
+SET IDENTITY_INSERT [dbo].[TaiKhoan] OFF;
 GO
 
 SET IDENTITY_INSERT [dbo].[NhanVien] ON;
@@ -474,9 +489,14 @@ BEGIN
     INSERT INTO [dbo].[NhanVien] ([Nhan_vien_id], [Ho_ten], [Gioi_tinh], [SDT], [Email],
                                    [Dia_chi], [Ngay_sinh], [Chuc_vu_id], [Trang_thai], [Ngay_tao])
     VALUES (1, N'Admin', N'Nam', '0900000001', 'admin@shop.vn',
-            N'Ha Noi', '1990-01-01', 1, 1, GETDATE());
+            N'Hà Nội', '1990-01-01', 1, 1, GETDATE());
 END;
 SET IDENTITY_INSERT [dbo].[NhanVien] OFF;
+GO
+
+-- Link NhanVien id=1 to TaiKhoan id=1 (only if not already linked)
+UPDATE [dbo].[NhanVien] SET [Tai_khoan_id] = 1
+WHERE [Nhan_vien_id] = 1 AND [Tai_khoan_id] IS NULL;
 GO
 
 -- 7.2 Sample HinhThucThanhToan

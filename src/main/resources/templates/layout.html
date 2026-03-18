@@ -36,6 +36,7 @@
             </a>
 
             <a class="nav__item"
+               th:if="${session.role == 'Quản lý' or session.role == 'Quan ly'}"
                th:href="@{/nhan-vien}"
                th:classappend="${activeMenu == 'nhanvien'} ? ' active'">
                 <span class="nav__icon"><i class="bi bi-people-fill"></i></span>
@@ -131,7 +132,26 @@
                 <button class="icon-btn topbar-icon" type="button" aria-label="Thông báo">
                     <i class="bi bi-bell-fill"></i>
                 </button>
-                <div class="avatar"><i class="bi bi-person-fill"></i></div>
+                <div class="user-menu" id="userMenu">
+                    <button class="user-menu__trigger" type="button" id="userMenuBtn">
+                        <div class="avatar"><i class="bi bi-person-fill"></i></div>
+                        <span class="user-menu__name" th:text="${session.hoTen} ?: 'Người dùng'">Người dùng</span>
+                        <i class="bi bi-chevron-down user-menu__arrow"></i>
+                    </button>
+                    <div class="user-menu__dropdown" id="userMenuDropdown">
+                        <div class="user-menu__header">
+                            <strong th:text="${session.hoTen} ?: 'Người dùng'">Name</strong>
+                            <span class="user-menu__role" th:text="${session.tenChucVu} ?: ''">Role</span>
+                        </div>
+                        <div class="user-menu__divider"></div>
+                        <button class="user-menu__item" type="button" onclick="openChangePasswordModal()">
+                            <i class="bi bi-key"></i> Đổi mật khẩu
+                        </button>
+                        <a class="user-menu__item" th:href="@{/logout}">
+                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -142,5 +162,39 @@
 </div>
 
 <script th:src="@{/js/app.js}"></script>
+
+<!-- Change Password Modal -->
+<div class="admin-modal-overlay" id="changePasswordOverlay" style="display:none" onclick="closeChangePasswordModal()">
+    <div class="admin-modal__card" onclick="event.stopPropagation()">
+        <div class="admin-modal__header">
+            <h3><i class="bi bi-key"></i> Đổi mật khẩu</h3>
+            <button class="admin-modal__close" onclick="closeChangePasswordModal()">&times;</button>
+        </div>
+        <div class="admin-modal__body">
+            <div id="cpMsg" style="display:none" class="cp-msg"></div>
+            <div class="admin-field">
+                <label for="cpOldPwd">Mật khẩu hiện tại</label>
+                <input type="password" id="cpOldPwd" placeholder="Nhập mật khẩu hiện tại..." autocomplete="current-password"/>
+            </div>
+            <div class="admin-field" style="margin-top:12px">
+                <label for="cpNewPwd">Mật khẩu mới</label>
+                <input type="password" id="cpNewPwd" placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)..." autocomplete="new-password"/>
+            </div>
+            <div class="admin-field" style="margin-top:12px">
+                <label for="cpConfirmPwd">Xác nhận mật khẩu mới</label>
+                <input type="password" id="cpConfirmPwd" placeholder="Nhập lại mật khẩu mới..." autocomplete="new-password"/>
+            </div>
+        </div>
+        <div class="admin-modal__footer">
+            <button class="admin-btn admin-btn--ghost" onclick="closeChangePasswordModal()">Hủy</button>
+            <button class="admin-btn admin-btn--primary" onclick="submitChangePassword()">
+                <i class="bi bi-check-lg"></i> Đổi mật khẩu
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div id="toastContainer" class="toast-container"></div>
 </body>
 </html>

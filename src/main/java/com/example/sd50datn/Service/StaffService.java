@@ -4,6 +4,7 @@ import com.example.sd50datn.Dto.StaffDTO;
 import com.example.sd50datn.Model.*;
 import com.example.sd50datn.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.*;
@@ -58,9 +59,10 @@ public class StaffService {
             staff = new Staff();
             // XỬ LÝ TÀI KHOẢN: Chỉ tạo khi thêm mới và có nhập Username
             if (dto.getUsername() != null && !dto.getUsername().trim().isEmpty()) {
+                BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
                 Account acc = Account.builder()
                         .username(dto.getUsername())
-                        .password("123456") // Mật khẩu mặc định
+                        .password(encoder.encode("123456")) // Mật khẩu mặc định, đã hash BCrypt
                         .trangThai(1)
                         .build();
                 acc = accRepo.save(acc);
