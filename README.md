@@ -1,264 +1,300 @@
-# SD50-DATN26 - Hệ Thống Quản Lý Chương Trình Khuyến Mại
+# SD50-DATN26 - He Thong Quan Ly Chuong Trinh Khuyen Mai
 
-## 📋 Tổng Quan
+## Tong Quan
 
-Hệ thống quản lý chương trình khuyến mại cho cửa hàng bán lẻ, hỗ trợ 2 loại giảm giá chính:
+He thong quan ly chuong trinh khuyen mai cho cua hang ban le, ho tro 2 loai giam gia chinh:
 
-1. **Giảm giá hóa đơn** - Áp dụng cho toàn bộ hóa đơn
-2. **Giảm giá sản phẩm** - Áp dụng cho sản phẩm cụ thể
+1. **Giam gia hoa don** - Ap dung cho toan bo hoa don
+2. **Giam gia san pham** - Ap dung cho san pham cu the
 
-## 🚀 Quick Start
+---
 
-### Yêu Cầu Hệ Thống
+## Quick Start
+
+### Yeu Cau He Thong
 
 - Java 17+
 - Maven 3.6+
 - SQL Server 2019+
-- IDE: IntelliJ IDEA / Eclipse (khuyến nghị)
+- `sqlcmd` (co san khi cai SQL Server, hoac cai rieng tu [mssql-tools](https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility))
+- IDE: IntelliJ IDEA / Eclipse (khuyen nghi)
 
-### Cài Đặt Nhanh
+### Cai Dat Nhanh
 
 ```bash
-# 1. Clone project (nếu từ git)
-git clone <repository-url>
+# 1. Clone project
+git clone https://github.com/Milky1002/SD50-DATN26.git
 cd SD50-DATN26
 
-# 2. Chạy file SQL duy nhất để tạo database + schema + dữ liệu mẫu:
-#    SQL_Query/SetupDatabaseSQL.sql
-#    (File này tự tạo database sd50, tất cả bảng, và seed data)
+# 2. Tao database bang & schema (chay 1 lan dau tien)
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -i SQL_Query/SetupDatabaseSQL.sql
 
-# 3. Cấu hình database
-# Chỉnh sửa src/main/resources/application.properties
-# Thay đổi username/password theo cấu hình của bạn
+# 3. Chay script cap nhat du lieu mau (chay sau buoc 2)
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -i SQL_Query/run_all_updates.sql
 
-# 4. Build project
+# 4. Cau hinh database (neu khac mac dinh)
+#    Chinh sua src/main/resources/application.properties
+#    Thay doi host/port/username/password theo cau hinh cua ban
+
+# 5. Build project
 mvn clean install
 
-# 5. Chạy application
+# 6. Chay application
 mvn spring-boot:run
 
-# 6. Mở trình duyệt: http://localhost:8888/dashboard
+# 7. Mo trinh duyet: http://localhost:8888/login
+#    Dang nhap: admin / admin@123
 ```
 
-### Cài Đặt Database
+> **Quan trong:** Doi mat khau admin ngay sau lan dang nhap dau tien! Bam vao ten nguoi dung goc tren phai -> "Doi mat khau".
 
-Chỉ cần chạy **1 file duy nhất**: `SQL_Query/SetupDatabaseSQL.sql`
+---
 
-File này bao gồm:
-- Tạo database `sd50`
-- Tất cả bảng (ecommerce, khuyến mại, nhập/xuất kho)
-- Dữ liệu mẫu: nhân viên, danh mục, màu sắc, sản phẩm, khuyến mại
+## Cai Dat Database Chi Tiet
 
-### Các Trang Chính
+### Cau Truc Thu Muc SQL
 
-| URL | Chức năng |
-|-----|-----------|
-| `/dashboard` | Tổng quan |
-| `/san-pham` | Quản lý sản phẩm (CRUD, tìm kiếm, lọc, Excel, barcode) |
-| `/danh-muc` | Quản lý danh mục sản phẩm |
-| `/mau-sac` | Quản lý màu sắc |
-| `/ban-hang` | Bán hàng tại quầy (POS) |
-| `/xuat-kho` | Quản lý xuất kho |
-| `/invoices` | Quản lý hóa đơn |
-| `/orders` | Quản lý đơn hàng |
-| `/khuyen-mai` | Chương trình khuyến mại |
+```
+SQL_Query/
+  SetupDatabaseSQL.sql          # Tao database sd50, tat ca bang, va du lieu seed co ban
+  run_all_updates.sql           # Chay tat ca script cap nhat (goi tung file trong updates/)
+  updates/
+    01_cap_nhat_chuc_vu.sql          # Chuc vu: Quan ly, Nhan vien
+    02_cap_nhat_tai_khoan.sql        # Tai khoan: admin, nhanvien01, nhanvien02
+    03_cap_nhat_nhan_vien.sql        # Nhan vien mau
+    04_cap_nhat_hinh_thuc_thanh_toan.sql  # Hinh thuc thanh toan
+    05_cap_nhat_danh_muc.sql         # Danh muc san pham
+    05b_fix_danh_muc.sql             # Fix danh muc cho DB cu
+    06_cap_nhat_mau_sac.sql          # Mau sac
+    06b_fix_mau_sac.sql              # Fix mau sac cho DB cu
+    07_cap_nhat_san_pham.sql         # San pham
+    07b_fix_san_pham.sql             # Fix san pham cho DB cu
+    08_cap_nhat_khuyen_mai.sql       # Chuong trinh khuyen mai
+    09_them_khach_hang.sql           # Khach hang mau
+```
 
-## 📚 Tài Liệu
+### Cach 1: Chay Mot Lenh Duy Nhat (Khuyen Nghi)
 
-### Tài Liệu Chính
+Cach nay su dung `sqlcmd` voi lenh `:r` de goi tung file con tu dong.
 
-1. **[QUICKSTART.md](./QUICKSTART.md)** - Hướng dẫn bắt đầu nhanh
-   - Cài đặt từng bước
-   - Cấu hình database
-   - Test API
-   - Tích hợp frontend
+```bash
+# Buoc 1: Tao database & schema (neu chua co)
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -i SQL_Query/SetupDatabaseSQL.sql
 
-2. **[PROMOTION_README.md](./PROMOTION_README.md)** - Tài liệu chi tiết đầy đủ
-   - Cấu trúc database
-   - API endpoints
-   - Business logic
-   - Ví dụ sử dụng
+# Buoc 2: Chay tat ca script cap nhat du lieu
+#   QUAN TRONG: phai chay tu thu muc SQL_Query/ vi file dung duong dan tuong doi
+cd SQL_Query
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -i run_all_updates.sql
+cd ..
+```
 
-3. **[IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)** - Tóm tắt triển khai
-   - Danh sách file đã tạo
-   - Tính năng chính
-   - Validation rules
-   - Performance tips
+> **Luu y:** File `run_all_updates.sql` su dung lenh `:r updates\...` (duong dan tuong doi), nen ban **phai `cd SQL_Query`** truoc khi chay, hoac dung tham so `-v` de truyen duong dan.
 
-### Tài Liệu Bổ Sung
+### Cach 2: Chay Tung File Theo Thu Tu
 
-- **[postman_collection.json](./postman_collection.json)** - Postman collection để test API
-- **[example_frontend.html](./example_frontend.html)** - Demo frontend tích hợp API
-- **[promotion_schema.sql](./promotion_schema.sql)** - Database schema
+Neu ban muon kiem soat tung buoc, chay tung file trong `updates/` theo thu tu so:
 
-## 🏗️ Cấu Trúc Project
+```bash
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/01_cap_nhat_chuc_vu.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/02_cap_nhat_tai_khoan.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/03_cap_nhat_nhan_vien.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/04_cap_nhat_hinh_thuc_thanh_toan.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/05_cap_nhat_danh_muc.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/06_cap_nhat_mau_sac.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/07_cap_nhat_san_pham.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/08_cap_nhat_khuyen_mai.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/09_them_khach_hang.sql
+```
+
+Cac file `05b`, `06b`, `07b` la fix bo sung cho DB cu — chi can chay neu gap loi khi chay file chinh tuong ung.
+
+### Backup Truoc Khi Chay (Khuyen Nghi Cho Production)
+
+```sql
+-- Tao backup truoc khi chay script
+BACKUP DATABASE [sd50] TO DISK = N'C:\Backup\sd50_backup.bak' WITH FORMAT;
+```
+
+### Xac Nhan Sau Khi Chay
+
+Sau khi chay xong, kiem tra du lieu:
+
+```sql
+USE [sd50];
+
+-- Kiem tra so luong ban ghi
+SELECT 'ChucVu' AS Bang, COUNT(*) AS SoLuong FROM dbo.ChucVu
+UNION ALL SELECT 'TaiKhoan', COUNT(*) FROM dbo.TaiKhoan
+UNION ALL SELECT 'NhanVien', COUNT(*) FROM dbo.NhanVien
+UNION ALL SELECT 'DanhMuc', COUNT(*) FROM dbo.Danh_muc_san_pham
+UNION ALL SELECT 'MauSac', COUNT(*) FROM dbo.MauSac
+UNION ALL SELECT 'SanPham', COUNT(*) FROM dbo.SanPham
+UNION ALL SELECT 'KhuyenMai', COUNT(*) FROM dbo.Chuong_trinh_khuyen_mai
+UNION ALL SELECT 'KhachHang', COUNT(*) FROM dbo.KhachHang
+UNION ALL SELECT 'HTTT', COUNT(*) FROM dbo.Hinh_thuc_thanh_toan;
+
+-- Kiem tra tai khoan admin
+SELECT Tai_khoan_id, User_name, Pass_word FROM dbo.TaiKhoan WHERE User_name = N'admin';
+```
+
+Ket qua mong doi:
+
+| Bang | SoLuong |
+|------|---------|
+| ChucVu | 2 |
+| TaiKhoan | 3 |
+| NhanVien | 3 |
+| DanhMuc | 5 |
+| MauSac | 10 |
+| SanPham | 12 |
+| KhuyenMai | 7 |
+| KhachHang | 9 |
+| HTTT | 4 |
+
+### Tai Khoan Mac Dinh
+
+| Username | Password | Vai Tro |
+|----------|----------|---------|
+| `admin` | `admin@123` | Quan ly (full quyen) |
+| `nhanvien01` | `admin@123` | Nhan vien |
+| `nhanvien02` | `admin@123` | Nhan vien |
+
+> Mat khau duoc luu plaintext trong SQL seed. Khi dang nhap lan dau, he thong tu dong hash bang BCrypt va cap nhat trong database. **Doi mat khau ngay sau khi cai dat!**
+
+---
+
+## Xac Thuc & Phan Quyen
+
+### Tong Quan
+
+He thong su dung xac thuc dua tren session (khong dung Spring Security):
+
+- **AuthInterceptor**: Chan tat ca request (tru `/login`, `/css/**`, `/js/**`, ...). Neu chua dang nhap -> redirect ve `/login`.
+- **AdminInterceptor**: Chan cac URL `/nhan-vien/**`. Chi cho phep role "Quan ly" truy cap.
+- **BCrypt**: Mat khau duoc hash bang BCrypt. He thong ho tro tu dong chuyen doi mat khau plaintext cu sang BCrypt khi dang nhap thanh cong (migration).
+
+### Luong Hoat Dong
+
+```
+Nguoi dung truy cap /dashboard
+  -> AuthInterceptor kiem tra session
+    -> Chua dang nhap? Redirect /login
+    -> Da dang nhap? Cho phep truy cap
+      -> URL /nhan-vien/**?
+        -> AdminInterceptor kiem tra role
+          -> Role "Quan ly"? Cho phep
+          -> Role khac? Redirect /dashboard (403)
+```
+
+### Session Attributes
+
+Khi dang nhap thanh cong, cac thuoc tinh sau duoc luu trong session:
+
+| Attribute | Mo Ta |
+|-----------|-------|
+| `loggedIn` | `true` |
+| `accountId` | ID tai khoan |
+| `nhanVienId` | ID nhan vien |
+| `username` | Ten dang nhap |
+| `hoTen` | Ho ten day du |
+| `email` | Email |
+| `chucVuId` | ID chuc vu |
+| `tenChucVu` | Ten chuc vu (vd: "Quan ly") |
+| `role` | Vai tro (vd: "ADMIN", "STAFF") |
+
+### API Doi Mat Khau
+
+```
+POST /api/change-password
+Content-Type: application/x-www-form-urlencoded
+
+oldPassword=matkhaucu&newPassword=matkhaumoi
+```
+
+Tra ve JSON: `{ "success": true/false, "message": "..." }`
+
+---
+
+## Cac Trang Chinh
+
+| URL | Chuc Nang | Quyen |
+|-----|-----------|-------|
+| `/login` | Dang nhap | Cong khai |
+| `/logout` | Dang xuat | Dang nhap |
+| `/dashboard` | Tong quan | Dang nhap |
+| `/san-pham` | Quan ly san pham (CRUD, tim kiem, loc, Excel, barcode) | Dang nhap |
+| `/danh-muc` | Quan ly danh muc san pham | Dang nhap |
+| `/mau-sac` | Quan ly mau sac | Dang nhap |
+| `/ban-hang` | Ban hang tai quay (POS) | Dang nhap |
+| `/xuat-kho` | Quan ly xuat kho | Dang nhap |
+| `/invoices` | Quan ly hoa don | Dang nhap |
+| `/orders` | Quan ly don hang | Dang nhap |
+| `/khuyen-mai` | Chuong trinh khuyen mai | Dang nhap |
+| `/khach-hang` | Quan ly khach hang | Dang nhap |
+| `/nhan-vien` | Quan ly nhan vien | Chi "Quan ly" |
+
+---
+
+## Cau Truc Project
 
 ```
 SD50-DATN26/
-├── src/
-│   ├── main/
-│   │   ├── java/com/example/sd50datn/
-│   │   │   ├── entity/              # Entity classes
-│   │   │   │   ├── ChuongTrinhKhuyenMai.java
-│   │   │   │   ├── ChuongTrinhKhuyenMaiChiTiet.java
-│   │   │   │   ├── LichSuApDungKhuyenMai.java
-│   │   │   │   └── ... (other entities)
-│   │   │   ├── repository/          # JPA repositories
-│   │   │   │   ├── ChuongTrinhKhuyenMaiRepository.java
-│   │   │   │   └── ...
-│   │   │   ├── service/             # Business logic
-│   │   │   │   └── ChuongTrinhKhuyenMaiService.java
-│   │   │   ├── controller/          # REST controllers
-│   │   │   │   └── ChuongTrinhKhuyenMaiController.java
-│   │   │   └── dto/                 # Data Transfer Objects
-│   │   │       ├── ChuongTrinhKhuyenMaiDTO.java
-│   │   │       ├── ChuongTrinhKhuyenMaiRequest.java
-│   │   │       └── ApiResponse.java
-│   │   └── resources/
-│   │       └── application.properties
-│   └── test/
-├── script.sql                       # Database schema (legacy, use SetupDatabaseSQL.sql)
-├── promotion_schema.sql             # Promotion tables schema (legacy)
-├── pom.xml                          # Maven configuration
-├── README.md                        # This file
-├── QUICKSTART.md                    # Quick start guide
-├── PROMOTION_README.md              # Detailed documentation
-├── IMPLEMENTATION_SUMMARY.md        # Implementation summary
-├── postman_collection.json          # Postman collection
-└── example_frontend.html            # Frontend demo
+  src/main/
+    java/com/example/sd50datn/
+      Config/
+        AuthInterceptor.java          # Chan request chua dang nhap
+        AdminInterceptor.java         # Chan request khong du quyen
+        WebMvcConfig.java             # Dang ky interceptor
+      Controller/
+        LoginController.java          # /login, /logout, /api/change-password
+        DashboardController.java      # /dashboard
+        SanPhamController.java        # /san-pham
+        DanhMucSanPhamController.java # /danh-muc
+        MauSacController.java         # /mau-sac
+        BanHangController.java        # /ban-hang
+        XuatKhoController.java        # /xuat-kho
+        InvoiceController.java        # /invoices
+        OrderController.java          # /orders
+        StaffController.java          # /nhan-vien
+        KhachHangController.java      # /khach-hang
+        KhuyenMaiViewController.java  # /khuyen-mai
+        ChuongTrinhKhuyenMaiController.java  # API khuyen mai
+      Service/
+        AuthService.java              # Xac thuc, BCrypt, doi mat khau
+        StaffService.java             # Quan ly nhan vien (hash password)
+        ...
+      entity/                         # JPA entity classes
+      repository/                     # JPA repositories
+      dto/                            # Data Transfer Objects
+    resources/
+      templates/
+        layout.html                   # Layout chinh (sidebar, topbar, user menu)
+        login.html                    # Trang dang nhap
+        ...
+      static/
+        css/
+          app.css                     # User menu, modal, toast styles
+          login.css                   # Trang dang nhap
+        js/
+          app.js                      # Dropdown, modal, change-password, toast
+      application.properties          # Cau hinh DB, port
+  SQL_Query/
+    SetupDatabaseSQL.sql              # Tao database + schema + seed ban dau
+    run_all_updates.sql               # Chay tat ca script cap nhat
+    updates/                          # Cac script cap nhat theo thu tu (01..09)
+  pom.xml                             # Maven configuration
+  README.md                           # File nay
 ```
 
-## 🎯 Tính Năng Chính
+---
 
-### 1. Quản Lý Chương Trình Khuyến Mại
-
-- ✅ Tạo, sửa, xóa chương trình khuyến mại
-- ✅ Hỗ trợ 2 loại: Giảm giá hóa đơn & Giảm giá sản phẩm
-- ✅ Giảm theo % hoặc theo tiền
-- ✅ Thiết lập điều kiện áp dụng
-- ✅ Quản lý trạng thái (Hoạt động/Ngừng/Sắp diễn ra/Đã kết thúc)
-
-### 2. Điều Kiện Áp Dụng
-
-- ✅ Thời gian: Ngày bắt đầu/kết thúc, Giờ, Ngày trong tuần/tháng
-- ✅ Khách hàng: Tất cả/Nhóm/Cụ thể
-- ✅ Đơn hàng tối thiểu
-- ✅ Giảm tối đa (khi giảm theo %)
-- ✅ Tự động áp dụng
-
-### 3. Tính Toán Giảm Giá
-
-- ✅ Tính giảm giá cho hóa đơn
-- ✅ Tính giảm giá cho sản phẩm
-- ✅ Kiểm tra điều kiện áp dụng
-- ✅ Lưu lịch sử áp dụng
-
-## 🔌 API Endpoints
-
-### Base URL: `http://localhost:8888/api/chuong-trinh-khuyen-mai`
-
-| Method | Endpoint | Mô tả |
-|--------|----------|-------|
-| GET | `/` | Lấy tất cả chương trình |
-| GET | `/active` | Lấy chương trình đang hoạt động |
-| GET | `/type/{loaiKhuyenMai}` | Lấy theo loại (1=Hóa đơn, 2=Sản phẩm) |
-| GET | `/{id}` | Lấy chi tiết theo ID |
-| GET | `/code/{maChuongTrinh}` | Lấy theo mã chương trình |
-| POST | `/` | Tạo mới chương trình |
-| PUT | `/{id}` | Cập nhật chương trình |
-| DELETE | `/{id}` | Xóa chương trình |
-| PATCH | `/{id}/status` | Cập nhật trạng thái |
-| GET | `/applicable/invoice` | Lấy CTKM áp dụng cho hóa đơn |
-| GET | `/applicable/product/{id}` | Lấy CTKM áp dụng cho sản phẩm |
-| GET | `/{id}/calculate-discount` | Tính toán giảm giá |
-
-## 📊 Database Schema
-
-### Bảng Chính
-
-1. **Chuong_trinh_khuyen_mai** - Thông tin chương trình khuyến mại
-2. **Chuong_trinh_khuyen_mai_chi_tiet** - Chi tiết sản phẩm áp dụng
-3. **Lich_su_ap_dung_khuyen_mai** - Lịch sử áp dụng
-
-### Relationships
-
-```
-Chuong_trinh_khuyen_mai
-    ├── 1:N → Chuong_trinh_khuyen_mai_chi_tiet
-    │           └── N:1 → SanPham
-    │           └── N:1 → Danh_muc_san_pham
-    └── 1:N → Lich_su_ap_dung_khuyen_mai
-                └── N:1 → HoaDon
-```
-
-## 🧪 Testing
-
-### 1. Test Bằng Postman
-
-```bash
-# Import file postman_collection.json vào Postman
-# Chạy các request theo thứ tự
-```
-
-### 2. Test Bằng cURL
-
-```bash
-# Lấy danh sách
-curl http://localhost:8888/api/chuong-trinh-khuyen-mai
-
-# Tạo mới
-curl -X POST http://localhost:8888/api/chuong-trinh-khuyen-mai \
-  -H "Content-Type: application/json" \
-  -d '{"maChuongTrinh":"CTKM001","tenChuongTrinh":"Test",...}'
-```
-
-### 3. Test Bằng Frontend Demo
-
-```bash
-# Mở file example_frontend.html trong browser
-# Đảm bảo backend đang chạy tại localhost:8888
-```
-
-## 🎨 Tích Hợp Frontend
-
-### JavaScript/Fetch Example
-
-```javascript
-// Lấy danh sách
-fetch('http://localhost:8888/api/chuong-trinh-khuyen-mai')
-  .then(response => response.json())
-  .then(data => console.log(data));
-
-// Tạo mới
-fetch('http://localhost:8888/api/chuong-trinh-khuyen-mai', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    maChuongTrinh: 'CTKM001',
-    tenChuongTrinh: 'Giảm giá hóa đơn',
-    loaiKhuyenMai: 1,
-    loaiGiam: 1,
-    giaTriGiam: 10,
-    ngayBatDau: '2026-03-01T00:00:00',
-    ngayKetThuc: '2026-03-31T23:59:59',
-    trangThai: 1
-  })
-})
-  .then(response => response.json())
-  .then(data => console.log(data));
-```
-
-### React/Vue/Angular
-
-Xem chi tiết trong [QUICKSTART.md](./QUICKSTART.md)
-
-## 🔧 Configuration
+## Cau Hinh
 
 ### application.properties
 
 ```properties
-# Database
-spring.datasource.url=jdbc:sqlserver://127.0.0.1:1433;databaseName=sd50
+# Database - thay doi cho phu hop moi truong cua ban
+spring.datasource.url=jdbc:sqlserver://127.0.0.1:1433;databaseName=sd50;encrypt=false;trustServerCertificate=true
 spring.datasource.username=sa
 spring.datasource.password=123
 
@@ -270,95 +306,138 @@ spring.jpa.show-sql=true
 server.port=8888
 ```
 
-## 🐛 Troubleshooting
+Doi voi production, thay doi:
+- `spring.datasource.url` — host va port cua SQL Server
+- `spring.datasource.username` / `password` — tai khoan database
+- `spring.jpa.show-sql=false` — tat log SQL
+- Them bien moi truong hoac Spring profiles de quan ly cau hinh
 
-### Lỗi Thường Gặp
+---
 
-1. **Cannot connect to database**
-   - Kiểm tra SQL Server đang chạy
-   - Kiểm tra username/password
-   - Kiểm tra port 1433
+## API Endpoints
 
-2. **Port 8888 already in use**
-   - Đổi port trong application.properties
-   - Hoặc kill process đang dùng port 8888
+### Khuyen Mai: `/api/chuong-trinh-khuyen-mai`
 
-3. **Table not found**
-   - Chạy script.sql
-   - Chạy promotion_schema.sql
+| Method | Endpoint | Mo Ta |
+|--------|----------|-------|
+| GET | `/` | Lay tat ca chuong trinh |
+| GET | `/active` | Lay chuong trinh dang hoat dong |
+| GET | `/type/{loaiKhuyenMai}` | Lay theo loai (1=Hoa don, 2=San pham) |
+| GET | `/{id}` | Lay chi tiet theo ID |
+| GET | `/code/{maChuongTrinh}` | Lay theo ma chuong trinh |
+| POST | `/` | Tao moi chuong trinh |
+| PUT | `/{id}` | Cap nhat chuong trinh |
+| DELETE | `/{id}` | Xoa chuong trinh |
+| PATCH | `/{id}/status` | Cap nhat trang thai |
+| GET | `/applicable/invoice` | Lay CTKM ap dung cho hoa don |
+| GET | `/applicable/product/{id}` | Lay CTKM ap dung cho san pham |
+| GET | `/{id}/calculate-discount` | Tinh toan giam gia |
 
-4. **Validation failed**
-   - Kiểm tra format dữ liệu
-   - Xem chi tiết trong PROMOTION_README.md
+### Xac Thuc
 
-## 📈 Performance Tips
+| Method | Endpoint | Mo Ta |
+|--------|----------|-------|
+| GET | `/login` | Trang dang nhap |
+| POST | `/login` | Xu ly dang nhap |
+| GET | `/logout` | Dang xuat |
+| POST | `/api/change-password` | Doi mat khau |
 
-- Sử dụng index cho các trường tìm kiếm thường xuyên
-- Cache danh sách chương trình đang hoạt động
-- Lazy loading cho relationships
-- Query optimization với JPA
+---
 
-## 🔐 Security (Có thể thêm)
+## Bao Mat
 
-- [ ] Spring Security
-- [ ] JWT Authentication
-- [ ] Role-based access control
-- [ ] API rate limiting
-- [ ] Input validation & sanitization
+### Da Trien Khai
 
-## 📝 TODO List
+- [x] Session-based authentication (AuthInterceptor)
+- [x] Role-based authorization (AdminInterceptor — "Quan ly" only cho /nhan-vien/**)
+- [x] BCrypt password hashing voi tu dong migration tu plaintext
+- [x] Doi mat khau qua UI modal
+- [x] Dang xuat xoa session
 
-### Đã Hoàn Thành ✅
+### Luu Y Cho Production
 
-- [x] Database schema
-- [x] Entity classes
-- [x] Repository layer
-- [x] Service layer
-- [x] REST API
-- [x] Validation
-- [x] Documentation
-- [x] Postman collection
-- [x] Frontend demo
+- He thong xac thuc hien tai la application-level, **khong dung Spring Security**. De bao mat tot hon, nen chuyen sang Spring Security.
+- Chua co CSRF protection — nen them CSRF token cho cac form POST.
+- Mat khau admin trong SQL seed la plaintext (tu dong hash khi dang nhap lan dau). De an toan hon, thay bang BCrypt hash da tinh truoc.
+- Nen su dung HTTPS cho production.
+- Nen them session timeout va gioi han so lan dang nhap sai.
 
-### Có Thể Thêm 🔜
+---
 
-- [ ] Authentication & Authorization
+## Troubleshooting
+
+### Loi Thuong Gap
+
+1. **Khong ket noi duoc database**
+   - Kiem tra SQL Server dang chay
+   - Kiem tra username/password trong application.properties
+   - Kiem tra port 1433 va firewall
+
+2. **Port 8888 da duoc su dung**
+   - Doi port trong application.properties
+   - Hoac kill process dang dung port 8888
+
+3. **Loi "Table not found"**
+   - Chay `SQL_Query/SetupDatabaseSQL.sql` truoc
+   - Sau do chay `SQL_Query/run_all_updates.sql`
+
+4. **Loi khi chay `run_all_updates.sql`**
+   - Dam bao `cd SQL_Query` truoc khi chay (vi file dung duong dan tuong doi `:r updates\...`)
+   - Hoac chay tung file trong `updates/` rieng le
+
+5. **Dang nhap khong duoc**
+   - Kiem tra da chay `02_cap_nhat_tai_khoan.sql` chua
+   - Kiem tra tai khoan: `SELECT * FROM dbo.TaiKhoan WHERE User_name = N'admin'`
+   - Mat khau mac dinh: `admin@123`
+
+6. **Truy cap /nhan-vien bi redirect ve dashboard**
+   - Chi tai khoan co chuc vu "Quan ly" moi truy cap duoc
+   - Kiem tra chuc vu: `SELECT nv.*, cv.Ten_chuc_vu FROM dbo.NhanVien nv JOIN dbo.ChucVu cv ON nv.Chuc_vu_id = cv.Chuc_vu_id`
+
+---
+
+## TODO
+
+### Da Hoan Thanh
+
+- [x] Database schema & seed data (tieng Viet co dau)
+- [x] Entity classes & JPA repositories
+- [x] Service layer & REST API
+- [x] Session-based authentication (AuthInterceptor)
+- [x] Role-based authorization (AdminInterceptor)
+- [x] BCrypt password hashing voi auto-migration
+- [x] Doi mat khau qua UI
+- [x] User menu (ten, vai tro, dang xuat)
+- [x] SQL update scripts (01..09) voi runner
+- [x] POS ban hang tai quay
+- [x] Quan ly khuyen mai
+- [x] Quan ly san pham, danh muc, mau sac
+- [x] Quan ly hoa don & don hang
+
+### Co The Them
+
+- [ ] Spring Security (thay the interceptor hien tai)
+- [ ] CSRF protection
 - [ ] Unit & Integration tests
 - [ ] Swagger/OpenAPI docs
 - [ ] Caching layer
 - [ ] Logging & Monitoring
-- [ ] Scheduled jobs
+- [ ] Scheduled jobs (tu dong ket thuc khuyen mai het han)
 - [ ] Email notifications
-- [ ] Export/Import features
-- [ ] Reports & Statistics
-
-## 👥 Contributors
-
-- Development Team
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 📞 Support
-
-Nếu có vấn đề hoặc câu hỏi:
-
-1. Đọc tài liệu trong thư mục docs
-2. Kiểm tra Troubleshooting section
-3. Liên hệ team phát triển
-
-## 🎉 Acknowledgments
-
-- Spring Boot
-- JPA/Hibernate
-- SQL Server
-- Maven
+- [ ] Database migration tool (Flyway/Liquibase)
 
 ---
 
-**Version:** 1.1.0  
-**Last Updated:** 2026-03-19  
-**Status:** ✅ Production Ready
+## Contributors
 
-**Happy Coding! 🚀**
+- Development Team
+
+## License
+
+This project is licensed under the MIT License.
+
+---
+
+**Version:** 2.0.0
+**Last Updated:** 2026-03-19
+**Status:** Production Ready
