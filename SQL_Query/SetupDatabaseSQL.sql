@@ -473,69 +473,95 @@ END;
 SET IDENTITY_INSERT [dbo].[ChucVu] OFF;
 GO
 
--- 7.1b Admin account (password "123456" — plaintext, will be auto-hashed on first login)
+-- 7.1b Admin account (password "admin@123" — plaintext, will be auto-hashed on first login)
 SET IDENTITY_INSERT [dbo].[TaiKhoan] ON;
 IF NOT EXISTS (SELECT 1 FROM [dbo].[TaiKhoan] WHERE [Tai_khoan_id] = 1)
 BEGIN
     INSERT INTO [dbo].[TaiKhoan] ([Tai_khoan_id], [User_name], [Pass_word], [Trang_thai])
-    VALUES (1, N'admin', N'123456', 1);
+    VALUES (1, N'admin', N'admin@123', 1);
 END;
 SET IDENTITY_INSERT [dbo].[TaiKhoan] OFF;
+GO
+
+-- Tài khoản nhân viên mẫu
+IF NOT EXISTS (SELECT 1 FROM [dbo].[TaiKhoan] WHERE [User_name] = N'nhanvien01')
+    INSERT INTO [dbo].[TaiKhoan] ([User_name], [Pass_word], [Trang_thai]) VALUES (N'nhanvien01', N'admin@123', 1);
+IF NOT EXISTS (SELECT 1 FROM [dbo].[TaiKhoan] WHERE [User_name] = N'nhanvien02')
+    INSERT INTO [dbo].[TaiKhoan] ([User_name], [Pass_word], [Trang_thai]) VALUES (N'nhanvien02', N'admin@123', 1);
 GO
 
 SET IDENTITY_INSERT [dbo].[NhanVien] ON;
 IF NOT EXISTS (SELECT 1 FROM [dbo].[NhanVien] WHERE [Nhan_vien_id] = 1)
 BEGIN
     INSERT INTO [dbo].[NhanVien] ([Nhan_vien_id], [Ho_ten], [Gioi_tinh], [SDT], [Email],
-                                   [Dia_chi], [Ngay_sinh], [Chuc_vu_id], [Trang_thai], [Ngay_tao])
-    VALUES (1, N'Admin', N'Nam', '0900000001', 'admin@shop.vn',
-            N'Hà Nội', '1990-01-01', 1, 1, GETDATE());
+                                   [Dia_chi], [Ngay_sinh], [Chuc_vu_id], [Trang_thai], [Tai_khoan_id], [Ngay_tao])
+    VALUES (1, N'Nguyễn Văn Admin', N'Nam', '0900000001', 'admin@shop.vn',
+            N'Số 1, Phố Huế, Quận Hai Bà Trưng, Hà Nội', '1990-01-01', 1, 1, 1, GETDATE());
 END;
 SET IDENTITY_INSERT [dbo].[NhanVien] OFF;
 GO
 
--- Link NhanVien id=1 to TaiKhoan id=1 (only if not already linked)
-UPDATE [dbo].[NhanVien] SET [Tai_khoan_id] = 1
-WHERE [Nhan_vien_id] = 1 AND [Tai_khoan_id] IS NULL;
+-- Nhân viên mẫu
+DECLARE @tkNV1 INT = (SELECT [Tai_khoan_id] FROM [dbo].[TaiKhoan] WHERE [User_name] = N'nhanvien01');
+IF @tkNV1 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[NhanVien] WHERE [Tai_khoan_id] = @tkNV1)
+    INSERT INTO [dbo].[NhanVien] ([Ho_ten], [Gioi_tinh], [SDT], [Email], [Dia_chi], [Ngay_sinh], [Chuc_vu_id], [Trang_thai], [Tai_khoan_id])
+    VALUES (N'Trần Thị Hương', N'Nữ', N'0912345678', N'huong.tran@shop.vn', N'Số 15, Đường Lê Lợi, Quận 1, TP. Hồ Chí Minh', '1995-05-15', 2, 1, @tkNV1);
+
+DECLARE @tkNV2 INT = (SELECT [Tai_khoan_id] FROM [dbo].[TaiKhoan] WHERE [User_name] = N'nhanvien02');
+IF @tkNV2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [dbo].[NhanVien] WHERE [Tai_khoan_id] = @tkNV2)
+    INSERT INTO [dbo].[NhanVien] ([Ho_ten], [Gioi_tinh], [SDT], [Email], [Dia_chi], [Ngay_sinh], [Chuc_vu_id], [Trang_thai], [Tai_khoan_id])
+    VALUES (N'Lê Minh Đức', N'Nam', N'0987654321', N'duc.le@shop.vn', N'Số 42, Phố Bạch Mai, Quận Hai Bà Trưng, Hà Nội', '1998-08-20', 2, 1, @tkNV2);
 GO
 
--- 7.2 Sample HinhThucThanhToan
+-- 7.2 Hình thức thanh toán
 INSERT INTO [dbo].[HinhThucThanhToan] ([Ten_hinh_thuc], [Mo_ta])
-VALUES (N'Tien mat', N'Thanh toan bang tien mat'),
-       (N'Chuyen khoan', N'Chuyen khoan ngan hang'),
-       (N'The tin dung', N'Thanh toan bang the tin dung'),
-       (N'Vi dien tu', N'Thanh toan qua vi dien tu');
+VALUES (N'Tiền mặt', N'Thanh toán bằng tiền mặt'),
+       (N'Chuyển khoản', N'Chuyển khoản ngân hàng'),
+       (N'Thẻ tín dụng', N'Thanh toán bằng thẻ tín dụng'),
+       (N'Ví điện tử', N'Thanh toán qua ví điện tử');
 GO
 
--- 7.3 Sample Danh muc san pham
+-- 7.3 Danh mục sản phẩm
 INSERT INTO [dbo].[Danh_muc_san_pham] ([Ten_danh_muc], [Trang_thai], [Ngay_tao])
-VALUES (N'Vot cau long', 1, CAST(GETDATE() AS DATE)),
-       (N'Giay cau long', 1, CAST(GETDATE() AS DATE)),
-       (N'Phu kien', 1, CAST(GETDATE() AS DATE)),
-       (N'Quan ao', 1, CAST(GETDATE() AS DATE)),
-       (N'Ba lo - Tui vot', 1, CAST(GETDATE() AS DATE));
+VALUES (N'Vợt cầu lông', 1, CAST(GETDATE() AS DATE)),
+       (N'Giày cầu lông', 1, CAST(GETDATE() AS DATE)),
+       (N'Phụ kiện', 1, CAST(GETDATE() AS DATE)),
+       (N'Quần áo', 1, CAST(GETDATE() AS DATE)),
+       (N'Ba lô - Túi vợt', 1, CAST(GETDATE() AS DATE));
 GO
 
--- 7.4 Sample Mau sac
+-- 7.4 Màu sắc
 INSERT INTO [dbo].[Mau_sac] ([Ten_mau], [Ma_mau_hex], [Trang_thai])
-VALUES (N'Do', '#FF0000', 1),
-       (N'Xanh duong', '#0000FF', 1),
-       (N'Den', '#000000', 1),
-       (N'Trang', '#FFFFFF', 1),
-       (N'Vang', '#FFD700', 1);
+VALUES (N'Đỏ', '#FF0000', 1),
+       (N'Xanh dương', '#0000FF', 1),
+       (N'Đen', '#000000', 1),
+       (N'Trắng', '#FFFFFF', 1),
+       (N'Vàng', '#FFD700', 1),
+       (N'Xanh lá', '#00FF00', 1),
+       (N'Cam', '#FF8C00', 1),
+       (N'Tím', '#800080', 1),
+       (N'Hồng', '#FF69B4', 1),
+       (N'Bạc', '#C0C0C0', 1);
 GO
 
--- 7.5 Sample San pham (5 products for testing)
+-- 7.5 Sản phẩm mẫu (12 sản phẩm)
 INSERT INTO [dbo].[SanPham] ([Danh_muc_san_pham_id], [Mau_sac_id], [Ten_san_pham], [Ma_san_pham], [Sku], [Barcode], [Gia_nhap], [Gia_ban], [So_luong_ton], [Don_vi_tinh], [Mo_ta], [Trang_thai])
 VALUES
-(1, 1, N'Vot Yonex Astrox 99 Pro', 'HH01', 'SKU-HH01', '8934567890123', 2500000, 3500000, 15, N'Cay', N'Vot cao cap cho nguoi choi chuyen nghiep', 1),
-(1, 3, N'Vot Lining Axforce 80', 'HH02', 'SKU-HH02', '8934567890130', 1800000, 2800000, 20, N'Cay', N'Vot cong thu toan dien', 1),
-(2, 4, N'Giay Yonex Power Cushion 65Z', 'HH03', 'SKU-HH03', '8934567890147', 1200000, 1900000, 30, N'Doi', N'Giay cau long cao cap', 1),
-(3, NULL, N'Cuoc cau long Yonex BG65', 'HH04', 'SKU-HH04', '8934567890154', 80000, 150000, 100, N'Cuon', N'Cuoc ben, pho bien', 1),
-(4, 2, N'Ao cau long Yonex 2026', 'HH05', 'SKU-HH05', '8934567890161', 250000, 450000, 50, N'Cai', N'Ao thi dau chinh hang', 1);
+(1, 1, N'Vợt Yonex Astrox 99 Pro', 'HH01', 'SKU-HH01', '8934567890123', 2500000, 3500000, 15, N'Cây', N'Vợt cao cấp cho người chơi chuyên nghiệp, thiết kế tấn công mạnh mẽ', 1),
+(1, 3, N'Vợt Lining Axforce 80', 'HH02', 'SKU-HH02', '8934567890130', 1800000, 2800000, 20, N'Cây', N'Vợt công thủ toàn diện, phù hợp nhiều lối chơi', 1),
+(2, 4, N'Giày Yonex Power Cushion 65Z', 'HH03', 'SKU-HH03', '8934567890147', 1200000, 1900000, 30, N'Đôi', N'Giày cầu lông cao cấp, đệm êm, bám sân tốt', 1),
+(3, NULL, N'Cước cầu lông Yonex BG65', 'HH04', 'SKU-HH04', '8934567890154', 80000, 150000, 100, N'Cuộn', N'Cước bền, phổ biến, phù hợp người chơi phong trào', 1),
+(4, 2, N'Áo cầu lông Yonex 2026', 'HH05', 'SKU-HH05', '8934567890161', 250000, 450000, 50, N'Cái', N'Áo thi đấu chính hãng, chất liệu thoáng mát', 1),
+(1, 3, N'Vợt Yonex Nanoflare 700', 'HH06', 'SKU-HH06', '8934567890178', 2200000, 3200000, 12, N'Cây', N'Vợt siêu nhẹ, tốc độ cao, phù hợp lối chơi phòng thủ phản công', 1),
+(1, 2, N'Vợt Victor Thruster K 9900', 'HH07', 'SKU-HH07', '8934567890185', 2800000, 3800000, 8, N'Cây', N'Vợt tấn công hàng đầu của Victor, cân bằng tốt', 1),
+(2, 1, N'Giày Yonex Aerus Z', 'HH08', 'SKU-HH08', '8934567890192', 1500000, 2300000, 25, N'Đôi', N'Giày siêu nhẹ, đệm Power Cushion+, phù hợp chơi đơn', 1),
+(3, NULL, N'Quấn cán Yonex Super Grap (3 cuộn)', 'HH09', 'SKU-HH09', '8934567890208', 50000, 95000, 200, N'Bộ', N'Quấn cán chống trượt, mềm mại, thấm mồ hôi tốt', 1),
+(4, 4, N'Quần cầu lông Yonex 2026', 'HH10', 'SKU-HH10', '8934567890215', 200000, 380000, 60, N'Cái', N'Quần thể thao chính hãng, co giãn tốt, thoáng khí', 1),
+(5, 3, N'Túi vợt Yonex BA82231W (6 vợt)', 'HH11', 'SKU-HH11', '8934567890222', 800000, 1350000, 15, N'Cái', N'Túi vợt cao cấp 6 ngăn, chống sốc, chống nước', 1),
+(3, NULL, N'Cầu lông Yonex Mavis 350 (Hộp 6 quả)', 'HH12', 'SKU-HH12', '8934567890239', 60000, 120000, 150, N'Hộp', N'Cầu lông nhựa chất lượng cao, bay ổn định, bền bỉ', 1);
 GO
 
--- 7.6 Sample Khuyen mai (7 programs)
+-- 7.6 Chương trình khuyến mãi mẫu (7 chương trình)
 INSERT INTO [dbo].[Chuong_trinh_khuyen_mai] (
     [Ma_chuong_trinh], [Ten_chuong_trinh], [Mo_ta],
     [Loai_khuyen_mai], [Loai_giam], [Gia_tri_giam], [Giam_toi_da], [Don_hang_toi_thieu],
@@ -544,14 +570,33 @@ INSERT INTO [dbo].[Chuong_trinh_khuyen_mai] (
     [Khach_hang_ap_dung], [Kenh_ban_ap_dung], [Ngay_trong_tuan],
     [Trang_thai], [Ngay_tao]
 ) VALUES
-(N'SALE10', N'Giam 10% hoa don tren 3 trieu', N'Giam 10% cho hoa don tren 3.000.000d', 1, 1, 10, 500000, 3000000, '2026-03-01', '2026-12-31', 0, 1, 1, N'[Facebook, Zalo]', N'[2,3,4,5,6]', 1, GETDATE()),
-(N'GIAM100K', N'Giam 100k cho don hang tren 1 trieu', N'Giam 100.000d cho moi don hang tren 1.000.000d', 1, 2, 100000, NULL, 1000000, '2026-03-01', '2026-06-30', 1, 1, 1, N'[Facebook,Zalo,TikTok]', NULL, 1, GETDATE()),
-(N'GIAM50K-SP', N'Giam 50k cho san pham vot cau long', N'Giam 50.000d cho cac san pham vot cau long', 2, 2, 50000, NULL, NULL, '2026-03-01', '2026-12-31', 1, 0, 1, N'[Facebook,Zalo]', NULL, 1, GETDATE()),
-(N'TANG-QUA', N'Tang qua khi mua tren 5 trieu', N'Tang 1 ao thun khi mua hang tren 5.000.000d', 3, 2, 0, NULL, NULL, '2026-03-01', '2026-12-31', 1, 1, 1, NULL, NULL, 1, GETDATE()),
-(N'DONGGIA99K', N'Dong gia 99k cho san pham sale', N'Tat ca san pham sale chi 99.000d', 4, 2, 99000, NULL, NULL, '2026-03-01', '2026-03-31', 0, 0, 1, NULL, NULL, 1, GETDATE()),
-(N'OLD-PROMO', N'Chuong trinh da ket thuc', N'Chuong trinh nay da ket thuc', 1, 1, 15, NULL, NULL, '2025-01-01', '2025-12-31', 0, 1, 1, NULL, NULL, 0, GETDATE()),
-(N'VIP20', N'Giam 20% cho khach VIP', N'Giam 20% cho khach hang VIP, toi da 1 trieu', 1, 1, 20, 1000000, NULL, '2026-03-01', '2026-12-31', 0, 1, 3, NULL, NULL, 1, GETDATE());
+(N'SALE10', N'Giảm 10% hoá đơn trên 3 triệu', N'Giảm 10% cho hoá đơn có giá trị trên 3.000.000đ', 1, 1, 10, 500000, 3000000, '2026-03-01', '2026-12-31', 0, 1, 1, N'[Facebook, Zalo]', N'[2,3,4,5,6]', 1, GETDATE()),
+(N'GIAM100K', N'Giảm 100K cho đơn hàng trên 1 triệu', N'Giảm 100.000đ cho mỗi đơn hàng có giá trị trên 1.000.000đ', 1, 2, 100000, NULL, 1000000, '2026-03-01', '2026-06-30', 1, 1, 1, N'[Facebook,Zalo,TikTok]', NULL, 1, GETDATE()),
+(N'GIAM50K-SP', N'Giảm 50K cho sản phẩm vợt cầu lông', N'Giảm 50.000đ cho các sản phẩm vợt cầu lông', 2, 2, 50000, NULL, NULL, '2026-03-01', '2026-12-31', 1, 0, 1, N'[Facebook,Zalo]', NULL, 1, GETDATE()),
+(N'TANG-QUA', N'Tặng quà khi mua trên 5 triệu', N'Tặng 1 áo thun khi mua hàng trên 5.000.000đ', 3, 2, 0, NULL, NULL, '2026-03-01', '2026-12-31', 1, 1, 1, NULL, NULL, 1, GETDATE()),
+(N'DONGGIA99K', N'Đồng giá 99K cho sản phẩm sale', N'Tất cả sản phẩm sale chỉ 99.000đ', 4, 2, 99000, NULL, NULL, '2026-03-01', '2026-03-31', 0, 0, 1, NULL, NULL, 1, GETDATE()),
+(N'OLD-PROMO', N'Chương trình đã kết thúc', N'Chương trình này đã kết thúc', 1, 1, 15, NULL, NULL, '2025-01-01', '2025-12-31', 0, 1, 1, NULL, NULL, 0, GETDATE()),
+(N'VIP20', N'Giảm 20% cho khách VIP', N'Giảm 20% cho khách hàng VIP, tối đa 1 triệu', 1, 1, 20, 1000000, NULL, '2026-03-01', '2026-12-31', 0, 1, 3, NULL, NULL, 1, GETDATE());
 GO
 
-PRINT N'Setup complete! Database sd50 is ready.';
+-- 7.7 Khách hàng mẫu
+INSERT INTO [dbo].[Khach_hang] ([Ten_khach_hang], [SDT], [Email], [Trang_thai], [Dia_chi_khach_hang])
+VALUES
+(N'Nguyễn Thị Lan', N'0901234567', N'lan.nguyen@gmail.com', 1, N'Số 10, Đường Nguyễn Trãi, Quận Thanh Xuân, Hà Nội'),
+(N'Phạm Văn Hùng', N'0918765432', N'hung.pham@gmail.com', 1, N'Số 25, Phố Hàng Bông, Quận Hoàn Kiếm, Hà Nội'),
+(N'Trương Thị Mai', N'0932456789', N'mai.truong@gmail.com', 1, N'Số 8, Đường Trần Phú, Quận Hải Châu, TP. Đà Nẵng'),
+(N'Hoàng Đức Anh', N'0945678901', N'anh.hoang@gmail.com', 1, N'Số 30, Đường Lý Tự Trọng, Quận 1, TP. Hồ Chí Minh'),
+(N'Vũ Thị Hồng Nhung', N'0956789012', N'nhung.vu@gmail.com', 1, N'Số 12, Phố Nguyễn Du, TP. Hải Phòng'),
+(N'Đặng Quốc Tuấn', N'0967890123', N'tuan.dang@gmail.com', 1, N'Số 5, Đường Võ Nguyên Giáp, TP. Huế, Thừa Thiên Huế'),
+(N'Bùi Thị Thanh Hà', N'0978901234', N'ha.bui@gmail.com', 1, N'Số 18, Phố Phan Chu Trinh, Quận Hoàn Kiếm, Hà Nội'),
+(N'Lý Minh Quân', N'0989012345', N'quan.ly@gmail.com', 1, N'Số 22, Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh');
+GO
+
+PRINT N'';
+PRINT N'========================================';
+PRINT N'  ✓ Thiết lập hoàn tất! Database sd50 sẵn sàng.';
+PRINT N'  Tài khoản: admin / admin@123';
+PRINT N'  Nhân viên: nhanvien01 / admin@123';
+PRINT N'  Nhân viên: nhanvien02 / admin@123';
+PRINT N'========================================';
 GO
