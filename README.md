@@ -1,257 +1,391 @@
 # SD50-DATN26 — Hệ Thống Quản Lý Cửa Hàng Cầu Lông
 
-Hệ thống quản lý cửa hàng bán lẻ cầu lông, hỗ trợ bán hàng tại quầy (POS), quản lý sản phẩm, nhập/xuất kho, khuyến mãi, hoá đơn và khách hàng.
+Ứng dụng Spring Boot quản lý cửa hàng cầu lông gồm 2 khu vực chính:
+
+- **Admin / vận hành nội bộ**: dashboard, quản lý sản phẩm, POS bán tại quầy, khách hàng, nhân viên, tài khoản, hóa đơn, đơn hàng, khuyến mãi, xuất kho, cấu hình trang chủ.
+- **Storefront / khách hàng**: xem sản phẩm, tìm kiếm, giỏ hàng, đặt hàng nhanh, thanh toán, đăng ký/đăng nhập khách hàng, quản lý hồ sơ và đơn hàng.
 
 ---
 
-## Yêu Cầu Hệ Thống
+## 1. Công nghệ sử dụng
 
-- Java 17+
-- Maven 3.6+
+- Java 17
+- Spring Boot 4.0.3
+- Spring MVC + Thymeleaf
+- Spring Data JPA
+- SQL Server
+- Maven
+- Lombok
+- Apache POI (xuất Excel)
+- BCrypt (`spring-security-crypto`) để mã hóa mật khẩu
+
+---
+
+## 2. Yêu cầu môi trường
+
+- JDK 17+
+- Maven 3.9+
 - SQL Server 2019+
-- `sqlcmd` (có sẵn khi cài SQL Server, hoặc cài riêng từ [mssql-tools](https://docs.microsoft.com/en-us/sql/tools/sqlcmd-utility))
+- `sqlcmd` hoặc SQL Server Management Studio
 
 ---
 
-## Hướng Dẫn Cài Đặt
+## 3. Cấu hình runtime hiện tại
 
-### 1. Clone dự án
+Theo `src/main/resources/application.properties`:
+
+```properties
+spring.datasource.url=jdbc:sqlserver://127.0.0.1:1433;databaseName=sd50;encrypt=false;trustServerCertificate=true
+spring.datasource.username=sa
+spring.datasource.password=123
+spring.jpa.hibernate.ddl-auto=none
+server.port=8888
+spring.servlet.multipart.max-file-size=50MB
+spring.servlet.multipart.max-request-size=60MB
+server.tomcat.max-http-form-post-size=60MB
+server.tomcat.max-swallow-size=60MB
+server.tomcat.max-part-count=-1
+app.upload.dir=uploads
+```
+
+> `ddl-auto=none` nghĩa là **database phải được tạo bằng SQL script**, ứng dụng không tự sinh schema.
+
+---
+
+## 4. Cài đặt dự án
+
+### Bước 1: Clone source
 
 ```bash
 git clone https://github.com/Milky1002/SD50-DATN26.git
 cd SD50-DATN26
 ```
 
-### 2. Tạo database và bảng
+### Bước 2: Tạo database bằng 1 file SQL thống nhất
 
-Chạy file `SetupDatabaseSQL.sql` để tạo database `sd50`, tất cả bảng và dữ liệu ban đầu:
+Đã bổ sung file cài đặt đầy đủ:
 
-```bash
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -i SQL_Query/SetupDatabaseSQL.sql
-```
+- `SQL_Query/install_full_database.sql`
 
-### 3. Chạy script cập nhật dữ liệu mẫu
+File này sẽ:
+
+1. tạo database `sd50`
+2. chạy `SetupDatabaseSQL.sql`
+3. chạy toàn bộ các script trong `SQL_Query/updates/`
+
+#### Cách chạy với `sqlcmd`
 
 ```bash
 cd SQL_Query
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -i run_all_updates.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -i install_full_database.sql
 cd ..
 ```
 
-> **Lưu ý:** File `run_all_updates.sql` dùng lệnh `:r updates\...` (đường dẫn tương đối), nên bạn **phải `cd SQL_Query`** trước khi chạy.
+> **Lưu ý:** vì file có dùng `:r` nên nên chạy từ thư mục `SQL_Query` để các đường dẫn tương đối hoạt động đúng.
 
-Nếu muốn chạy từng file riêng lẻ, chạy theo thứ tự số trong thư mục `updates/`:
-
-```bash
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/01_cap_nhat_chuc_vu.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/02_cap_nhat_tai_khoan.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/03_cap_nhat_nhan_vien.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/04_cap_nhat_hinh_thuc_thanh_toan.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/05_cap_nhat_danh_muc.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/06_cap_nhat_mau_sac.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/07_cap_nhat_san_pham.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/08_cap_nhat_khuyen_mai.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -d sd50 -i SQL_Query/updates/09_them_khach_hang.sql
-```
-
-### 4. Cấu hình kết nối database
-
-Mở file `src/main/resources/application.properties` và chỉnh sửa nếu thông tin kết nối khác mặc định:
-
-```properties
-spring.datasource.url=jdbc:sqlserver://127.0.0.1:1433;databaseName=sd50;encrypt=false;trustServerCertificate=true
-spring.datasource.username=sa
-spring.datasource.password=123
-server.port=8888
-```
-
-### 5. Build và chạy ứng dụng
+### Bước 3: Build và chạy ứng dụng
 
 ```bash
 mvn clean install
 mvn spring-boot:run
 ```
 
-### 6. Truy cập hệ thống
+### Bước 4: Truy cập hệ thống
 
-Mở trình duyệt tại: **http://localhost:8888/login**
-
----
-
-## Tài Khoản Mặc Định
-
-| Tài khoản | Mật khẩu | Vai trò |
-|------------|-----------|---------|
-| `admin` | `admin@123` | Quản lý (toàn quyền) |
-| `nhanvien01` | `admin@123` | Nhân viên |
-| `nhanvien02` | `admin@123` | Nhân viên |
-
-> **Quan trọng:** Đổi mật khẩu ngay sau lần đăng nhập đầu tiên! Bấm vào tên người dùng góc trên phải → "Đổi mật khẩu".
+- Admin login: `http://localhost:8888/login`
+- Trang chủ storefront: `http://localhost:8888/`
 
 ---
 
-## Cấu Trúc Thư Mục SQL
+## 5. Tài khoản mặc định
 
-```
+| Username | Password | Vai trò |
+|---|---|---|
+| `admin` | `admin@123` | ADMIN / Quản lý |
+| `nhanvien01` | `admin@123` | STAFF / Nhân viên |
+| `nhanvien02` | `admin@123` | STAFF / Nhân viên |
+
+> Mật khẩu mặc định có thể được hệ thống tự chuyển sang BCrypt sau khi đăng nhập thành công.
+
+---
+
+## 6. Cấu trúc SQL hiện tại
+
+### File chính
+
+- `SQL_Query/install_full_database.sql` — file cài đặt toàn bộ database bằng một lệnh
+- `SQL_Query/SetupDatabaseSQL.sql` — file schema + seed gốc
+- `SQL_Query/run_all_updates.sql` — file gọi tuần tự các script cập nhật
+
+### Nhóm script cập nhật
+
+- `updates/01_cap_nhat_chuc_vu.sql`
+- `updates/02_cap_nhat_tai_khoan.sql`
+- `updates/03_cap_nhat_nhan_vien.sql`
+- `updates/04_cap_nhat_hinh_thuc_thanh_toan.sql`
+- `updates/05_cap_nhat_danh_muc.sql`
+- `updates/05b_fix_danh_muc.sql`
+- `updates/06_cap_nhat_mau_sac.sql`
+- `updates/06b_fix_mau_sac.sql`
+- `updates/07_cap_nhat_san_pham.sql`
+- `updates/07b_fix_san_pham.sql`
+- `updates/08_cap_nhat_khuyen_mai.sql`
+- `updates/09_them_khach_hang.sql`
+- `updates/10_shop_tables.sql`
+- `updates/11_sync_storefront_and_homepage.sql`
+- `updates/12_unify_tai_khoan.sql`
+- `updates/13_normalize_customer_account_links.sql`
+- `updates/14_lich_su_hoat_dong_nhan_vien.sql`
+
+### Ghi chú schema
+
+Schema hiện tại có lịch sử phát triển theo nhiều đợt:
+
+- `SetupDatabaseSQL.sql` là nền schema chính
+- các file update bổ sung storefront, liên kết tài khoản khách hàng, lịch sử hoạt động nhân viên và đồng bộ thêm dữ liệu/cột mới
+
+Vì vậy, **file nên dùng để cài mới đầy đủ là `install_full_database.sql`**.
+
+---
+
+## 7. Tính năng chính
+
+### 7.1 Khu vực admin / nội bộ
+
+- Đăng nhập / đăng xuất / đổi mật khẩu
+- Dashboard tổng quan
+- Quản lý nhân viên
+- Quản lý tài khoản hệ thống
+- Lịch sử hoạt động nhân viên
+- Quản lý khách hàng
+- Quản lý sản phẩm
+  - tạo / sửa / xóa
+  - upload ảnh hoặc nhập link ảnh
+  - sinh mã sản phẩm, barcode, SKU
+  - kiểm tra trùng mã / barcode
+  - export Excel
+- Quản lý danh mục sản phẩm
+- Quản lý màu sắc
+- Bán hàng tại quầy (POS)
+  - tìm kiếm sản phẩm
+  - giỏ hàng nhiều tab đơn hàng
+  - áp dụng khuyến mãi hóa đơn
+  - tìm khách hàng theo tên hoặc số điện thoại
+  - thêm khách hàng mới tại quầy
+  - checkout và in phiếu tính tiền PDF
+- Quản lý hóa đơn
+- Quản lý đơn hàng
+- Quản lý xuất kho
+- Quản lý / API chương trình khuyến mãi
+- Cấu hình trang chủ storefront
+
+### 7.2 Khu vực storefront / khách hàng
+
+- Trang chủ cửa hàng
+- Danh sách sản phẩm `/cua-hang`
+- Chi tiết sản phẩm `/cua-hang/{id}`
+- Tìm kiếm sản phẩm `/tim-kiem`
+- Giỏ hàng `/gio-hang`
+- Thanh toán `/thanh-toan`
+- Đặt hàng nhanh `/dat-hang-nhanh`
+- Đăng ký / đăng nhập / đăng xuất khách hàng
+- Hồ sơ khách hàng `/tai-khoan/ho-so`
+- Theo dõi đơn hàng khách hàng `/tai-khoan/don-hang`
+
+---
+
+## 8. Inventory route và API chính
+
+## 8.1 Auth / hệ thống
+
+| Method | Route | Mô tả |
+|---|---|---|
+| GET | `/login` | Trang đăng nhập admin/staff |
+| POST | `/login` | Xử lý đăng nhập admin/staff |
+| GET | `/logout` | Đăng xuất |
+| POST | `/api/change-password` | Đổi mật khẩu tài khoản hệ thống |
+
+## 8.2 Dashboard / admin views
+
+| Method | Route | Mô tả |
+|---|---|---|
+| GET | `/dashboard` | Trang tổng quan |
+| GET | `/quan-ly-tai-khoan/them-moi` | Form tạo tài khoản |
+| POST | `/quan-ly-tai-khoan/them-moi` | Tạo tài khoản |
+| GET | `/quan-ly-tai-khoan/chinh-sua/{id}` | Form sửa tài khoản |
+| POST | `/quan-ly-tai-khoan/chinh-sua/{id}` | Cập nhật tài khoản |
+| POST | `/quan-ly-tai-khoan/doi-trang-thai/{id}` | Đổi trạng thái tài khoản |
+| GET | `/lich-su-nhan-vien` | Xem lịch sử nhân viên |
+
+## 8.3 Sản phẩm
+
+| Method | Route | Mô tả |
+|---|---|---|
+| GET | `/san-pham` | Danh sách sản phẩm |
+| POST | `/san-pham/save` | Tạo / cập nhật sản phẩm |
+| GET | `/san-pham/delete/{id}` | Xóa sản phẩm |
+| GET | `/san-pham/export` | Xuất Excel sản phẩm |
+| GET | `/san-pham/api/search` | Tìm kiếm sản phẩm |
+| GET | `/san-pham/api/generate-code` | Sinh mã sản phẩm |
+| GET | `/san-pham/api/generate-barcode` | Sinh barcode |
+| GET | `/san-pham/api/generate-sku` | Sinh SKU |
+| GET | `/san-pham/api/check-ma` | Kiểm tra trùng mã sản phẩm |
+| GET | `/san-pham/api/check-barcode` | Kiểm tra trùng barcode |
+
+## 8.4 POS / bán hàng tại quầy
+
+| Method | Route | Mô tả |
+|---|---|---|
+| GET | `/ban-hang` | Màn hình POS |
+| GET | `/ban-hang/api/tim-san-pham` | Tìm sản phẩm cho POS |
+| GET | `/ban-hang/api/tim-khach-hang` | Tìm khách hàng theo tên / SĐT |
+| POST | `/ban-hang/api/khach-hang` | Tạo khách hàng mới tại quầy |
+| POST | `/ban-hang/checkout` | Thanh toán hóa đơn POS |
+| GET | `/ban-hang/{id}/phieu-tinh-tien` | Xuất phiếu tính tiền PDF |
+
+## 8.5 Khách hàng admin
+
+| Method | Route | Mô tả |
+|---|---|---|
+| GET | `/khachhang/hienthi` | Danh sách khách hàng |
+| POST | `/khachhang/save` | Tạo / cập nhật khách hàng |
+| GET | `/khachhang/edit/{id}` | Lấy thông tin khách hàng |
+| GET | `/khachhang/delete/{id}` | Xóa khách hàng |
+| GET | `/khachhang/search` | Tìm theo tên |
+| GET | `/khachhang/status` | Lọc theo trạng thái |
+
+## 8.6 Storefront
+
+| Method | Route | Mô tả |
+|---|---|---|
+| GET | `/` | Trang chủ storefront |
+| GET | `/cua-hang` | Danh sách sản phẩm storefront |
+| GET | `/cua-hang/{id}` | Chi tiết sản phẩm |
+| GET | `/tim-kiem` | Tìm kiếm storefront |
+| GET | `/khuyen-mai` | Danh sách khuyến mãi storefront |
+| GET | `/gio-hang` | Xem giỏ hàng |
+| POST | `/gio-hang/them` | Thêm sản phẩm vào giỏ |
+| POST | `/gio-hang/cap-nhat` | Cập nhật số lượng giỏ hàng |
+| POST | `/gio-hang/xoa` | Xóa một item khỏi giỏ |
+| POST | `/gio-hang/xoa-tat-ca` | Xóa toàn bộ giỏ |
+| GET | `/thanh-toan` | Trang thanh toán |
+| GET | `/thanh-toan/xac-nhan` | Trang xác nhận thanh toán |
+| POST | `/dat-hang-nhanh` | Đặt hàng nhanh không cần đăng nhập |
+| GET | `/dat-hang-nhanh/xac-nhan` | Xác nhận đơn đặt nhanh |
+| GET | `/dang-nhap` | Đăng nhập khách hàng |
+| POST | `/dang-nhap` | Xử lý đăng nhập khách hàng |
+| GET | `/dang-ky` | Trang đăng ký khách hàng |
+| POST | `/dang-ky` | Xử lý đăng ký khách hàng |
+| GET | `/dang-xuat` | Đăng xuất khách hàng |
+| GET | `/tai-khoan/ho-so` | Hồ sơ khách hàng |
+| POST | `/tai-khoan/ho-so` | Cập nhật hồ sơ khách hàng |
+| GET | `/tai-khoan/don-hang` | Danh sách đơn hàng của khách |
+| GET | `/tai-khoan/don-hang/{id}` | Chi tiết đơn hàng của khách |
+
+## 8.7 Khuyến mãi API
+
+Base path: `/api/chuong-trinh-khuyen-mai`
+
+Các endpoint chính:
+
+- `GET /api/chuong-trinh-khuyen-mai`
+- `GET /api/chuong-trinh-khuyen-mai/active`
+- `GET /api/chuong-trinh-khuyen-mai/type/{loaiKhuyenMai}`
+- `GET /api/chuong-trinh-khuyen-mai/{id}`
+- `GET /api/chuong-trinh-khuyen-mai/code/{maChuongTrinh}`
+- `POST /api/chuong-trinh-khuyen-mai`
+- `PUT /api/chuong-trinh-khuyen-mai/{id}`
+- `DELETE /api/chuong-trinh-khuyen-mai/{id}`
+- `PATCH /api/chuong-trinh-khuyen-mai/{id}/status`
+- `GET /api/chuong-trinh-khuyen-mai/applicable/invoice?orderTotal=...`
+- `GET /api/chuong-trinh-khuyen-mai/applicable/product/{sanPhamId}`
+- `GET /api/chuong-trinh-khuyen-mai/{promotionId}/calculate-discount?orderTotal=...`
+- `GET /api/chuong-trinh-khuyen-mai/history`
+- `GET /api/chuong-trinh-khuyen-mai/history/{id}`
+- `GET /api/chuong-trinh-khuyen-mai/{promotionId}/history`
+
+---
+
+## 9. Cấu trúc thư mục chính
+
+```text
+src/main/java/com/example/sd50datn/
+├── Config/                 # Interceptor, MVC config, multipart config
+├── Controller/             # MVC + REST controllers
+├── Dto/                    # DTO cho API khuyến mãi và dữ liệu trao đổi
+├── Entity/                 # JPA entities
+├── Model/                  # Account / Staff model
+├── Repository/             # Spring Data JPA repository
+└── Service/                # Business logic
+
+src/main/resources/
+├── application.properties
+├── templates/              # Thymeleaf templates (admin + shop)
+└── static/                 # CSS / JS / assets
+
 SQL_Query/
-  SetupDatabaseSQL.sql                    # Tạo database, tất cả bảng, dữ liệu ban đầu
-  run_all_updates.sql                     # Chạy tất cả script cập nhật (gọi tuần tự các file trong updates/)
-  updates/
-    01_cap_nhat_chuc_vu.sql               # Chức vụ: Quản lý, Nhân viên
-    02_cap_nhat_tai_khoan.sql             # Tài khoản: admin, nhanvien01, nhanvien02
-    03_cap_nhat_nhan_vien.sql             # Nhân viên mẫu
-    04_cap_nhat_hinh_thuc_thanh_toan.sql  # Hình thức thanh toán
-    05_cap_nhat_danh_muc.sql              # Danh mục sản phẩm
-    05b_fix_danh_muc.sql                  # Sửa danh mục cho DB cũ
-    06_cap_nhat_mau_sac.sql               # Màu sắc
-    06b_fix_mau_sac.sql                   # Sửa màu sắc cho DB cũ
-    07_cap_nhat_san_pham.sql              # Sản phẩm
-    07b_fix_san_pham.sql                  # Sửa sản phẩm cho DB cũ
-    08_cap_nhat_khuyen_mai.sql            # Chương trình khuyến mãi
-    09_them_khach_hang.sql                # Khách hàng mẫu
+├── install_full_database.sql
+├── SetupDatabaseSQL.sql
+├── run_all_updates.sql
+└── updates/
 ```
 
 ---
 
-## Cấu Trúc Dự Án
+## 10. Xác thực và phân quyền
 
-```
-SD50-DATN26/
-  src/main/
-    java/com/example/sd50datn/
-      Config/
-        AuthInterceptor.java              # Chặn request chưa đăng nhập → redirect /login
-        AdminInterceptor.java             # Chặn request không đủ quyền (chỉ "Quản lý")
-        WebMvcConfig.java                 # Đăng ký interceptor
-      Controller/
-        LoginController.java              # Đăng nhập, đăng xuất, đổi mật khẩu
-        DashboardController.java          # Trang tổng quan
-        SanPhamController.java            # Quản lý sản phẩm
-        DanhMucSanPhamController.java     # Quản lý danh mục
-        MauSacController.java             # Quản lý màu sắc
-        BanHangController.java            # Bán hàng tại quầy (POS)
-        XuatKhoController.java            # Quản lý xuất kho
-        InvoiceController.java            # Quản lý hoá đơn
-        OrderController.java              # Quản lý đơn hàng
-        StaffController.java              # Quản lý nhân viên
-        KhachHangController.java          # Quản lý khách hàng
-        KhuyenMaiViewController.java      # Quản lý khuyến mãi
-        ChuongTrinhKhuyenMaiController.java  # API khuyến mãi
-      Service/
-        AuthService.java                  # Xác thực, BCrypt, đổi mật khẩu
-        StaffService.java                 # Quản lý nhân viên (hash mật khẩu)
-        ...
-      entity/                             # JPA entity classes
-      repository/                         # JPA repositories
-      dto/                                # Data Transfer Objects
-    resources/
-      templates/
-        layout.html                       # Layout chính (sidebar, topbar, menu người dùng)
-        login.html                        # Trang đăng nhập
-        ...
-      static/
-        css/app.css                       # Giao diện menu, modal, toast
-        css/login.css                     # Giao diện trang đăng nhập
-        js/app.js                         # Dropdown, modal, đổi mật khẩu, toast
-      application.properties              # Cấu hình database, port
-  SQL_Query/                              # Script SQL (xem mục trên)
-  pom.xml                                 # Cấu hình Maven
-```
+Hệ thống đang dùng **session-based authentication** kết hợp interceptor:
+
+- `AuthInterceptor` / `WebMvcConfig`: chặn route nội bộ nếu chưa đăng nhập
+- `AdminInterceptor`: giới hạn một số route cho admin/quản lý
+- `StaffPosOnlyInterceptor`: ràng buộc một số flow POS theo vai trò
+- `ShopAuthService` / `ShopAuthController`: auth riêng cho khách hàng storefront
+
+Ứng dụng hiện **không dùng Spring Security full-stack cho web flow**, mà chủ yếu dùng interceptor + session thủ công.
 
 ---
 
-## Các Trang Chính
+## 11. Lưu ý quan trọng
 
-| URL | Chức năng | Quyền truy cập |
-|-----|-----------|-----------------|
-| `/login` | Đăng nhập | Công khai |
-| `/logout` | Đăng xuất | Đã đăng nhập |
-| `/dashboard` | Tổng quan | Đã đăng nhập |
-| `/san-pham` | Quản lý sản phẩm (CRUD, tìm kiếm, lọc, Excel, barcode) | Đã đăng nhập |
-| `/danh-muc` | Quản lý danh mục sản phẩm | Đã đăng nhập |
-| `/mau-sac` | Quản lý màu sắc | Đã đăng nhập |
-| `/ban-hang` | Bán hàng tại quầy (POS) | Đã đăng nhập |
-| `/xuat-kho` | Quản lý xuất kho | Đã đăng nhập |
-| `/invoices` | Quản lý hoá đơn | Đã đăng nhập |
-| `/orders` | Quản lý đơn hàng | Đã đăng nhập |
-| `/khuyen-mai` | Chương trình khuyến mãi | Đã đăng nhập |
-| `/khach-hang` | Quản lý khách hàng | Đã đăng nhập |
-| `/nhan-vien` | Quản lý nhân viên | Chỉ "Quản lý" |
+- `spring.jpa.hibernate.ddl-auto=none` → luôn phải cài DB bằng SQL script
+- nên dùng **`SQL_Query/install_full_database.sql`** cho môi trường cài mới
+- `run_all_updates.sql` vẫn hữu ích khi nâng cấp DB cũ đã tồn tại
+- upload ảnh đang dùng thư mục `uploads/`
+- multipart hiện đã cấu hình cho request lớn và nhiều part (`server.tomcat.max-part-count=-1`)
 
 ---
 
-## Xác Thực & Phân Quyền
+## 12. Kiểm tra nhanh sau khi cài đặt
 
-Hệ thống sử dụng xác thực dựa trên session:
+Sau khi cài DB và chạy app:
 
-- **AuthInterceptor** — chặn tất cả request (trừ `/login`, `/css/**`, `/js/**`...). Nếu chưa đăng nhập sẽ redirect về `/login`.
-- **AdminInterceptor** — chặn các URL `/nhan-vien/**`. Chỉ cho phép vai trò "Quản lý" truy cập.
-- **BCrypt** — mật khẩu được hash bằng BCrypt. Nếu database có mật khẩu plaintext cũ, hệ thống tự động chuyển đổi sang BCrypt khi đăng nhập thành công.
-
-**Đổi mật khẩu:** Bấm vào tên người dùng góc trên phải → "Đổi mật khẩu", hoặc gọi API:
-
-```
-POST /api/change-password
-Content-Type: application/x-www-form-urlencoded
-
-oldPassword=mậtkhẩucũ&newPassword=mậtkhẩumới
-```
+1. đăng nhập `/login` bằng `admin / admin@123`
+2. vào `/san-pham` kiểm tra CRUD sản phẩm
+3. vào `/ban-hang` kiểm tra:
+   - tìm sản phẩm
+   - tìm khách hàng
+   - thêm khách hàng mới
+   - checkout
+4. vào `/lich-su-nhan-vien` kiểm tra log hoạt động
+5. vào storefront `/`, `/cua-hang`, `/gio-hang`, `/thanh-toan`
 
 ---
 
-## Xác Nhận Sau Khi Cài Đặt
-
-Sau khi chạy xong script SQL, có thể kiểm tra dữ liệu bằng truy vấn sau:
-
-```sql
-USE [sd50];
-
-SELECT 'ChucVu' AS Bảng, COUNT(*) AS SốLượng FROM dbo.ChucVu
-UNION ALL SELECT N'TaiKhoan', COUNT(*) FROM dbo.TaiKhoan
-UNION ALL SELECT N'NhanVien', COUNT(*) FROM dbo.NhanVien
-UNION ALL SELECT N'DanhMuc', COUNT(*) FROM dbo.Danh_muc_san_pham
-UNION ALL SELECT N'MauSac', COUNT(*) FROM dbo.MauSac
-UNION ALL SELECT N'SanPham', COUNT(*) FROM dbo.SanPham
-UNION ALL SELECT N'KhuyenMai', COUNT(*) FROM dbo.Chuong_trinh_khuyen_mai
-UNION ALL SELECT N'KhachHang', COUNT(*) FROM dbo.KhachHang
-UNION ALL SELECT N'HTTT', COUNT(*) FROM dbo.Hinh_thuc_thanh_toan;
-```
-
-Kết quả mong đợi:
-
-| Bảng | Số lượng |
-|------|----------|
-| ChucVu | 2 |
-| TaiKhoan | 3 |
-| NhanVien | 3 |
-| DanhMuc | 5 |
-| MauSac | 10 |
-| SanPham | 12 |
-| KhuyenMai | 7 |
-| KhachHang | 9 |
-| HTTT | 4 |
-
----
-
-## Lưu Ý Quan Trọng
-
-- **Đổi mật khẩu ngay** sau lần đăng nhập đầu tiên. Mật khẩu mặc định trong SQL seed là plaintext, hệ thống sẽ tự hash bằng BCrypt khi đăng nhập.
-- **Backup database** trước khi chạy script cập nhật trên môi trường production:
-  ```sql
-  BACKUP DATABASE [sd50] TO DISK = N'C:\Backup\sd50_backup.bak' WITH FORMAT;
-  ```
-- Các file `05b`, `06b`, `07b` trong `updates/` là bản sửa bổ sung cho database cũ — chỉ cần chạy nếu gặp lỗi khi chạy file chính tương ứng.
-- Hệ thống xác thực hiện tại là application-level (interceptor), chưa dùng Spring Security. Nên cân nhắc nâng cấp lên Spring Security cho môi trường production.
-
----
-
-## Xử Lý Lỗi Thường Gặp
+## 13. Xử lý lỗi thường gặp
 
 | Lỗi | Cách xử lý |
-|-----|------------|
-| Không kết nối được database | Kiểm tra SQL Server đang chạy, đúng port 1433, đúng username/password |
-| Port 8888 đã được sử dụng | Đổi `server.port` trong `application.properties` hoặc tắt process đang dùng port |
-| "Table not found" | Chạy `SetupDatabaseSQL.sql` trước, sau đó chạy `run_all_updates.sql` |
-| Lỗi khi chạy `run_all_updates.sql` | Phải `cd SQL_Query` trước khi chạy (do file dùng đường dẫn tương đối) |
-| Đăng nhập không được | Kiểm tra đã chạy `02_cap_nhat_tai_khoan.sql`. Tài khoản: `admin` / `admin@123` |
-| Truy cập `/nhan-vien` bị redirect | Chỉ tài khoản có chức vụ "Quản lý" mới truy cập được trang này |
+|---|---|
+| Không kết nối được SQL Server | Kiểm tra SQL Server chạy đúng host/port/user/pass trong `application.properties` |
+| Lỗi thiếu bảng | Chạy lại `SQL_Query/install_full_database.sql` |
+| Lỗi khi chạy script có `:r` | Chạy từ thư mục `SQL_Query` bằng `sqlcmd` hoặc mở bằng SSMS SQLCMD mode |
+| Port 8888 bị chiếm | Đổi `server.port` trong `application.properties` |
+| Upload ảnh lỗi 413 | Kiểm tra lại multipart config và Tomcat limits trong `application.properties` |
+
+---
+
+## 14. Hướng phát triển tiếp
+
+- thay SQL script rời rạc bằng Flyway/Liquibase
+- chuẩn hóa REST API inventory thành OpenAPI/Swagger
+- bổ sung test tự động cho POS, checkout, promotions, customer flow
+- chuẩn hóa README ảnh chụp màn hình / kiến trúc / sơ đồ DB

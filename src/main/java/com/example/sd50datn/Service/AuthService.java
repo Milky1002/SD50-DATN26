@@ -12,7 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,11 +25,15 @@ public class AuthService {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     /**
-     * Authenticate user by username and password.
+     * Authenticate admin/staff by username or email.
      * Returns a Map with user info if successful, null otherwise.
      */
-    public Map<String, Object> authenticate(String username, String password) {
-        Optional<Account> optAccount = accountRepo.findByUsername(username);
+    public Map<String, Object> authenticate(String usernameOrEmail, String password) {
+        // Try username first, then email
+        Optional<Account> optAccount = accountRepo.findByUsername(usernameOrEmail);
+        if (optAccount.isEmpty()) {
+            optAccount = accountRepo.findByEmail(usernameOrEmail);
+        }
         if (optAccount.isEmpty()) {
             return null;
         }
@@ -58,12 +61,9 @@ public class AuthService {
             return null;
         }
 
-        // Find linked NhanVien
-        List<Staff> staffList = staffRepo.findAll();
-        Staff staff = staffList.stream()
-                .filter(s -> account.getId().equals(s.getTaiKhoanId()))
-                .findFirst()
-                .orElse(null);
+        // Find linked NhanVien via direct lookup (no stream scan)
+        Optional<Staff> staffOpt = staffRepo.findByTaiKhoanId(account.getId());
+        Staff staff = staffOpt.orElse(null);
 
         if (staff == null) {
             return null; // No linked staff
@@ -74,12 +74,26 @@ public class AuthService {
             return null;
         }
 
-        // Get position/role
+        // Get position/role display label
         String tenChucVu = positionRepo.findById(staff.getChucVuId())
                 .map(Position::getTenChucVu)
                 .orElse("Nhân viên");
 
+        // Canonical role code: derive from account.roleCode or fallback from position
+        String roleCode = account.getRoleCode();
+        if (roleCode == null || roleCode.isBlank()) {
+            // Fallback: derive from position for legacy accounts not yet migrated
+            roleCode = tenChucVu.contains("Quản lý") || tenChucVu.contains("Quan ly")
+                    ? "ADMIN" : "STAFF";
+        }
+
         Map<String, Object> userInfo = new HashMap<>();
+        // Canonical keys (new)
+        userInfo.put("userId", account.getId());
+        userInfo.put("roleCode", roleCode);
+        userInfo.put("displayName", staff.getHoTen());
+        userInfo.put("authenticated", true);
+        // Legacy keys (preserved for backward compat)
         userInfo.put("accountId", account.getId());
         userInfo.put("nhanVienId", staff.getId());
         userInfo.put("username", account.getUsername());
@@ -87,15 +101,21 @@ public class AuthService {
         userInfo.put("email", staff.getEmail());
         userInfo.put("chucVuId", staff.getChucVuId());
         userInfo.put("tenChucVu", tenChucVu);
-        userInfo.put("role", tenChucVu);
+        userInfo.put("role", tenChucVu); // legacy string role
 
         return userInfo;
     }
 
     /**
-     * Store user info in session
+     * Store user info in session — writes both new canonical and legacy keys.
      */
     public void setSession(HttpSession session, Map<String, Object> userInfo) {
+        // Canonical keys
+        session.setAttribute("userId", userInfo.get("userId"));
+        session.setAttribute("roleCode", userInfo.get("roleCode"));
+        session.setAttribute("displayName", userInfo.get("displayName"));
+        session.setAttribute("authenticated", true);
+        // Legacy keys
         session.setAttribute("loggedIn", true);
         session.setAttribute("accountId", userInfo.get("accountId"));
         session.setAttribute("nhanVienId", userInfo.get("nhanVienId"));
@@ -109,6 +129,32 @@ public class AuthService {
     }
 
     /**
+     * Clear all session attributes (both canonical and legacy).
+     */
+    public void clearSession(HttpSession session) {
+        // Canonical
+        session.removeAttribute("userId");
+        session.removeAttribute("roleCode");
+        session.removeAttribute("displayName");
+        session.removeAttribute("authenticated");
+        // Legacy admin
+        session.removeAttribute("loggedIn");
+        session.removeAttribute("accountId");
+        session.removeAttribute("nhanVienId");
+        session.removeAttribute("username");
+        session.removeAttribute("hoTen");
+        session.removeAttribute("email");
+        session.removeAttribute("chucVuId");
+        session.removeAttribute("tenChucVu");
+        session.removeAttribute("role");
+        // Legacy shop (in case of cross-login)
+        session.removeAttribute("shopLoggedIn");
+        session.removeAttribute("shopCustomerId");
+        session.removeAttribute("shopCustomerName");
+        session.removeAttribute("shopCustomerEmail");
+    }
+
+    /**
      * Change password for an account
      */
     public boolean changePassword(Integer accountId, String oldPassword, String newPassword) {
@@ -118,7 +164,7 @@ public class AuthService {
         Account account = optAccount.get();
 
         // BCrypt check with plaintext fallback
-        boolean oldMatch = false;
+        boolean oldMatch;
         if (account.getPassword().startsWith("$2")) {
             oldMatch = encoder.matches(oldPassword, account.getPassword());
         } else {
@@ -134,7 +180,7 @@ public class AuthService {
     }
 
     /**
-     * Check if user is logged in
+     * Check if admin/staff user is logged in
      */
     public boolean isLoggedIn(HttpSession session) {
         Boolean loggedIn = (Boolean) session.getAttribute("loggedIn");

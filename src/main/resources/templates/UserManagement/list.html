@@ -1,0 +1,90 @@
+<div th:fragment="content">
+        <link rel="stylesheet" th:href="@{/css/homepage-config.css}"/>
+        <style>
+            .um-table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+            .um-table th { background:#2563EB; color:#fff; padding:10px 14px; text-align:left; font-weight:600; font-size:13px; }
+            .um-table td { padding:10px 14px; border-bottom:1px solid #f0f0f0; font-size:13px; vertical-align:middle; }
+            .um-table tr:last-child td { border-bottom:none; }
+            .um-table tr:hover td { background:#f8faff; }
+            .um-badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:11px; font-weight:700; }
+            .um-badge--admin { background:#fee2e2; color:#dc2626; }
+            .um-badge--staff { background:#dbeafe; color:#1d4ed8; }
+            .um-badge--user  { background:#dcfce7; color:#16a34a; }
+            .um-badge--active { background:#dcfce7; color:#16a34a; }
+            .um-badge--inactive { background:#f3f4f6; color:#6b7280; }
+            .um-actions { display:flex; gap:6px; }
+            .um-btn { padding:4px 12px; border-radius:6px; border:none; cursor:pointer; font-size:12px; font-weight:600; }
+            .um-btn--edit { background:#dbeafe; color:#1d4ed8; }
+            .um-btn--edit:hover { background:#bfdbfe; }
+            .um-btn--toggle { background:#fef3c7; color:#92400e; }
+            .um-btn--toggle:hover { background:#fde68a; }
+            .um-btn--new { background:#2563EB; color:#fff; padding:8px 16px; border-radius:8px; border:none; cursor:pointer; font-size:13px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+            .um-btn--new:hover { background:#1d4ed8; }
+            .um-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+            .um-alert { padding:12px 16px; border-radius:8px; margin-bottom:16px; font-size:13px; font-weight:500; }
+            .um-alert--success { background:#dcfce7; color:#15803d; }
+            .um-alert--error   { background:#fee2e2; color:#dc2626; }
+        </style>
+
+        <div th:if="${success}" class="um-alert um-alert--success" th:text="${success}"></div>
+        <div th:if="${error}"   class="um-alert um-alert--error"   th:text="${error}"></div>
+
+        <div class="um-header">
+            <h2 style="margin:0;font-size:18px;color:#1e293b;">Danh sách tài khoản hệ thống</h2>
+            <a th:href="@{/quan-ly-tai-khoan/them-moi}" class="um-btn--new">
+                <i class="bi bi-plus-circle-fill"></i> Thêm tài khoản
+            </a>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table class="um-table">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>SĐT</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="acc : ${accounts}">
+                    <td th:text="${acc.id}"></td>
+                    <td style="font-weight:600;" th:text="${acc.username}"></td>
+                    <td th:text="${acc.hoTen} ?: '—'"></td>
+                    <td th:text="${acc.email} ?: '—'"></td>
+                    <td th:text="${acc.soDienThoai} ?: '—'"></td>
+                    <td>
+                        <span class="um-badge"
+                              th:classappend="${acc.roleCode == 'ADMIN'} ? 'um-badge--admin' : (${acc.roleCode == 'USER'} ? 'um-badge--user' : 'um-badge--staff')"
+                              th:text="${acc.roleCode} ?: 'STAFF'"></span>
+                    </td>
+                    <td>
+                        <span class="um-badge"
+                              th:classappend="${acc.trangThai == 1} ? 'um-badge--active' : 'um-badge--inactive'"
+                              th:text="${acc.trangThai == 1} ? 'Hoạt động' : 'Đã khóa'"></span>
+                    </td>
+                    <td>
+                        <div class="um-actions">
+                            <a th:href="@{/quan-ly-tai-khoan/chinh-sua/{id}(id=${acc.id})}" class="um-btn um-btn--edit">
+                                <i class="bi bi-pencil"></i> Sửa
+                            </a>
+                            <form th:action="@{/quan-ly-tai-khoan/doi-trang-thai/{id}(id=${acc.id})}" method="post"
+                                  onsubmit="return confirm('Thay đổi trạng thái tài khoản này?')">
+                                <button type="submit" class="um-btn um-btn--toggle">
+                                    <span th:text="${acc.trangThai == 1} ? 'Khóa' : 'Mở khóa'"></span>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(accounts)}">
+                    <td colspan="8" style="text-align:center;color:#9ca3af;padding:32px;">Chưa có tài khoản nào</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

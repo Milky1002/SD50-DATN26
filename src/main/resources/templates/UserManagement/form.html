@@ -1,0 +1,126 @@
+<div th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/user-management.css}" />
+
+    <div class="um-page">
+        <div th:if="${error}" class="um-alert um-alert--error" th:text="${error}"></div>
+
+        <div class="um-hero admin-card">
+            <div class="um-hero__content">
+                <span class="um-hero__eyebrow">
+                    <i class="bi bi-person-lock"></i>
+                    Quản trị tài khoản
+                </span>
+                <h2 class="um-hero__title" th:text="${account.id == null} ? 'Tạo tài khoản mới' : 'Chỉnh sửa tài khoản hệ thống'">Chỉnh sửa tài khoản hệ thống</h2>
+                <p class="um-hero__desc"
+                   th:text="${account.id == null} ? 'Thiết lập quyền truy cập và thông tin cơ bản cho tài khoản mới trong hệ thống quản trị.' : 'Cập nhật quyền hạn, thông tin liên hệ và trạng thái hoạt động để tài khoản đồng bộ với các trang quản trị khác.'">
+                    Cập nhật quyền hạn, thông tin liên hệ và trạng thái hoạt động để tài khoản đồng bộ với các trang quản trị khác.
+                </p>
+            </div>
+            <div class="um-hero__meta">
+                <div class="um-hero__meta-card">
+                    <span class="um-hero__meta-label">Tên đăng nhập</span>
+                    <strong th:text="${account.username} ?: 'Tài khoản mới'">Tài khoản mới</strong>
+                </div>
+                <div class="um-hero__meta-card">
+                    <span class="um-hero__meta-label">Vai trò hiện tại</span>
+                    <strong th:text="${account.roleCode} ?: 'STAFF'">STAFF</strong>
+                </div>
+            </div>
+        </div>
+
+        <form class="um-form-shell admin-card"
+              th:action="${account.id == null} ? @{/quan-ly-tai-khoan/them-moi} : @{/quan-ly-tai-khoan/chinh-sua/{id}(id=${account.id})}"
+              method="post">
+
+            <div class="um-section">
+                <div class="um-section__header">
+                    <div>
+                        <h3 class="um-section__title">Thông tin tài khoản</h3>
+                        <p class="um-section__subtitle">Những dữ liệu này dùng để đăng nhập, nhận diện người dùng và hiển thị trên các màn hình quản trị.</p>
+                    </div>
+                    <span class="um-section__badge" th:text="${account.id == null} ? 'Tạo mới' : 'Đang chỉnh sửa'">Đang chỉnh sửa</span>
+                </div>
+
+                <div class="um-form-grid">
+                    <!-- Username (only on create) -->
+                    <div class="um-field" th:if="${account.id == null}">
+                        <label>Tên đăng nhập <span class="um-required">*</span></label>
+                        <input type="text" name="username" th:value="${account.username}" required
+                               autocomplete="off" placeholder="vd: admin2"/>
+                        <p class="um-hint">Tên đăng nhập nên ngắn gọn, không chứa khoảng trắng.</p>
+                    </div>
+                    <div class="um-field" th:unless="${account.id == null}">
+                        <label>Tên đăng nhập</label>
+                        <input type="text" th:value="${account.username}" disabled class="um-input--readonly"/>
+                        <p class="um-hint">Tên đăng nhập là khóa định danh và không thể thay đổi sau khi tạo.</p>
+                    </div>
+
+                    <!-- Role -->
+                    <div class="um-field">
+                        <label>Vai trò <span class="um-required">*</span></label>
+                        <select name="roleCode">
+                            <option th:each="r : ${allowedRoles}"
+                                    th:value="${r}"
+                                    th:text="${r == 'ADMIN'} ? 'Quản lý (ADMIN)' : (${r == 'STAFF'} ? 'Nhân viên (STAFF)' : 'Khách hàng (USER)')"
+                                    th:selected="${account.roleCode == r}"></option>
+                        </select>
+                        <p class="um-hint">Vai trò quyết định quyền truy cập vào các module trong hệ thống.</p>
+                    </div>
+
+                    <!-- Full name -->
+                    <div class="um-field">
+                        <label>Họ tên</label>
+                        <input type="text" name="hoTen" th:value="${account.hoTen}" placeholder="Nguyễn Văn A"/>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="um-field">
+                        <label>Email</label>
+                        <input type="email" name="email" th:value="${account.email}" placeholder="email@example.com"/>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="um-field">
+                        <label>Số điện thoại</label>
+                        <input type="text" name="soDienThoai" th:value="${account.soDienThoai}" placeholder="0901234567"/>
+                    </div>
+
+                    <!-- Status (only on edit) -->
+                    <div class="um-field" th:if="${account.id != null}">
+                        <label>Trạng thái</label>
+                        <select name="trangThai">
+                            <option value="1" th:selected="${account.trangThai == 1}">Hoạt động</option>
+                            <option value="0" th:selected="${account.trangThai == 0}">Khóa</option>
+                        </select>
+                    </div>
+                    <input th:if="${account.id == null}" type="hidden" name="trangThai" value="1"/>
+
+                    <!-- Password -->
+                    <div class="um-field um-field--full">
+                        <label th:text="${account.id == null} ? 'Mật khẩu *' : 'Mật khẩu mới (bỏ trống nếu không đổi)'"></label>
+                        <input type="password"
+                               th:name="${account.id == null} ? 'password' : 'newPassword'"
+                               th:required="${account.id == null}"
+                               placeholder="Ít nhất 6 ký tự" autocomplete="new-password"/>
+                        <p class="um-hint" th:if="${account.id != null}">Để trống nếu không muốn thay đổi mật khẩu</p>
+                        <p class="um-hint" th:if="${account.id == null}">Mật khẩu nên có tối thiểu 6 ký tự để đảm bảo an toàn đăng nhập.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="um-form-footer">
+                <div class="um-form-footer__text">
+                    <strong>Lưu ý</strong>
+                    <span>Thay đổi sẽ có hiệu lực ngay sau khi lưu và áp dụng cho toàn bộ khu vực quản trị.</span>
+                </div>
+                <div class="um-form-actions">
+                    <a th:href="@{/quan-ly-tai-khoan}" class="um-btn um-btn--ghost">Hủy</a>
+                    <button type="submit" class="um-btn um-btn--primary">
+                        <i class="bi bi-check-lg"></i>
+                        <span th:text="${account.id == null} ? 'Tạo tài khoản' : 'Lưu thay đổi'"></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

@@ -208,11 +208,13 @@ function changePage(direction) {
 // Open add modal
 function openAddModal() {
     document.getElementById('modalAddCTKM').classList.add('active');
-    document.getElementById('step1').classList.add('active');
-    document.getElementById('step2').classList.remove('active');
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
     document.getElementById('btnBack').style.display = 'none';
-    document.getElementById('btnSave').style.display = 'none';
+    document.getElementById('btnSave').style.display = 'inline-block';
     resetForm();
+    selectedPromoType = 1;
+    document.getElementById('loaiKhuyenMai').value = 1;
 }
 
 // Close modal
@@ -223,6 +225,9 @@ function closeModal(modalId) {
 
 // Select promo type
 function selectPromoType(type) {
+    if (type !== 1) {
+        return;
+    }
     selectedPromoType = type;
     document.getElementById('loaiKhuyenMai').value = type;
     
@@ -243,10 +248,10 @@ function selectPromoType(type) {
 
 // Back to step 1
 function backToStep1() {
-    document.getElementById('step2').classList.remove('active');
-    document.getElementById('step1').classList.add('active');
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
     document.getElementById('btnBack').style.display = 'none';
-    document.getElementById('btnSave').style.display = 'none';
+    document.getElementById('btnSave').style.display = 'inline-block';
 }
 
 // Toggle giảm tối đa field
@@ -275,7 +280,7 @@ async function saveCTKM() {
         maChuongTrinh: document.getElementById('maChuongTrinh').value || 'CTKM' + Date.now(),
         tenChuongTrinh: document.getElementById('tenChuongTrinh').value,
         moTa: document.getElementById('moTa').value,
-        loaiKhuyenMai: parseInt(document.getElementById('loaiKhuyenMai').value),
+        loaiKhuyenMai: 1,
         loaiGiam: parseInt(document.getElementById('loaiGiam').value),
         giaTriGiam: parseFloat(document.getElementById('giaTriGiam').value),
         giamToiDa: parseFloat(document.getElementById('giamToiDa').value) || null,
@@ -411,10 +416,16 @@ async function updateStatus(id, newStatus) {
 function resetForm() {
     document.getElementById('formCTKM').reset();
     document.getElementById('ctkm_id').value = '';
-    selectedPromoType = null;
+    selectedPromoType = 1;
+    document.getElementById('loaiKhuyenMai').value = 1;
     document.querySelectorAll('.promo-type-card').forEach(card => {
         card.classList.remove('selected');
     });
+    const invoiceCard = document.querySelector('.promo-type-card');
+    if (invoiceCard) {
+        invoiceCard.classList.add('selected');
+    }
+    toggleGiamToiDa();
 }
 
 // Helper functions
@@ -426,10 +437,7 @@ function formatDate(dateString) {
 
 function getLoaiKhuyenMaiText(loai) {
     const types = {
-        1: 'Giảm giá hóa đơn',
-        2: 'Giảm giá sản phẩm',
-        3: 'Tặng hàng',
-        4: 'Đồng giá'
+        1: 'Giảm giá hóa đơn'
     };
     return types[loai] || '-';
 }

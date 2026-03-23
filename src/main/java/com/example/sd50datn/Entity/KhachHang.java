@@ -1,5 +1,6 @@
 package com.example.sd50datn.Entity;
 
+import com.example.sd50datn.Model.Account;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -47,4 +48,18 @@ public class KhachHang {
     @NotBlank(message = "Địa chỉ không được để trống")
     @Column(name = "Dia_chi_khach_hang")
     private String diaChiKhachHang;
+
+    @Column(name = "Mat_khau")
+    private String matKhau;
+
+    @Column(name = "Tai_khoan_id")
+    private Integer taiKhoanId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Tai_khoan_id", insertable = false, updatable = false)
+    private Account taiKhoan;
+
+    public boolean hasLinkedAccount() {
+        return taiKhoanId != null;
+    }
 }

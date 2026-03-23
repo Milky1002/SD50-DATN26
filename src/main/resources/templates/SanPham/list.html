@@ -126,7 +126,7 @@
                 <div class="sp-modal__title">Thêm mới hàng hóa</div>
                 <button type="button" class="sp-modal__close" id="btnCloseAdd">&times;</button>
             </div>
-            <form th:action="@{/san-pham/save}" method="post" th:object="${sp}" id="addForm">
+            <form th:action="@{/san-pham/save}" method="post" enctype="multipart/form-data" th:object="${sp}" id="addForm">
                 <div class="sp-modal__body">
 
                     <!-- THÔNG TIN CƠ BẢN -->
@@ -167,11 +167,11 @@
                             </div>
                             <div class="sp-field">
                                 <label>Giá bán</label>
-                                <input type="number" th:field="*{giaBan}" placeholder="0" min="0" step="1000"/>
+                                <input type="number" th:field="*{giaBan}" placeholder="0" min="0" step="1000" data-price-input/>
                             </div>
                             <div class="sp-field">
                                 <label>Đơn giá vốn</label>
-                                <input type="number" th:field="*{giaNhap}" placeholder="0" min="0" step="1000"/>
+                                <input type="number" th:field="*{giaNhap}" placeholder="0" min="0" step="1000" data-price-input/>
                             </div>
                         </div>
                     </div>
@@ -243,6 +243,22 @@
                         </div>
                     </div>
 
+                    <div class="sp-section-panel">
+                        <div class="sp-section-title">HÌNH ẢNH SẢN PHẨM</div>
+                        <div class="sp-form-grid">
+                            <div class="sp-field">
+                                <label>Tải ảnh từ máy</label>
+                                <input type="file" name="imageFile" accept="image/*" class="sp-file-input" />
+                                <span class="sp-field__hint">Ưu tiên upload file để hệ thống tự lưu ảnh.</span>
+                            </div>
+                            <div class="sp-field">
+                                <label>Hoặc nhập link ảnh</label>
+                                <input type="text" name="imageUrl" placeholder="https://..." />
+                                <span class="sp-field__hint">Chỉ dùng khi bạn chưa có file ảnh trên máy.</span>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
                 <div class="sp-modal__footer">
                     <button type="button" class="sp-btn sp-btn--ghost" id="btnCancelAdd">Hủy bỏ</button>
@@ -264,7 +280,7 @@
                 <div class="sp-modal__title">Cập nhật hàng hóa</div>
                 <button type="button" class="sp-modal__close" id="btnCloseEdit">&times;</button>
             </div>
-            <form th:action="@{/san-pham/save}" method="post" th:object="${sp}">
+            <form th:action="@{/san-pham/save}" method="post" enctype="multipart/form-data" th:object="${sp}">
                 <input type="hidden" th:field="*{id}"/>
                 <div class="sp-modal__body">
                     <div class="sp-section-title">THÔNG TIN CƠ BẢN</div>
@@ -307,11 +323,11 @@
                     <div class="sp-form-grid">
                         <div class="sp-field">
                             <label>Giá bán</label>
-                            <input type="number" th:field="*{giaBan}" min="0" step="1000"/>
+                            <input type="number" th:field="*{giaBan}" min="0" step="1000" data-price-input/>
                         </div>
                         <div class="sp-field">
                             <label>Giá vốn (giá nhập)</label>
-                            <input type="number" th:field="*{giaNhap}" min="0" step="1000"/>
+                            <input type="number" th:field="*{giaNhap}" min="0" step="1000" data-price-input/>
                         </div>
                     </div>
 
@@ -373,6 +389,25 @@
                     <div class="sp-section-title">MÔ TẢ</div>
                     <div class="sp-field">
                         <textarea th:field="*{moTa}" rows="3"></textarea>
+                    </div>
+
+                    <div class="sp-section-title">HÌNH ẢNH SẢN PHẨM</div>
+                    <div class="sp-form-grid">
+                        <div class="sp-field">
+                            <label>Tải ảnh mới từ máy</label>
+                            <input type="file" name="imageFile" accept="image/*" class="sp-file-input" />
+                            <span class="sp-field__hint">Nếu chọn file mới, hệ thống sẽ thay ảnh hiện tại.</span>
+                        </div>
+                        <div class="sp-field">
+                            <label>Hoặc cập nhật link ảnh</label>
+                            <input type="text" name="imageUrl"
+                                   th:value="${sp.anh != null ? sp.anh.anhUrl : ''}"
+                                   placeholder="https://... hoặc /uploads/..." />
+                        </div>
+                    </div>
+                    <div class="sp-image-preview-card" th:if="${sp.anh != null and sp.anh.anhUrl != null}">
+                        <label>Ảnh hiện tại</label>
+                        <img th:src="${sp.anh.anhUrl}" th:alt="${sp.tenSanPham}" class="sp-image-preview-card__img" />
                     </div>
                 </div>
                 <div class="sp-modal__footer">
@@ -764,6 +799,15 @@
                 }
             });
         }
+
+        document.querySelectorAll('[data-price-input]').forEach(function(input) {
+            var raw = input.value;
+            if (!raw) return;
+            var normalized = raw.replace(/\.00$/, '');
+            if (!isNaN(Number(normalized))) {
+                input.value = normalized;
+            }
+        });
 
         /* ==================== ADD MODAL BARCODE PREVIEW ==================== */
         var addBarcodeField = document.getElementById('addBarcode');

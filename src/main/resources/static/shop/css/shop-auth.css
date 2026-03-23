@@ -1,0 +1,262 @@
+/* =============================================
+   SHOP AUTH — Login & Register Pages
+   Reuses shop-base.css design tokens
+   ============================================= */
+
+.shop-auth {
+    position: relative;
+    min-height: calc(100vh - var(--shop-header-height) - 140px);
+    padding: 48px 0 72px;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at top left, rgba(96, 165, 250, 0.18), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.14), transparent 28%),
+        linear-gradient(135deg, #F8FBFF 0%, #F1F7FF 46%, var(--shop-bg) 100%);
+}
+
+.shop-auth::before,
+.shop-auth::after {
+    content: "";
+    position: absolute;
+    border-radius: var(--shop-radius-full);
+    background: rgba(37, 99, 235, 0.06);
+    filter: blur(2px);
+}
+
+.shop-auth::before {
+    width: 260px;
+    height: 260px;
+    top: -88px;
+    left: 8%;
+}
+
+.shop-auth::after {
+    width: 190px;
+    height: 190px;
+    right: 10%;
+    bottom: 24px;
+}
+
+.shop-auth__shell {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.shop-auth__card {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(226, 232, 240, 0.92);
+    border-radius: var(--shop-radius-md);
+    box-shadow: var(--shop-shadow-lg);
+    padding: 40px;
+    animation: shopFadeInUp 0.5s ease both;
+    backdrop-filter: blur(10px);
+}
+
+.shop-auth__card--login {
+    max-width: 480px;
+}
+
+.shop-auth__card--register {
+    max-width: 520px;
+}
+
+.shop-auth__header {
+    margin-bottom: 24px;
+}
+
+.shop-auth__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: var(--shop-radius-full);
+    background: var(--shop-primary-lightest);
+    color: var(--shop-primary-dark);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.shop-auth__title {
+    font-size: clamp(2rem, 3.6vw, 2.65rem);
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 10px;
+}
+
+.shop-auth__subtitle {
+    color: var(--shop-text-secondary);
+    line-height: 1.7;
+}
+
+.shop-auth__alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: var(--shop-radius);
+    border: 1px solid transparent;
+    font-size: 0.9375rem;
+    margin-bottom: 20px;
+}
+
+.shop-auth__alert i {
+    font-size: 1rem;
+    margin-top: 2px;
+}
+
+.shop-auth__alert--danger {
+    background: var(--shop-danger-light);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #B91C1C;
+}
+
+.shop-auth__alert--success {
+    background: var(--shop-success-light);
+    border-color: rgba(16, 185, 129, 0.2);
+    color: #047857;
+}
+
+.shop-auth__notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 18px;
+    border-radius: var(--shop-radius);
+    border: 1px solid rgba(37, 99, 235, 0.14);
+    background: rgba(219, 234, 254, 0.55);
+    margin-bottom: 20px;
+}
+
+.shop-auth__notice-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: rgba(37, 99, 235, 0.12);
+    color: var(--shop-primary-dark);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.shop-auth__notice strong {
+    display: block;
+    color: var(--shop-text);
+    margin-bottom: 4px;
+}
+
+.shop-auth__notice p {
+    color: var(--shop-text-secondary);
+    margin: 0;
+    line-height: 1.6;
+}
+
+.shop-auth__hint {
+    display: block;
+    margin-top: 6px;
+    color: var(--shop-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+}
+
+.shop-auth__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.shop-auth__form .shop-field {
+    margin-bottom: 18px;
+}
+
+.shop-auth__grid {
+    display: grid;
+    gap: 16px;
+}
+
+.shop-auth__grid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.shop-auth__form .shop-input {
+    min-height: 48px;
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.shop-auth__form .shop-input:hover {
+    border-color: var(--shop-primary-lighter);
+}
+
+.shop-auth__form .shop-btn {
+    margin-top: 6px;
+    box-shadow: var(--shop-shadow-md);
+}
+
+.shop-auth__form .shop-btn:hover {
+    transform: translateY(-1px);
+}
+
+.shop-auth__footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid var(--shop-border-light);
+    color: var(--shop-text-secondary);
+    text-align: center;
+}
+
+.shop-auth__footer p {
+    font-size: 0.9375rem;
+}
+
+.shop-auth__footer a {
+    font-weight: 600;
+}
+
+.shop-auth__back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--shop-text-secondary);
+}
+
+.shop-auth__back-link:hover {
+    color: var(--shop-primary-dark);
+}
+
+@media (max-width: 768px) {
+    .shop-auth {
+        padding: 32px 0 48px;
+    }
+
+    .shop-auth__card {
+        padding: 28px 24px;
+    }
+
+    .shop-auth__grid--2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .shop-auth {
+        padding: 24px 0 40px;
+    }
+
+    .shop-auth__card {
+        padding: 24px 16px;
+        border-radius: var(--shop-radius);
+    }
+
+    .shop-auth__title {
+        font-size: 1.8rem;
+    }
+}

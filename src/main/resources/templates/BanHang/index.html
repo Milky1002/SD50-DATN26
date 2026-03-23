@@ -55,6 +55,7 @@
                             <input type="text" id="customerInput" placeholder="Tên khách hàng (F4)"/>
                             <button type="button" class="pos-icon-btn" id="btnAddCustomer" title="Thêm khách hàng mới">+</button>
                         </div>
+                        <input type="hidden" id="selectedCustomerId" value=""/>
                         <div id="customerSuggestions" class="pos-customer-suggestions" style="display:none"></div>
                         <div class="pos-customer-row" style="margin-top:6px;">
                             <input type="text" id="customerPhone" placeholder="Số điện thoại khách hàng"/>
@@ -69,14 +70,26 @@
                             <span class="pos-badge" id="itemCountBadge">0 hàng hóa</span>
                             <span class="pos-amount" id="totalAmount">0</span>
                         </div>
+                        <div class="pos-field-row pos-field-row--summary">
+                            <label>Giảm giá</label>
+                            <span class="pos-amount pos-amount--discount" id="discountAmount">0</span>
+                        </div>
+                        <div class="pos-field-row pos-field-row--summary pos-field-row--final">
+                            <label>Khách cần trả</label>
+                            <span class="pos-amount pos-amount--final" id="finalAmount">0</span>
+                        </div>
                     </div>
 
-                    <!-- Promotion / Coupon -->
+                    <!-- Promotion -->
                     <div class="pos-sidebar__section">
-                        <div class="pos-coupon-row">
-                            <span class="pos-coupon-icon">&#127991;</span>
-                            <input type="text" id="couponInput" placeholder="Nhập mã khuyến mại..." autocomplete="off"/>
-                            <button type="button" class="pos-icon-btn" id="btnApplyPromo" title="Áp dụng">✓</button>
+                        <div class="pos-section-head">
+                            <strong>Khuyến mãi hóa đơn</strong>
+                            <span class="muted">Tự động chọn mã tốt nhất</span>
+                        </div>
+                        <div class="pos-promo-selector-wrap">
+                            <select id="promotionSelect" class="pos-select">
+                                <option value="">Không áp dụng khuyến mãi</option>
+                            </select>
                         </div>
                         <div class="pos-promo-result" id="promoResult" style="display:none">
                             <div class="pos-promo-name" id="promoName"></div>
@@ -102,14 +115,6 @@
                                 <input type="radio" name="paymentMethod" value="transfer"/>
                                 <span>Chuyển khoản</span>
                             </label>
-                            <label class="pos-radio">
-                                <input type="radio" name="paymentMethod" value="card"/>
-                                <span>Thẻ</span>
-                            </label>
-                            <label class="pos-radio">
-                                <input type="radio" name="paymentMethod" value="ewallet"/>
-                                <span>Ví</span>
-                            </label>
                         </div>
 
                         <div class="pos-field-row">
@@ -125,14 +130,9 @@
 
                     <!-- Options -->
                     <div class="pos-sidebar__section pos-options">
-                        <a href="#" class="pos-link">Thông tin xuất hóa đơn &rarr;</a>
-                        <label class="pos-checkbox">
-                            <input type="checkbox" id="chkInvoice" checked/>
-                            <span>Phát hành hóa đơn ngay</span>
-                        </label>
                         <label class="pos-checkbox">
                             <input type="checkbox" id="chkPrint" checked/>
-                            <span>In phiếu tính tiền (F10)</span>
+                            <span>Xuất phiếu tính tiền PDF (F10)</span>
                         </label>
                         <textarea id="orderNote" placeholder="Ghi chú..." rows="2"></textarea>
                     </div>
@@ -169,6 +169,11 @@
                     <label>Email</label>
                     <input type="email" id="newCustEmail" placeholder="Nhập email (không bắt buộc)"/>
                 </div>
+                <div class="pos-modal-field">
+                    <label>Địa chỉ <span style="color:#ef4444">*</span></label>
+                    <input type="text" id="newCustAddress" placeholder="Nhập địa chỉ khách hàng"/>
+                </div>
+                <div class="pos-modal-feedback" id="customerModalMessage" style="display:none"></div>
                 <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:12px;">
                     <button type="button" class="pos-modal-btn pos-modal-btn--ghost" onclick="document.getElementById('addCustomerModal').classList.remove('is-open')">Hủy</button>
                     <button type="button" class="pos-modal-btn pos-modal-btn--primary" id="btnSaveCustomer">Lưu khách hàng</button>
@@ -187,6 +192,33 @@
             </div>
             <div class="bh-modal__body" style="text-align:center">
                 <div id="posScannerView" style="width:100%;max-width:400px;margin:0 auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bh-modal" id="paymentSuccessModal" aria-hidden="true">
+        <div class="bh-modal__overlay" data-success-close></div>
+        <div class="bh-modal__dialog bh-modal__dialog--success">
+            <div class="bh-modal__header">
+                <div class="bh-modal__title"><i class="bi bi-check-circle-fill"></i> Thanh toán thành công</div>
+                <button type="button" class="bh-modal__close" data-success-close>&times;</button>
+            </div>
+            <div class="bh-modal__body">
+                <div class="pos-success-summary">
+                    <div class="pos-success-summary__item">
+                        <span>Mã hóa đơn</span>
+                        <strong id="successInvoiceId">#HD-0</strong>
+                    </div>
+                    <div class="pos-success-summary__item">
+                        <span>Tổng thanh toán</span>
+                        <strong id="successInvoiceTotal">0đ</strong>
+                    </div>
+                </div>
+                <p class="pos-success-message" id="successPaymentMethod">Đã ghi nhận thanh toán.</p>
+            </div>
+            <div class="modal-footer pos-success-actions">
+                <button type="button" class="btn-secondary" data-success-close>Đóng</button>
+                <button type="button" class="btn-primary" id="btnSuccessPrint">Mở phiếu tính tiền PDF</button>
             </div>
         </div>
     </div>
@@ -228,18 +260,20 @@
             function saveCurrentOrder() {
                 orders[activeOrderIdx] = {
                     cart: cart.slice(),
-                    customerName: document.getElementById('customerInput').value,
-                    customerPhone: document.getElementById('customerPhone').value,
+                    customerName: customerInput.value,
+                    customerPhone: customerPhoneInput.value,
                     note: document.getElementById('orderNote').value,
-                    cashGiven: parseInt(document.getElementById('cashGiven').value) || 0
+                    cashGiven: parseInt(document.getElementById('cashGiven').value) || 0,
+                    customerId: selectedCustomerId.value || ''
                 };
             }
 
             function loadOrder(idx) {
                 var order = orders[idx];
                 cart = order.cart.slice();
-                document.getElementById('customerInput').value = order.customerName || '';
-                document.getElementById('customerPhone').value = order.customerPhone || '';
+                customerInput.value = order.customerName || '';
+                customerPhoneInput.value = order.customerPhone || '';
+                selectedCustomerId.value = order.customerId || '';
                 document.getElementById('orderNote').value = order.note || '';
                 document.getElementById('cashGiven').value = order.cashGiven || 0;
                 renderCart();
@@ -265,12 +299,68 @@
 
             btnAddTab.addEventListener('click', function() {
                 saveCurrentOrder();
-                orders.push({ cart: [], customerName: '', customerPhone: '', note: '', cashGiven: 0 });
+                orders.push({ cart: [], customerName: '', customerPhone: '', note: '', cashGiven: 0, customerId: '' });
                 tabCounter++;
                 activeOrderIdx = orders.length - 1;
                 loadOrder(activeOrderIdx);
                 renderTabs();
             });
+
+            function hideCustomerSuggestions() {
+                customerSuggestions.style.display = 'none';
+                customerSuggestions.innerHTML = '';
+            }
+
+            function selectCustomer(customer) {
+                customerInput.value = customer.tenKhachHang || '';
+                customerPhoneInput.value = customer.sdt || '';
+                selectedCustomerId.value = customer.id || '';
+                hideCustomerSuggestions();
+                saveCurrentOrder();
+            }
+
+            function renderCustomerSuggestions(customers, query) {
+                if (!query || query.length < 2) {
+                    hideCustomerSuggestions();
+                    return;
+                }
+
+                if (!customers.length) {
+                    customerSuggestions.innerHTML = '<div class="pos-customer-suggestion pos-customer-suggestion--empty">Không tìm thấy khách hàng phù hợp. Bạn có thể thêm mới ngay.</div>';
+                    customerSuggestions.style.display = 'block';
+                    return;
+                }
+
+                var html = '';
+                customers.forEach(function(customer) {
+                    html += '<button type="button" class="pos-customer-suggestion">'
+                        + '<span class="pos-customer-suggestion__name">' + customer.tenKhachHang + '</span>'
+                        + '<span class="pos-customer-suggestion__meta">' + (customer.sdt || 'Chưa có SĐT') + (customer.email ? ' · ' + customer.email : '') + '</span>'
+                        + '</button>';
+                });
+                customerSuggestions.innerHTML = html;
+                customerSuggestions.style.display = 'block';
+                customerSuggestions.querySelectorAll('.pos-customer-suggestion').forEach(function(btn, index) {
+                    btn.addEventListener('click', function() {
+                        selectCustomer(customers[index]);
+                    });
+                });
+            }
+
+            function searchCustomers(q) {
+                var token = ++activeCustomerSearchToken;
+                fetch('/ban-hang/api/tim-khach-hang?q=' + encodeURIComponent(q))
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (token !== activeCustomerSearchToken) return;
+                        renderCustomerSuggestions(Array.isArray(data) ? data : [], q);
+                    })
+                    .catch(function() {
+                        if (token !== activeCustomerSearchToken) return;
+                        customerSuggestions.innerHTML = '<div class="pos-customer-suggestion pos-customer-suggestion--empty">Không thể tải danh sách khách hàng. Vui lòng thử lại.</div>';
+                        customerSuggestions.style.display = 'block';
+                    });
+            }
 
             /* ========== CORE VARIABLES ========== */
             var cart = [];
@@ -281,11 +371,23 @@
             var cartEmpty = document.getElementById('cartEmpty');
             var totalAmount = document.getElementById('totalAmount');
             var amountDue = document.getElementById('amountDue');
+            var discountAmount = document.getElementById('discountAmount');
+            var finalAmount = document.getElementById('finalAmount');
             var itemCountBadge = document.getElementById('itemCountBadge');
             var btnCheckout = document.getElementById('btnCheckout');
             var cashGiven = document.getElementById('cashGiven');
             var debtAmount = document.getElementById('debtAmount');
             var searchTimeout = null;
+            var customerSearchTimeout = null;
+            var promotionSelect = document.getElementById('promotionSelect');
+            var paymentSuccessModal = document.getElementById('paymentSuccessModal');
+            var btnSuccessPrint = document.getElementById('btnSuccessPrint');
+            var latestReceiptUrl = null;
+            var customerInput = document.getElementById('customerInput');
+            var customerPhoneInput = document.getElementById('customerPhone');
+            var customerSuggestions = document.getElementById('customerSuggestions');
+            var selectedCustomerId = document.getElementById('selectedCustomerId');
+            var activeCustomerSearchToken = 0;
 
             /* ---------- DATE/TIME ---------- */
             function updateDateTime() {
@@ -355,9 +457,32 @@
                 if (this.value.trim()) searchProducts(this.value.trim());
             });
 
+            customerInput.addEventListener('input', function () {
+                clearTimeout(customerSearchTimeout);
+                selectedCustomerId.value = '';
+                var q = this.value.trim();
+                if (!q || q.length < 2) { hideCustomerSuggestions(); return; }
+                customerSearchTimeout = setTimeout(function () { searchCustomers(q); }, 250);
+            });
+
+            customerPhoneInput.addEventListener('input', function () {
+                clearTimeout(customerSearchTimeout);
+                selectedCustomerId.value = '';
+                var q = this.value.trim();
+                if (!q || q.length < 2) { hideCustomerSuggestions(); return; }
+                customerSearchTimeout = setTimeout(function () { searchCustomers(q); }, 250);
+            });
+
+            customerInput.addEventListener('focus', function () {
+                if (this.value.trim().length >= 2) searchCustomers(this.value.trim());
+            });
+
             document.addEventListener('click', function (e) {
                 if (!productList.contains(e.target) && e.target !== searchInput) {
                     productList.style.display = 'none';
+                }
+                if (!customerSuggestions.contains(e.target) && e.target !== customerInput && e.target !== customerPhoneInput) {
+                    hideCustomerSuggestions();
                 }
             });
 
@@ -393,6 +518,8 @@
                     cartEmpty.style.display = 'flex';
                     totalAmount.textContent = '0';
                     amountDue.textContent = '0';
+                    discountAmount.textContent = '0';
+                    finalAmount.textContent = '0';
                     itemCountBadge.textContent = '0 hàng hóa';
                     btnCheckout.disabled = true;
                     updateDebt();
@@ -423,9 +550,12 @@
                 cartItems.innerHTML = html;
                 totalAmount.textContent = formatMoney(total);
                 amountDue.textContent = formatMoney(total);
+                discountAmount.textContent = '0';
+                finalAmount.textContent = formatMoney(total);
                 itemCountBadge.textContent = totalQty + ' hàng hóa';
                 btnCheckout.disabled = false;
                 updateDebt();
+                loadApplicablePromotions();
 
                 // Event listeners
                 cartItems.querySelectorAll('.pos-qty-btn').forEach(function (btn) {
@@ -466,11 +596,138 @@
                 return total;
             }
 
-            function updateDebt() {
+            function calculatePromotionPreview(promo, total) {
+                if (!promo || !total || promo.loaiKhuyenMai !== 1) {
+                    return 0;
+                }
+
+                var discount = 0;
+                if (promo.loaiGiam === 1) {
+                    discount = total * (Number(promo.giaTriGiam || 0) / 100);
+                    if (promo.giamToiDa != null) {
+                        discount = Math.min(discount, Number(promo.giamToiDa));
+                    }
+                } else {
+                    discount = Number(promo.giaTriGiam || 0);
+                }
+
+                return Math.min(discount, total);
+            }
+
+            function renderPromotionSummary(promo, discount) {
+                if (!promo) {
+                    promoResult.style.display = 'none';
+                    promoName.textContent = '';
+                    promoDiscount.textContent = '';
+                    selectedPromotionId.value = '';
+                    discountAmount.textContent = '0';
+                    finalAmount.textContent = formatMoney(getTotal());
+                    amountDue.textContent = formatMoney(getTotal());
+                    return;
+                }
+
+                selectedPromotionId.value = promo.id;
+                promoName.textContent = promo.tenChuongTrinh + (promo.maChuongTrinh ? ' · ' + promo.maChuongTrinh : '');
+                promoDiscount.textContent = '-' + formatMoney(discount || 0);
+                discountAmount.textContent = formatMoney(discount || 0);
+                var payable = Math.max(0, getTotal() - Number(discount || 0));
+                finalAmount.textContent = formatMoney(payable);
+                amountDue.textContent = formatMoney(payable);
+                promoResult.style.display = 'flex';
+            }
+
+            function clearPromotionSelection(resetDropdown) {
+                selectedPromotionId.value = '';
+                promoResult.style.display = 'none';
+                promoName.textContent = '';
+                promoDiscount.textContent = '';
+                discountAmount.textContent = '0';
+                finalAmount.textContent = formatMoney(getTotal());
+                amountDue.textContent = formatMoney(getTotal());
+
+                if (resetDropdown && promotionSelect) {
+                    promotionSelect.value = '';
+                }
+            }
+
+            function autoSelectBestPromotion(promotions, total) {
+                var bestPromo = null;
+                var bestDiscount = 0;
+
+                promotions.forEach(function (promo) {
+                    var discount = calculatePromotionPreview(promo, total);
+                    if (discount > bestDiscount) {
+                        bestDiscount = discount;
+                        bestPromo = promo;
+                    }
+                });
+
+                if (bestPromo && promotionSelect) {
+                    promotionSelect.value = String(bestPromo.id);
+                    renderPromotionSummary(bestPromo, bestDiscount);
+                } else {
+                    clearPromotionSelection(true);
+                }
+            }
+
+            function loadApplicablePromotions() {
                 var total = getTotal();
+
+                if (!promotionSelect) {
+                    return;
+                }
+
+                promotionSelect.innerHTML = '<option value="">Không áp dụng khuyến mãi</option>';
+
+                if (total <= 0) {
+                    clearPromotionSelection(true);
+                    return;
+                }
+
+                fetch('/api/chuong-trinh-khuyen-mai/applicable/invoice?orderTotal=' + encodeURIComponent(total))
+                    .then(function (r) { return r.json(); })
+                    .then(function (result) {
+                        var promotions = result && result.success && Array.isArray(result.data) ? result.data : [];
+
+                        promotions.forEach(function (promo) {
+                            var discount = calculatePromotionPreview(promo, total);
+                            var option = document.createElement('option');
+                            option.value = promo.id;
+                            option.textContent = promo.tenChuongTrinh + ' — giảm ' + formatMoney(discount);
+                            option.setAttribute('data-discount', discount);
+                            option.setAttribute('data-name', promo.tenChuongTrinh || '');
+                            option.setAttribute('data-code', promo.maChuongTrinh || '');
+                            promotionSelect.appendChild(option);
+                        });
+
+                        autoSelectBestPromotion(promotions, total);
+                    })
+                    .catch(function () {
+                        clearPromotionSelection(true);
+                    });
+            }
+
+            function updateDebt() {
+                var total = parseInt((finalAmount.textContent || '0').replace(/\./g, ''), 10);
+                if (isNaN(total)) {
+                    total = getTotal();
+                }
                 var cash = parseInt(cashGiven.value) || 0;
                 var debt = total - cash;
                 debtAmount.textContent = debt > 0 ? formatMoney(debt) : '0';
+            }
+
+            function showPaymentSuccess(result, paymentMethod) {
+                var methodText = paymentMethod === 'transfer' ? 'Đã ghi nhận thanh toán chuyển khoản.' : 'Đã ghi nhận thanh toán tiền mặt.';
+                latestReceiptUrl = '/ban-hang/' + result.hoaDonId + '/phieu-tinh-tien';
+                document.getElementById('successInvoiceId').textContent = '#HD-' + result.hoaDonId;
+                document.getElementById('successInvoiceTotal').textContent = formatMoney(result.tongTien) + 'đ';
+                document.getElementById('successPaymentMethod').textContent = methodText;
+                paymentSuccessModal.classList.add('is-open');
+            }
+
+            function closePaymentSuccessModal() {
+                paymentSuccessModal.classList.remove('is-open');
             }
 
             cashGiven.addEventListener('input', updateDebt);
@@ -481,8 +738,8 @@
                 var paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
                 var promoId = document.getElementById('selectedPromotionId').value;
                 var payload = {
-                    tenKhachHang: document.getElementById('customerInput').value || 'Khách lẻ',
-                    sdtKhachHang: document.getElementById('customerPhone').value || '',
+                    tenKhachHang: customerInput.value || 'Khách lẻ',
+                    sdtKhachHang: customerPhoneInput.value || '',
                     ghiChu: document.getElementById('orderNote').value || '',
                     phuongThucThanhToan: paymentMethod,
                     tienKhachDua: parseInt(cashGiven.value) || 0,
@@ -505,16 +762,21 @@
                 })
                 .then(function (res) {
                     if (res.ok && res.data.success) {
-                        alert('Thanh toán thành công!\nMã hóa đơn: ' + res.data.hoaDonId + '\nTổng tiền: ' + formatMoney(res.data.tongTien));
+                        if (document.getElementById('chkPrint').checked) {
+                            window.open('/ban-hang/' + res.data.hoaDonId + '/phieu-tinh-tien', '_blank');
+                        }
+                        showPaymentSuccess(res.data, paymentMethod);
                         cart = [];
                         renderCart();
-                        document.getElementById('customerInput').value = '';
+                        customerInput.value = '';
                         document.getElementById('orderNote').value = '';
-                        document.getElementById('customerPhone').value = '';
+                        customerPhoneInput.value = '';
+                        selectedCustomerId.value = '';
                         cashGiven.value = '0';
                         searchInput.value = '';
                         productList.style.display = 'none';
-                        clearPromotion();
+                        hideCustomerSuggestions();
+                        clearPromotionSelection(true);
                         // Also save the cleared state
                         saveCurrentOrder();
                     } else {
@@ -532,10 +794,15 @@
 
             /* ---------- ADD CUSTOMER MODAL ---------- */
             var addCustModal = document.getElementById('addCustomerModal');
+            var customerModalMessage = document.getElementById('customerModalMessage');
             document.getElementById('btnAddCustomer').addEventListener('click', function() {
                 document.getElementById('newCustName').value = '';
                 document.getElementById('newCustPhone').value = '';
                 document.getElementById('newCustEmail').value = '';
+                document.getElementById('newCustAddress').value = '';
+                customerModalMessage.style.display = 'none';
+                customerModalMessage.textContent = '';
+                customerModalMessage.className = 'pos-modal-feedback';
                 addCustModal.classList.add('is-open');
                 setTimeout(function() { document.getElementById('newCustName').focus(); }, 100);
             });
@@ -543,13 +810,67 @@
             document.getElementById('btnSaveCustomer').addEventListener('click', function() {
                 var name = document.getElementById('newCustName').value.trim();
                 var phone = document.getElementById('newCustPhone').value.trim();
-                if (!name) { alert('Vui lòng nhập tên khách hàng'); return; }
-                if (!phone) { alert('Vui lòng nhập số điện thoại'); return; }
+                var email = document.getElementById('newCustEmail').value.trim();
+                var address = document.getElementById('newCustAddress').value.trim();
+                var saveBtn = this;
 
-                // Fill the customer fields in the POS form
-                document.getElementById('customerInput').value = name;
-                document.getElementById('customerPhone').value = phone;
-                addCustModal.classList.remove('is-open');
+                if (!name) {
+                    customerModalMessage.textContent = 'Vui lòng nhập tên khách hàng';
+                    customerModalMessage.className = 'pos-modal-feedback pos-modal-feedback--error';
+                    customerModalMessage.style.display = 'block';
+                    return;
+                }
+                if (!phone) {
+                    customerModalMessage.textContent = 'Vui lòng nhập số điện thoại';
+                    customerModalMessage.className = 'pos-modal-feedback pos-modal-feedback--error';
+                    customerModalMessage.style.display = 'block';
+                    return;
+                }
+                if (!address) {
+                    customerModalMessage.textContent = 'Vui lòng nhập địa chỉ khách hàng';
+                    customerModalMessage.className = 'pos-modal-feedback pos-modal-feedback--error';
+                    customerModalMessage.style.display = 'block';
+                    return;
+                }
+
+                saveBtn.disabled = true;
+                saveBtn.textContent = 'Đang lưu...';
+
+                fetch('/ban-hang/api/khach-hang', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tenKhachHang: name,
+                        sdt: phone,
+                        email: email,
+                        diaChiKhachHang: address
+                    })
+                })
+                .then(function(r) {
+                    return r.json().then(function(data) {
+                        return { ok: r.ok, data: data };
+                    });
+                })
+                .then(function(res) {
+                    if (!res.ok || !res.data.success) {
+                        throw new Error(res.data.message || 'Không thể lưu khách hàng');
+                    }
+
+                    customerModalMessage.textContent = 'Đã tạo khách hàng thành công';
+                    customerModalMessage.className = 'pos-modal-feedback pos-modal-feedback--success';
+                    customerModalMessage.style.display = 'block';
+                    selectCustomer(res.data.customer);
+                    addCustModal.classList.remove('is-open');
+                })
+                .catch(function(err) {
+                    customerModalMessage.textContent = err.message;
+                    customerModalMessage.className = 'pos-modal-feedback pos-modal-feedback--error';
+                    customerModalMessage.style.display = 'block';
+                })
+                .finally(function() {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = 'Lưu khách hàng';
+                });
             });
 
             /* ---------- KEYBOARD SHORTCUTS ---------- */
@@ -589,88 +910,47 @@
             document.getElementById('btnCloseScanPos').addEventListener('click', closeScanPos);
             document.getElementById('scanModalPosOverlay').addEventListener('click', closeScanPos);
 
+            document.querySelectorAll('[data-success-close]').forEach(function (element) {
+                element.addEventListener('click', closePaymentSuccessModal);
+            });
+
+            if (btnSuccessPrint) {
+                btnSuccessPrint.addEventListener('click', function () {
+                    if (latestReceiptUrl) {
+                        window.open(latestReceiptUrl, '_blank');
+                    }
+                });
+            }
+
             /* ---------- PROMOTION / COUPON ---------- */
-            var btnApplyPromo = document.getElementById('btnApplyPromo');
             var btnRemovePromo = document.getElementById('btnRemovePromo');
-            var couponInput = document.getElementById('couponInput');
             var promoResult = document.getElementById('promoResult');
             var promoName = document.getElementById('promoName');
             var promoDiscount = document.getElementById('promoDiscount');
             var selectedPromotionId = document.getElementById('selectedPromotionId');
 
-            if (btnApplyPromo) {
-                btnApplyPromo.addEventListener('click', function() {
-                    var code = couponInput.value.trim();
-                    if (!code) { alert('Vui lòng nhập mã khuyến mại'); return; }
-                    fetch('/api/chuong-trinh-khuyen-mai/code/' + encodeURIComponent(code))
-                        .then(function(r) { return r.json(); })
-                        .then(function(result) {
-                            if (result.success && result.data) {
-                                var promo = result.data;
-                                if (promo.trangThai !== 1) {
-                                    alert('Chương trình khuyến mại này đã ngừng hoạt động');
-                                    return;
-                                }
-                                selectedPromotionId.value = promo.id;
-                                promoName.textContent = promo.tenChuongTrinh;
-                                // Calculate discount preview
-                                var total = getCartTotal();
-                                if (total > 0 && promo.loaiKhuyenMai === 1) {
-                                    fetch('/api/chuong-trinh-khuyen-mai/' + promo.id + '/calculate-discount?orderTotal=' + total)
-                                        .then(function(r) { return r.json(); })
-                                        .then(function(res) {
-                                            if (res.success) {
-                                                promoDiscount.textContent = '-' + formatMoney(res.data);
-                                            } else {
-                                                promoDiscount.textContent = res.message;
-                                            }
-                                        });
-                                } else {
-                                    promoDiscount.textContent = promo.loaiGiam === 1
-                                        ? 'Giảm ' + promo.giaTriGiam + '%'
-                                        : 'Giảm ' + formatMoney(promo.giaTriGiam);
-                                }
-                                promoResult.style.display = 'flex';
-                                couponInput.style.display = 'none';
-                                btnApplyPromo.style.display = 'none';
-                            } else {
-                                alert('Không tìm thấy mã khuyến mại: ' + code);
-                            }
-                        })
-                        .catch(function(err) {
-                            alert('Lỗi tìm mã: ' + err.message);
-                        });
+            if (promotionSelect) {
+                promotionSelect.addEventListener('change', function () {
+                    var selectedId = this.value;
+                    var option = this.options[this.selectedIndex];
+
+                    if (!selectedId || !option) {
+                        clearPromotionSelection(false);
+                        return;
+                    }
+
+                    renderPromotionSummary({
+                        id: selectedId,
+                        tenChuongTrinh: option.getAttribute('data-name') || option.textContent,
+                        maChuongTrinh: option.getAttribute('data-code') || ''
+                    }, Number(option.getAttribute('data-discount') || 0));
                 });
             }
 
             if (btnRemovePromo) {
                 btnRemovePromo.addEventListener('click', function() {
-                    clearPromotion();
+                    clearPromotionSelection(true);
                 });
-            }
-
-            // Enter key on coupon input
-            if (couponInput) {
-                couponInput.addEventListener('keypress', function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (btnApplyPromo) btnApplyPromo.click();
-                    }
-                });
-            }
-
-            function clearPromotion() {
-                selectedPromotionId.value = '';
-                promoResult.style.display = 'none';
-                couponInput.style.display = '';
-                couponInput.value = '';
-                if (btnApplyPromo) btnApplyPromo.style.display = '';
-            }
-
-            function getCartTotal() {
-                var total = 0;
-                cart.forEach(function(c) { total += c.giaBan * c.soLuong; });
-                return total;
             }
 
             /* ---------- INIT ---------- */

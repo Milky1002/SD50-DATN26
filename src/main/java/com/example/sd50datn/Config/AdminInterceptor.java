@@ -17,9 +17,14 @@ public class AdminInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        String role = (String) session.getAttribute("role");
-        // Accept both Unicode "Quản lý" and ASCII "Quan ly" for compatibility
-        if (role == null || (!role.equalsIgnoreCase("Quản lý") && !role.equalsIgnoreCase("Quan ly"))) {
+        // Check canonical roleCode first, fall back to legacy "role" string for transition period
+        String roleCode = (String) session.getAttribute("roleCode");
+        String legacyRole = (String) session.getAttribute("role");
+
+        boolean isAdmin = "ADMIN".equals(roleCode)
+                || (legacyRole != null && (legacyRole.equalsIgnoreCase("Quản lý") || legacyRole.equalsIgnoreCase("Quan ly")));
+
+        if (!isAdmin) {
             response.sendRedirect("/dashboard?error=access_denied");
             return false;
         }

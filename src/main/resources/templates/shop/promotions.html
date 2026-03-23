@@ -1,0 +1,52 @@
+<div th:fragment="content">
+    <section class="shop-section shop-promotions">
+        <div class="shop-container">
+            <div class="shop-search-header shop-promotions__header">
+                <div>
+                    <p class="shop-search-header__eyebrow">Storefront offers</p>
+                    <h1 class="shop-search-header__title">Chương trình khuyến mãi</h1>
+                    <p class="shop-search-header__summary">Tổng hợp các ưu đãi nổi bật đang áp dụng tại Yonex Store.</p>
+                </div>
+                <span class="shop-search-count"
+                      th:text="${(allPromotions != null ? #lists.size(allPromotions) : 0) + ' chương trình'}">0 chương trình</span>
+            </div>
+
+            <section class="shop-promotions__section"
+                     th:if="${activePromotions != null and !#lists.isEmpty(activePromotions)}">
+                <div class="shop-section__header shop-promotions__section-header">
+                    <div>
+                        <h2 class="shop-section__title"><i class="bi bi-lightning-charge-fill"></i> Đang diễn ra</h2>
+                        <p class="shop-section__intro">Các chương trình có hiệu lực và sẵn sàng áp dụng cho đơn hàng hoặc sản phẩm phù hợp.</p>
+                    </div>
+                </div>
+
+                <div class="shop-promo-grid">
+                    <div class="shop-promo-card"
+                         th:each="promo : ${activePromotions}">
+                        <div class="shop-promo-card__icon">
+                            <i class="bi bi-tag-fill"></i>
+                        </div>
+                        <div class="shop-promo-card__body">
+                            <span class="shop-promo-card__code" th:text="${promo.maChuongTrinh}">KM01</span>
+                            <p class="shop-promo-card__name" th:text="${promo.tenChuongTrinh}">Tên chương trình</p>
+                            <p class="shop-promo-card__desc" th:if="${promo.moTa != null}" th:text="${promo.moTa}">Mô tả</p>
+                            <p class="shop-promo-card__val"
+                               th:text="${promo.loaiGiam == 1}
+                                   ? ('Giảm ' + promo.giaTriGiam + '%')
+                                   : ('Giảm ' + #numbers.formatInteger(promo.giaTriGiam, 0, 'DEFAULT') + 'đ')">
+                                Giảm giá
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="shop-empty-state shop-search-empty"
+                 th:if="${activePromotions == null or #lists.isEmpty(activePromotions)}">
+                <i class="bi bi-tags shop-empty-state__icon"></i>
+                <p class="shop-empty-state__msg">Hiện tại chưa có chương trình khuyến mãi nào</p>
+                <p class="shop-search-empty__hint">Các ưu đãi mới sẽ được cập nhật tại đây ngay khi bắt đầu triển khai.</p>
+            </div>
+        </div>
+    </section>
+</div>

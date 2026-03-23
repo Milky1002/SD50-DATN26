@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="${pageTitle} ?: 'Yonex Store'">Yonex Store</title>
+
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" /></noscript>
+    <link rel="stylesheet" th:href="@{/shop/css/shop-base.css}" />
+    <link rel="stylesheet" th:href="@{/shop/css/shop-layout.css}" />
+    <link rel="stylesheet" th:if="${pageCss}"  th:href="@{${pageCss}}" />
+    <link rel="stylesheet" th:if="${pageCss2}" th:href="@{${pageCss2}}" />
+</head>
+<body class="shop-body">
+<div class="shop-site-shell">
+    <header class="shop-header" id="shopHeader" data-sticky-header>
+        <div class="shop-topbar">
+            <div class="shop-container shop-topbar__inner">
+                <div class="shop-topbar__message">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <span>Miễn phí giao hàng cho đơn từ 1.500.000đ</span>
+                </div>
+                <div class="shop-topbar__links">
+                        <a th:href="@{/thanh-toan}">Thanh toán nhanh</a>
+                        <a th:href="@{/tai-khoan}">Theo dõi tài khoản</a>
+                    <a href="tel:19006750">Hotline: 1900 6750</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="shop-container shop-header__main">
+            <button type="button"
+                    class="shop-mobile-menu-btn"
+                    id="shopMobileMenuBtn"
+                    data-mobile-nav-toggle
+                    aria-label="Mở menu điều hướng"
+                    aria-controls="shopMainNav"
+                    aria-expanded="false">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <a class="shop-logo" th:href="@{/}" aria-label="Về trang chủ Yonex Store">
+                <span class="shop-logo__icon"><i class="bi bi-bag-heart-fill"></i></span>
+                <span class="shop-logo__text">Yonex <span>Store</span></span>
+            </a>
+
+            <div class="shop-search">
+                <form class="shop-search__form" th:action="@{/tim-kiem}" method="get" role="search">
+                    <i class="bi bi-search shop-search__icon"></i>
+                    <input class="shop-search__input"
+                           type="search"
+                           name="q"
+                           th:value="${param.q} ?: ${param.keyword}"
+                           placeholder="Tìm vợt cầu lông, giày, phụ kiện..."
+                           aria-label="Tìm kiếm sản phẩm" />
+                    <button class="shop-search__btn" type="submit">Tìm kiếm</button>
+                </form>
+            </div>
+
+            <div class="shop-header__actions">
+                <a class="shop-header__action" th:href="@{/tai-khoan}">
+                    <i class="bi bi-person"></i>
+                    <span>Tài khoản</span>
+                </a>
+                <a class="shop-header__action" th:href="@{/tai-khoan/don-hang}">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Đơn hàng</span>
+                </a>
+                <a class="shop-header__action" th:href="@{/gio-hang}" aria-label="Giỏ hàng">
+                    <i class="bi bi-bag"></i>
+                    <span>Giỏ hàng</span>
+                    <span id="shopCartBadge"
+                           class="shop-cart-badge"
+                           data-cart-badge
+                           th:attr="hidden=${(cartItemCount ?: 0) == 0} ? 'hidden' : null"
+                           th:text="${cartItemCount} ?: 0">0</span>
+                </a>
+            </div>
+        </div>
+
+        <nav class="shop-nav" id="shopMainNav" data-mobile-nav-panel>
+            <div class="shop-container shop-nav__inner">
+                <a class="shop-nav__item"
+                   th:href="@{/}"
+                   th:classappend="${activeMenu == 'home'} ? ' shop-nav__item--active'">
+                    Trang chủ
+                </a>
+                <a class="shop-nav__item"
+                   th:href="@{/cua-hang}"
+                   th:classappend="${activeMenu == 'products'} ? ' shop-nav__item--active'">
+                     Sản phẩm
+                 </a>
+                <a class="shop-nav__item"
+                   th:href="@{/gio-hang}"
+                   th:classappend="${activeMenu == 'cart'} ? ' shop-nav__item--active'">
+                    Giỏ hàng
+                </a>
+                <a class="shop-nav__item"
+                   th:href="@{/thanh-toan}"
+                   th:classappend="${activeMenu == 'checkout'} ? ' shop-nav__item--active'">
+                    Thanh toán
+                </a>
+                <a class="shop-nav__item"
+                   th:href="@{/tai-khoan}"
+                   th:classappend="${activeMenu == 'account'} ? ' shop-nav__item--active'">
+                    Tài khoản
+                </a>
+                <a class="shop-nav__item shop-nav__item--highlight" th:href="@{/cua-hang(sort='price_desc')}">
+                     Ưu đãi hôm nay
+                 </a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="shop-breadcrumb-area" th:if="${breadcrumbItems != null and !#lists.isEmpty(breadcrumbItems)}">
+        <div class="shop-container">
+            <nav class="shop-breadcrumb" aria-label="breadcrumb" itemscope itemtype="https://schema.org/BreadcrumbList">
+                <ol class="shop-breadcrumb__list">
+                    <li class="shop-breadcrumb__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                        <a th:href="@{/}" itemprop="item"><span itemprop="name">Trang chủ</span></a>
+                        <meta itemprop="position" content="1" />
+                    </li>
+                    <li class="shop-breadcrumb__item"
+                        th:each="item, itemStat : ${breadcrumbItems}"
+                        th:classappend="${itemStat.last} ? ' shop-breadcrumb__item--current'"
+                        itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                        <span class="shop-breadcrumb__sep" aria-hidden="true"><i class="bi bi-chevron-right"></i></span>
+                        <a th:if="${!itemStat.last and item.url != null}" th:href="${item.url}" itemprop="item"><span itemprop="name" th:text="${item.label}">Danh mục</span></a>
+                        <span th:if="${itemStat.last or item.url == null}" itemprop="name" th:text="${item.label}" aria-current="page">Trang hiện tại</span>
+                        <meta itemprop="position" th:content="${itemStat.index + 2}" />
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </section>
+
+    <main class="shop-main">
+        <div th:replace="~{${content} :: content}"></div>
+    </main>
+
+    <footer class="shop-footer">
+        <div class="shop-container shop-footer__main">
+            <div class="shop-footer__grid">
+                <section>
+                    <div class="shop-footer__brand">
+                        <span class="shop-footer__brand-icon"><i class="bi bi-bag-heart-fill"></i></span>
+                        <span class="shop-footer__brand-name">Yonex Store</span>
+                    </div>
+                    <p class="shop-footer__desc">
+                        Không gian mua sắm cầu lông hiện đại, tuyển chọn sản phẩm chính hãng cho người chơi phong trào và vận động viên.
+                    </p>
+                    <div class="shop-footer__social">
+                        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                        <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+                    </div>
+                </section>
+
+                <section>
+                    <h3 class="shop-footer__title">Mua sắm</h3>
+                    <ul class="shop-footer__links">
+                        <li><a th:href="@{/cua-hang}">Tất cả sản phẩm</a></li>
+                        <li><a th:href="@{/cua-hang(sort='newest')}">Hàng mới về</a></li>
+                        <li><a th:href="@{/cua-hang(sort='price_desc')}">Khuyến mãi</a></li>
+                        <li><a th:href="@{/gio-hang}">Giỏ hàng</a></li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 class="shop-footer__title">Hỗ trợ</h3>
+                    <ul class="shop-footer__links">
+                        <li><a th:href="@{/thanh-toan}">Hướng dẫn thanh toán</a></li>
+                        <li><a th:href="@{/tai-khoan}">Tài khoản của tôi</a></li>
+                        <li><a th:href="@{/tai-khoan/so-dia-chi}">Sổ địa chỉ</a></li>
+                        <li><a th:href="@{/tai-khoan/don-hang}">Tra cứu đơn hàng</a></li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h3 class="shop-footer__title">Liên hệ</h3>
+                    <div class="shop-footer__contact-item">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>268 Tô Hiến Thành, Hai Bà Trưng, Hà Nội</span>
+                    </div>
+                    <div class="shop-footer__contact-item">
+                        <i class="bi bi-telephone"></i>
+                        <span>1900 6750</span>
+                    </div>
+                    <div class="shop-footer__contact-item">
+                        <i class="bi bi-envelope"></i>
+                        <span>support@yonexstore.vn</span>
+                    </div>
+                    <div class="shop-footer__contact-item">
+                        <i class="bi bi-clock"></i>
+                        <span>08:00 - 21:30 mỗi ngày</span>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="shop-container shop-footer__bottom">
+            <p>&copy; 2026 Yonex Store. Bản quyền thuộc SD50-DATN26.</p>
+            <div class="shop-footer__payments" aria-label="Phương thức thanh toán hỗ trợ">
+                <span>VISA</span>
+                <span>VNPay</span>
+                <span>MOMO</span>
+                <span>COD</span>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<div id="shopToastContainer" class="shop-toast-container" aria-live="polite" aria-atomic="true"></div>
+
+<script th:src="@{/shop/js/shop-layout.js}"></script>
+<script th:src="@{/shop/js/shop-app.js}"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<div th:fragment="content" xmlns:th="http://www.thymeleaf.org">
+    <section class="shop-section shop-cart">
+        <div class="shop-container">
+            <div class="shop-cart__header">
+                <div>
+                    <p class="shop-cart__eyebrow">Storefront cart</p>
+                    <h1 class="shop-h2">Giỏ hàng của bạn</h1>
+                    <p class="shop-cart__sub">
+                        Kiểm tra lại sản phẩm, cập nhật số lượng và tiếp tục tới bước thanh toán khi bạn đã sẵn sàng.
+                    </p>
+                </div>
+                <div class="shop-cart__meta" th:if="${cartItemCount > 0}">
+                    <span class="shop-badge shop-badge--primary">
+                        <i class="bi bi-bag-check"></i>
+                        <span th:text="${cartItemCount} + ' sản phẩm'">0 sản phẩm</span>
+                    </span>
+                </div>
+            </div>
+
+            <div class="shop-cart__alerts" th:if="${success != null or error != null}">
+                <div class="shop-cart__alert shop-cart__alert--success" th:if="${success}">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span th:text="${success}">Thao tác thành công</span>
+                </div>
+                <div class="shop-cart__alert shop-cart__alert--error" th:if="${error}">
+                    <i class="bi bi-exclamation-octagon-fill"></i>
+                    <span th:text="${error}">Có lỗi xảy ra</span>
+                </div>
+            </div>
+
+            <div class="shop-cart__layout" th:if="${cartItems != null and !#lists.isEmpty(cartItems)}">
+                <div class="shop-cart__list shop-stagger">
+                    <article class="shop-cart__item shop-card" th:each="item : ${cartItems}">
+                        <a class="shop-cart__item-media"
+                           th:href="@{/cua-hang/{id}(id=${item.sanPham.id})}"
+                           aria-label="Xem chi tiết sản phẩm">
+                            <img class="shop-cart__item-image"
+                                 th:if="${item.sanPham != null and item.sanPham.anh != null and item.sanPham.anh.anhUrl != null}"
+                                 th:src="${item.sanPham.anh.anhUrl}"
+                                 th:alt="${item.sanPham.tenSanPham}" />
+                            <div class="shop-cart__item-placeholder"
+                                 th:unless="${item.sanPham != null and item.sanPham.anh != null and item.sanPham.anh.anhUrl != null}">
+                                <i class="bi bi-image"></i>
+                            </div>
+                        </a>
+
+                        <div class="shop-cart__item-info">
+                            <div class="shop-cart__item-copy">
+                                <a class="shop-cart__item-name"
+                                   th:href="@{/cua-hang/{id}(id=${item.sanPham.id})}"
+                                   th:text="${item.sanPham.tenSanPham}">Tên sản phẩm</a>
+                                <p class="shop-cart__item-variant"
+                                   th:if="${item.sanPham != null and item.sanPham.mauSac != null}">
+                                    <i class="bi bi-palette2"></i>
+                                    <span th:text="${item.sanPham.mauSac.tenMau}">Màu sắc</span>
+                                </p>
+                                <p class="shop-cart__item-variant"
+                                   th:if="${item.sanPham != null and item.sanPham.mauSac == null}">
+                                    <i class="bi bi-dot"></i>
+                                    <span>Phiên bản tiêu chuẩn</span>
+                                </p>
+                            </div>
+
+                            <div class="shop-cart__item-price">
+                                <span class="shop-cart__label">Đơn giá</span>
+                                <span class="shop-price"
+                                      th:text="${#numbers.formatInteger(item.giaTaiThoiDiem != null ? item.giaTaiThoiDiem : item.sanPham.giaBan, 0, 'DEFAULT') + 'đ'}">0đ</span>
+                            </div>
+                        </div>
+
+                        <div class="shop-cart__item-quantity">
+                            <span class="shop-cart__label">Số lượng</span>
+                            <form class="shop-cart__qty-form" th:action="@{/gio-hang/cap-nhat}" method="post">
+                                <input type="hidden" name="chiTietId" th:value="${item.id}" />
+                                <div class="shop-qty" data-quantity-control>
+                                    <button type="button" class="shop-qty__btn" data-quantity-decrease aria-label="Giảm số lượng">-</button>
+                                    <input type="number"
+                                           class="shop-qty__val"
+                                           data-quantity-input
+                                           name="soLuong"
+                                           min="0"
+                                           th:max="${item.sanPham != null ? item.sanPham.soLuongTon : null}"
+                                           th:value="${item.soLuong}" />
+                                    <button type="button" class="shop-qty__btn" data-quantity-increase aria-label="Tăng số lượng">+</button>
+                                </div>
+                                <button type="submit" class="shop-btn shop-btn--ghost shop-btn--sm">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                    Cập nhật
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="shop-cart__item-total">
+                            <span class="shop-cart__label">Thành tiền</span>
+                            <strong class="shop-price"
+                                    th:text="${#numbers.formatInteger((item.giaTaiThoiDiem != null ? item.giaTaiThoiDiem : item.sanPham.giaBan) * item.soLuong, 0, 'DEFAULT') + 'đ'}">0đ</strong>
+                        </div>
+
+                        <div class="shop-cart__item-actions">
+                            <form th:action="@{/gio-hang/xoa}" method="post">
+                                <input type="hidden" name="chiTietId" th:value="${item.id}" />
+                                <button type="submit" class="shop-btn shop-btn--ghost shop-btn--sm shop-cart__remove-btn">
+                                    <i class="bi bi-trash3"></i>
+                                    Xóa
+                                </button>
+                            </form>
+                        </div>
+                    </article>
+                </div>
+
+                <aside class="shop-cart__summary shop-card">
+                    <div class="shop-cart__summary-header">
+                        <h2 class="shop-h4">Tóm tắt đơn hàng</h2>
+                        <p>Giá trị đơn tạm tính trước khi áp dụng ưu đãi và phương thức vận chuyển.</p>
+                    </div>
+
+                    <div class="shop-cart__summary-row">
+                        <span>Tạm tính</span>
+                        <strong th:text="${#numbers.formatInteger(cartTotal, 0, 'DEFAULT') + 'đ'}">0đ</strong>
+                    </div>
+                    <div class="shop-cart__summary-row">
+                        <span>Số lượng sản phẩm</span>
+                        <strong th:text="${cartItemCount}">0</strong>
+                    </div>
+                    <div class="shop-cart__summary-total">
+                        <span>Tổng cộng</span>
+                        <strong class="shop-price"
+                                th:text="${#numbers.formatInteger(cartTotal, 0, 'DEFAULT') + 'đ'}">0đ</strong>
+                    </div>
+
+                    <div class="shop-cart__actions">
+                        <a class="shop-btn shop-btn--outline" th:href="@{/cua-hang}">
+                            <i class="bi bi-arrow-left"></i>
+                            Tiếp tục mua sắm
+                        </a>
+
+                        <form th:action="@{/gio-hang/xoa-tat-ca}" method="post">
+                            <button type="submit" class="shop-btn shop-btn--ghost shop-cart__clear-btn">
+                                <i class="bi bi-trash"></i>
+                                Xóa toàn bộ
+                            </button>
+                        </form>
+
+                        <a class="shop-btn shop-btn--primary shop-btn--lg shop-btn--full" th:href="@{/thanh-toan}">
+                            <i class="bi bi-credit-card-2-front"></i>
+                            Tiến hành thanh toán
+                        </a>
+                    </div>
+                </aside>
+            </div>
+
+            <div class="shop-empty shop-card shop-cart__empty" th:if="${cartItems == null or #lists.isEmpty(cartItems)}">
+                <div class="shop-empty__icon">
+                    <i class="bi bi-bag-x"></i>
+                </div>
+                <h2 class="shop-empty__title">Giỏ hàng trống</h2>
+                <p class="shop-empty__desc">
+                    Chưa có sản phẩm nào trong giỏ. Khám phá thêm các mẫu vợt, giày và phụ kiện đang sẵn hàng tại cửa hàng.
+                </p>
+                <a class="shop-btn shop-btn--primary shop-btn--lg" th:href="@{/cua-hang}">
+                    <i class="bi bi-arrow-right"></i>
+                    Tiếp tục mua sắm
+                </a>
+            </div>
+        </div>
+    </section>
+</div>

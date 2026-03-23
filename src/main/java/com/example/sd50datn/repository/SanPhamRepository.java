@@ -46,4 +46,15 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
     List<SanPham> searchProducts(@Param("keyword") String keyword,
                                  @Param("trangThai") Integer trangThai,
                                  @Param("danhMucId") Integer danhMucId);
+
+    @Query("SELECT sp FROM SanPham sp LEFT JOIN FETCH sp.danhMucSanPham LEFT JOIN FETCH sp.mauSac LEFT JOIN FETCH sp.anh " +
+           "WHERE sp.trangThai = 1 AND sp.danhMucSanPham.danhMucSanPhamId = :danhMucId ORDER BY sp.id DESC")
+    List<SanPham> findLatestActiveByCategory(@Param("danhMucId") Integer danhMucId);
+
+    @Query("SELECT sp FROM SanPham sp " +
+           "LEFT JOIN FETCH sp.danhMucSanPham " +
+           "LEFT JOIN FETCH sp.mauSac " +
+           "LEFT JOIN FETCH sp.anh " +
+           "WHERE sp.id = :id")
+    Optional<SanPham> findByIdWithRelations(@Param("id") Integer id);
 }

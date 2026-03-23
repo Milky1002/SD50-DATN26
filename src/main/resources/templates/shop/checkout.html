@@ -1,0 +1,150 @@
+<div th:fragment="content" xmlns:th="http://www.thymeleaf.org">
+    <section class="shop-section shop-section--sm">
+        <div class="shop-container">
+            <div class="shop-checkout shop-checkout--ready">
+                <form id="shopCheckoutForm" class="shop-checkout__form" th:action="@{/thanh-toan}" method="post">
+                    <section class="shop-checkout__section shop-card">
+                        <div class="shop-checkout__section-head">
+                            <span class="shop-badge shop-badge--primary">Bước 1</span>
+                            <h1 class="shop-checkout__section-title">Thông tin giao hàng</h1>
+                        </div>
+
+                        <div class="shop-field">
+                            <label class="shop-label" for="checkoutCustomerName">Họ tên</label>
+                            <input id="checkoutCustomerName"
+                                   class="shop-input"
+                                   type="text"
+                                   name="tenKhachHang"
+                                   th:value="${customerName}"
+                                   autocomplete="name"
+                                   required />
+                        </div>
+
+                        <div class="shop-field">
+                            <label class="shop-label" for="checkoutCustomerPhone">Số điện thoại</label>
+                            <input id="checkoutCustomerPhone"
+                                   class="shop-input"
+                                   type="tel"
+                                   name="sdtKhachHang"
+                                   pattern="0[0-9]{9}"
+                                   inputmode="numeric"
+                                   autocomplete="tel"
+                                   placeholder="0xxxxxxxxx"
+                                   required />
+                        </div>
+
+                        <div class="shop-field">
+                            <label class="shop-label" for="checkoutCustomerEmail">Email</label>
+                            <input id="checkoutCustomerEmail"
+                                   class="shop-input"
+                                   type="email"
+                                   name="emailKhachHang"
+                                   th:value="${customerEmail}"
+                                   autocomplete="email"
+                                   placeholder="ban@email.com" />
+                        </div>
+
+                        <div class="shop-field shop-field--last">
+                            <label class="shop-label" for="checkoutCustomerAddress">Địa chỉ giao hàng</label>
+                            <textarea id="checkoutCustomerAddress"
+                                      class="shop-input shop-checkout__textarea"
+                                      name="diaChiKhachHang"
+                                      rows="4"
+                                      autocomplete="street-address"
+                                      placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
+                                      required></textarea>
+                        </div>
+                    </section>
+
+                    <section class="shop-checkout__section shop-card">
+                        <div class="shop-checkout__section-head">
+                            <span class="shop-badge shop-badge--primary">Bước 2</span>
+                            <h2 class="shop-checkout__section-title">Phương thức thanh toán</h2>
+                        </div>
+
+                        <div class="shop-checkout__payment-list">
+                            <label class="shop-checkout__payment-option"
+                                   th:each="pm, stat : ${paymentMethods}"
+                                   th:classappend="${stat.first} ? ' shop-checkout__payment-option--default'">
+                                <input type="radio"
+                                       name="hinhThucThanhToanId"
+                                       th:value="${pm.id}"
+                                       th:checked="${stat.first}" />
+                                <span class="shop-checkout__payment-content">
+                                    <span class="shop-checkout__payment-name" th:text="${pm.tenHinhThuc}">Thanh toán khi nhận hàng</span>
+                                    <span class="shop-checkout__payment-note"
+                                          th:text="${pm.moTa != null and !#strings.isEmpty(pm.moTa) ? pm.moTa : 'Xác nhận nhanh chóng và an toàn cho đơn hàng của bạn.'}">Mô tả thanh toán</span>
+                                </span>
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="shop-checkout__section shop-card">
+                        <div class="shop-checkout__section-head">
+                            <span class="shop-badge shop-badge--primary">Bước 3</span>
+                            <h2 class="shop-checkout__section-title">Ghi chú</h2>
+                        </div>
+
+                        <div class="shop-field shop-field--last">
+                            <label class="shop-label" for="checkoutOrderNote">Thông tin thêm cho đơn hàng</label>
+                            <textarea id="checkoutOrderNote"
+                                      class="shop-input shop-checkout__textarea"
+                                      name="ghiChu"
+                                      rows="4"
+                                      placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi giao..."></textarea>
+                        </div>
+                    </section>
+
+                    <div class="shop-checkout__submit shop-checkout__submit--desktop">
+                        <button type="submit" class="shop-btn shop-btn--primary shop-btn--lg shop-btn--full">
+                            <i class="bi bi-shield-check"></i>
+                            Đặt hàng
+                        </button>
+                    </div>
+                </form>
+
+                <aside class="shop-checkout__summary">
+                    <div class="shop-card shop-checkout__summary-card">
+                        <div class="shop-checkout__summary-head">
+                            <p class="shop-checkout__eyebrow">Đơn hàng của bạn</p>
+                            <h2 class="shop-checkout__summary-title">Tóm tắt đơn hàng</h2>
+                            <p class="shop-checkout__summary-count"
+                               th:text="${cartItemCount} + ' sản phẩm đang chờ xác nhận'">0 sản phẩm đang chờ xác nhận</p>
+                        </div>
+
+                        <div class="shop-checkout__items">
+                            <div class="shop-checkout__item" th:each="item : ${cartItems}">
+                                <div class="shop-checkout__item-main">
+                                    <p class="shop-checkout__item-name"
+                                       th:text="${item.sanPham != null ? item.sanPham.tenSanPham : 'Sản phẩm'}">Tên sản phẩm</p>
+                                    <p class="shop-checkout__item-meta"
+                                       th:text="|${item.soLuong != null ? item.soLuong : 0} × ${#numbers.formatInteger(item.giaTaiThoiDiem != null ? item.giaTaiThoiDiem : item.sanPham.giaBan, 0, 'DEFAULT')}đ|">1 × 0đ</p>
+                                </div>
+                                <strong class="shop-checkout__item-total"
+                                        th:text="${#numbers.formatDecimal((item.giaTaiThoiDiem != null ? item.giaTaiThoiDiem : item.sanPham.giaBan).multiply(T(java.math.BigDecimal).valueOf(item.soLuong != null ? item.soLuong : 0)), 0, 'DEFAULT', 0, 'DEFAULT')} + 'đ'">0đ</strong>
+                            </div>
+                        </div>
+
+                        <hr class="shop-divider" />
+
+                        <div class="shop-checkout__total">
+                            <span>Tổng thanh toán</span>
+                            <strong th:text="${#numbers.formatInteger(cartTotal, 0, 'DEFAULT')} + 'đ'">0đ</strong>
+                        </div>
+
+                        <p class="shop-checkout__summary-note">
+                            Đơn hàng sẽ được xác nhận thủ công bởi đội ngũ Yonex Store trong thời gian sớm nhất.
+                        </p>
+
+                        <div class="shop-checkout__submit shop-checkout__submit--mobile">
+                            <button type="submit" form="shopCheckoutForm" class="shop-btn shop-btn--primary shop-btn--lg shop-btn--full">
+                                <i class="bi bi-shield-check"></i>
+                                Đặt hàng
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+</div>

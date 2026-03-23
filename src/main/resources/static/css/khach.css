@@ -1,6 +1,46 @@
 /* ───── KhachHang Page ───── */
 .kh-wrap { padding: 0; }
 
+.kh-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.kh-summary-card {
+    background: linear-gradient(135deg, #eef4ff, #ffffff);
+    border: 1px solid #dbe7ff;
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kh-summary-card--muted {
+    background: linear-gradient(135deg, #f8fafc, #ffffff);
+    border-color: #e2e8f0;
+}
+
+.kh-summary-card__label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+.kh-summary-card__value {
+    font-size: 28px;
+    line-height: 1;
+    color: #0f172a;
+}
+
+.kh-summary-card small {
+    color: #64748b;
+}
+
 /* Toolbar */
 .kh-toolbar {
     display: flex; flex-wrap: wrap; align-items: center;
@@ -69,6 +109,20 @@
 /* Pills - use shared vars */
 .pill--ok { background: var(--admin-success-light); color: var(--admin-success); }
 .pill--off { background: var(--admin-danger-light); color: var(--admin-danger); }
+.pill--linked {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #e0f2fe;
+    color: #0369a1;
+}
+.pill--pending-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fef3c7;
+    color: #b45309;
+}
 
 /* Actions */
 .kh-action {
@@ -143,3 +197,23 @@
     background: #fff;
 }
 .req { color: var(--admin-danger); }
+.kh-field__hint {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.45;
+}
+.kh-field__info {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 13px;
+}
+.kh-field__info i {
+    margin-top: 2px;
+    color: var(--admin-primary);
+}

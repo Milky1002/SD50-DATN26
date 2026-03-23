@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+*.log
+
+### Runtime / temp ###
+uploads/
+cookies.txt
+nul
+.hive/

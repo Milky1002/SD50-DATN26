@@ -21,13 +21,16 @@ public class BanHangService {
     private final HinhThucThanhToanRepository hinhThucThanhToanRepo;
     private final ChuongTrinhKhuyenMaiRepository chuongTrinhKhuyenMaiRepo;
     private final LichSuApDungKhuyenMaiRepository lichSuApDungRepo;
+    private final NhanVienHoatDongService nhanVienHoatDongService;
 
     @Transactional
     public HoaDon checkout(String tenKhachHang, String sdtKhachHang,
                            String ghiChu, String phuongThucThanhToan,
                            int tienKhachDua,
                            List<Map<String, Object>> items,
-                           Integer promotionId) {
+                           Integer promotionId,
+                           Integer nhanVienId,
+                           String hoTenNhanVien) {
 
         if (items == null || items.isEmpty()) {
             throw new IllegalArgumentException("Giỏ hàng trống");
@@ -50,7 +53,7 @@ public class BanHangService {
         Integer hinhThucThanhToanId = resolvePaymentMethodId(phuongThucThanhToan);
 
         HoaDon hoaDon = new HoaDon();
-        hoaDon.setNhanVienId(1);
+        hoaDon.setNhanVienId(nhanVienId != null ? nhanVienId : 1);
         hoaDon.setTenKhachHang(tenKhachHang != null && !tenKhachHang.isBlank() ? tenKhachHang : "Khách lẻ");
         hoaDon.setSdtKhachHang(sdtKhachHang);
         hoaDon.setGhiChu(ghiChu);
@@ -129,7 +132,28 @@ public class BanHangService {
             lichSuApDungRepo.save(lichSu);
         }
 
+        // Log staff activity
+        String moTa = String.format("Bán tại quầy – %d sản phẩm – Tổng: %,.0f đ",
+                items.size(), tongTienSauGiam);
+        nhanVienHoatDongService.log(
+                nhanVienId, hoTenNhanVien,
+                "SALE_OFFLINE", "HOA_DON", hoaDon.getId(),
+                moTa, tongTienSauGiam);
+
         return hoaDon;
+    }
+
+    /**
+     * Backward-compatible checkout without nhanVienId / hoTen (defaults to nhanVienId=1)
+     */
+    @Transactional
+    public HoaDon checkout(String tenKhachHang, String sdtKhachHang,
+                           String ghiChu, String phuongThucThanhToan,
+                           int tienKhachDua,
+                           List<Map<String, Object>> items,
+                           Integer promotionId) {
+        return checkout(tenKhachHang, sdtKhachHang, ghiChu, phuongThucThanhToan,
+                tienKhachDua, items, promotionId, null, null);
     }
 
     /**

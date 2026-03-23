@@ -1,0 +1,123 @@
+<div th:fragment="content" xmlns:th="http://www.thymeleaf.org">
+    <section class="shop-auth">
+        <div class="shop-container">
+            <div class="shop-auth__shell">
+                <article class="shop-auth__card shop-auth__card--register">
+                    <header class="shop-auth__header">
+                        <p class="shop-auth__eyebrow">Yonex Store</p>
+                        <h1 class="shop-auth__title">Đăng ký tài khoản</h1>
+                        <p class="shop-auth__subtitle">Tạo tài khoản để lưu thông tin, theo dõi đơn hàng và nhận ưu đãi dành riêng cho thành viên.</p>
+                    </header>
+
+                    <div class="shop-auth__alert shop-auth__alert--danger" th:if="${error}">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <span th:text="${error}">Có lỗi xảy ra</span>
+                    </div>
+
+                    <div class="shop-auth__alert shop-auth__alert--success" th:if="${success}">
+                        <i class="bi bi-check-circle"></i>
+                        <span th:text="${success}">Đăng ký thành công</span>
+                    </div>
+
+                    <div class="shop-auth__notice">
+                        <div class="shop-auth__notice-icon"><i class="bi bi-person-badge"></i></div>
+                        <div>
+                            <strong>Nếu bạn đã từng mua tại quầy</strong>
+                            <p>Khi email hoặc số điện thoại trùng với hồ sơ khách hàng có sẵn, hệ thống sẽ tự động kích hoạt tài khoản website và giữ nguyên lịch sử khách hàng.</p>
+                        </div>
+                    </div>
+
+                    <form class="shop-auth__form" th:action="@{/dang-ky}" method="post">
+                        <div class="shop-field">
+                            <label class="shop-label" for="shopRegisterName">Họ tên</label>
+                            <input id="shopRegisterName"
+                                   class="shop-input"
+                                   type="text"
+                                   name="tenKhachHang"
+                                   th:value="${form?.tenKhachHang}"
+                                   placeholder="Nguyễn Văn A"
+                                   autocomplete="name"
+                                   required />
+                        </div>
+
+                        <div class="shop-field shop-auth__grid shop-auth__grid--2">
+                            <div>
+                                <label class="shop-label" for="shopRegisterEmail">Email</label>
+                                <input id="shopRegisterEmail"
+                                       class="shop-input"
+                                       type="email"
+                                       name="email"
+                                       th:value="${form?.email}"
+                                       placeholder="nhapemail@example.com"
+                                        autocomplete="email"
+                                        required />
+                                <small class="shop-auth__hint">Dùng email bạn đã cung cấp khi mua tại quầy để hệ thống tự động liên kết hồ sơ.</small>
+                            </div>
+                            <div>
+                                <label class="shop-label" for="shopRegisterPhone">Số điện thoại</label>
+                                <input id="shopRegisterPhone"
+                                       class="shop-input"
+                                       type="tel"
+                                       name="sdt"
+                                       th:value="${form?.sdt}"
+                                       placeholder="09xxxxxxxx"
+                                        autocomplete="tel"
+                                        pattern="0[0-9]{9}"
+                                        required />
+                                <small class="shop-auth__hint">Số điện thoại này cũng được dùng để nhận diện khách hàng đã có hồ sơ offline.</small>
+                            </div>
+                        </div>
+
+                        <div class="shop-field">
+                            <label class="shop-label" for="shopRegisterAddress">Địa chỉ</label>
+                            <input id="shopRegisterAddress"
+                                   class="shop-input"
+                                   type="text"
+                                   name="diaChi"
+                                   th:value="${form?.diaChi}"
+                                   placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành"
+                                   autocomplete="street-address"
+                                   required />
+                        </div>
+
+                        <div class="shop-field shop-auth__grid shop-auth__grid--2">
+                            <div>
+                                <label class="shop-label" for="shopRegisterPassword">Mật khẩu</label>
+                                <input id="shopRegisterPassword"
+                                       class="shop-input"
+                                       type="password"
+                                       name="password"
+                                       placeholder="Tối thiểu 6 ký tự"
+                                       autocomplete="new-password"
+                                       minlength="6"
+                                       required />
+                            </div>
+                            <div>
+                                <label class="shop-label" for="shopRegisterConfirmPassword">Xác nhận mật khẩu</label>
+                                <input id="shopRegisterConfirmPassword"
+                                       class="shop-input"
+                                       type="password"
+                                       name="confirmPassword"
+                                       placeholder="Nhập lại mật khẩu"
+                                       autocomplete="new-password"
+                                       required />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="shop-btn shop-btn--primary shop-btn--full shop-btn--lg">
+                            Đăng ký
+                        </button>
+                    </form>
+
+                    <footer class="shop-auth__footer">
+                        <p>Đã có tài khoản? <a th:href="@{/dang-nhap}">Đăng nhập</a></p>
+                        <a class="shop-auth__back-link" th:href="@{/}">
+                            <i class="bi bi-arrow-left"></i>
+                            <span>Quay về trang chủ</span>
+                        </a>
+                    </footer>
+                </article>
+            </div>
+        </div>
+    </section>
+</div>

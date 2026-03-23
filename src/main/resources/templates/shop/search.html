@@ -1,0 +1,81 @@
+<div th:fragment="content">
+    <section class="shop-section shop-search-results">
+        <div class="shop-container">
+            <div class="shop-search-header">
+                <div>
+                    <p class="shop-search-header__eyebrow">Storefront search</p>
+                    <h1 class="shop-search-header__title">Kết quả tìm kiếm</h1>
+                    <p class="shop-search-header__summary" th:if="${query != null and !#strings.isEmpty(#strings.trim(query))}">
+                        Từ khóa:
+                        <span class="shop-search-query" th:text="${query}">Yonex Astrox</span>
+                    </p>
+                    <p class="shop-search-header__summary" th:unless="${query != null and !#strings.isEmpty(#strings.trim(query))}">
+                        Nhập từ khóa để tìm kiếm sản phẩm
+                    </p>
+                </div>
+                <span class="shop-search-count" th:text="${resultCount + ' sản phẩm'}">0 sản phẩm</span>
+            </div>
+
+            <div class="shop-empty-state shop-search-empty"
+                 th:if="${query == null or #strings.isEmpty(#strings.trim(query))}">
+                <i class="bi bi-search shop-empty-state__icon"></i>
+                <p class="shop-empty-state__msg">Nhập từ khóa để tìm kiếm sản phẩm</p>
+                <p class="shop-search-empty__hint">Bạn có thể tìm theo tên sản phẩm, dòng vợt, giày hoặc phụ kiện.</p>
+                <a class="shop-btn shop-btn--primary" th:href="@{/cua-hang}">Khám phá cửa hàng</a>
+            </div>
+
+            <div class="shop-product-showcase shop-stagger"
+                 th:if="${query != null and !#strings.isEmpty(#strings.trim(query)) and results != null and !#lists.isEmpty(results)}">
+                <article class="shop-product-card"
+                         th:each="sp : ${results}">
+                    <a class="shop-product-card__image-link"
+                       th:href="@{/cua-hang/{id}(id=${sp.id})}">
+                        <img th:if="${sp.anh != null}"
+                             th:src="${sp.anh.anhUrl}"
+                             th:alt="${sp.tenSanPham}"
+                             class="shop-product-card__image"
+                             loading="lazy" />
+                        <span th:unless="${sp.anh != null}"
+                              class="shop-product-card__placeholder">
+                            <i class="bi bi-image"></i>
+                        </span>
+                        <span class="shop-badge shop-badge--primary shop-product-card__badge">Tìm thấy</span>
+                    </a>
+                    <div class="shop-product-card__body">
+                        <p class="shop-product-card__category"
+                           th:text="${sp.danhMucSanPham != null ? sp.danhMucSanPham.tenDanhMuc : ''}">Danh mục</p>
+                        <a class="shop-product-card__name"
+                           th:href="@{/cua-hang/{id}(id=${sp.id})}"
+                           th:text="${sp.tenSanPham}">Tên sản phẩm</a>
+                        <div class="shop-product-card__meta">
+                            <span th:if="${sp.mauSac != null}"><i class="bi bi-palette2"></i><span th:text="${sp.mauSac.tenMau}">Màu</span></span>
+                            <span><i class="bi bi-box-seam"></i><span th:text="${(sp.soLuongTon != null ? sp.soLuongTon : 0) + ' tồn kho'}">0 tồn kho</span></span>
+                        </div>
+                        <div class="shop-product-card__price-row">
+                            <span class="shop-price"
+                                  th:text="${#numbers.formatInteger(sp.giaBan, 0, 'DEFAULT') + 'đ'}">0đ</span>
+                            <span class="shop-product-card__stock"
+                                  th:classappend="${sp.soLuongTon != null and sp.soLuongTon == 0} ? ' shop-product-card__stock--out'"
+                                  th:text="${sp.soLuongTon != null and sp.soLuongTon == 0 ? 'Hết hàng' : 'Sẵn hàng'}">Sẵn hàng</span>
+                        </div>
+                        <a class="shop-btn shop-btn--primary shop-btn--full" th:href="@{/cua-hang/{id}(id=${sp.id})}">
+                            <i class="bi bi-eye"></i>
+                            Xem chi tiết
+                        </a>
+                    </div>
+                </article>
+            </div>
+
+            <div class="shop-empty-state shop-search-empty"
+                 th:if="${query != null and !#strings.isEmpty(#strings.trim(query)) and (results == null or #lists.isEmpty(results))}">
+                <i class="bi bi-search shop-empty-state__icon"></i>
+                <p class="shop-empty-state__msg">
+                    Không tìm thấy sản phẩm nào cho
+                    <span class="shop-search-query" th:text="${'"' + query + '"'}">"Yonex"</span>
+                </p>
+                <p class="shop-search-empty__hint">Hãy thử từ khóa ngắn hơn, tên dòng sản phẩm khác hoặc khám phá toàn bộ cửa hàng.</p>
+                <a class="shop-btn shop-btn--outline" th:href="@{/cua-hang}">Xem tất cả sản phẩm</a>
+            </div>
+        </div>
+    </section>
+</div>

@@ -22,6 +22,18 @@ public class Anh {
     @Column(name = "Anh_url", nullable = false, columnDefinition = "nvarchar(max)")
     private String anhUrl;
 
+    @Column(name = "Ten_file_goc")
+    private String tenFileGoc;
+
+    @Column(name = "Loai_nguon")
+    private String loaiNguon;
+
+    @Column(name = "Kich_thuoc_byte")
+    private Long kichThuocByte;
+
+    @Column(name = "Mime_type")
+    private String mimeType;
+
     @Column(name = "Mo_ta", columnDefinition = "nvarchar(max)")
     private String moTa;
 

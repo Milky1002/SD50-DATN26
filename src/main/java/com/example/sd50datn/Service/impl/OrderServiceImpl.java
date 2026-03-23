@@ -2,10 +2,15 @@ package com.example.sd50datn.Service.impl;
 
 
 import com.example.sd50datn.Dto.OrderSummaryDTO;
+import com.example.sd50datn.Entity.HoaDonChiTiet;
+import com.example.sd50datn.Entity.SanPham;
+import com.example.sd50datn.Repository.HoaDonChiTietRepository;
 import com.example.sd50datn.Repository.OrderRepository;
+import com.example.sd50datn.Repository.SanPhamRepository;
 import com.example.sd50datn.Service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -16,6 +21,8 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+    private final HoaDonChiTietRepository hoaDonChiTietRepository;
+    private final SanPhamRepository sanPhamRepository;
 
     @Override
     public List<OrderSummaryDTO> getOrderSummaries() {
@@ -39,14 +46,56 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public void updateOrderStatus(Integer id, Integer status) {
         if (id == null || status == null) {
             return;
         }
         orderRepository.findById(id).ifPresent(order -> {
+            Integer previousStatus = order.getTrangThai();
+
+            if (!isStockManagedStatus(previousStatus) && isStockManagedStatus(status)) {
+                reserveStock(order.getId());
+            }
+
+            if (isStockManagedStatus(previousStatus) && status == 3) {
+                restoreStock(order.getId());
+            }
+
             order.setTrangThai(status);
             orderRepository.save(order);
         });
+    }
+
+    private boolean isStockManagedStatus(Integer status) {
+        return status != null && status != 3;
+    }
+
+    private void reserveStock(Integer orderId) {
+        List<HoaDonChiTiet> orderItems = hoaDonChiTietRepository.findByHoaDonId(orderId);
+        for (HoaDonChiTiet item : orderItems) {
+            SanPham sanPham = item.getSanPham();
+            if (sanPham == null || item.getSoLuongSanPham() == null) {
+                continue;
+            }
+            Integer currentStock = sanPham.getSoLuongTon() != null ? sanPham.getSoLuongTon() : 0;
+            int remaining = Math.max(0, currentStock - item.getSoLuongSanPham());
+            sanPham.setSoLuongTon(remaining);
+            sanPhamRepository.save(sanPham);
+        }
+    }
+
+    private void restoreStock(Integer orderId) {
+        List<HoaDonChiTiet> orderItems = hoaDonChiTietRepository.findByHoaDonId(orderId);
+        for (HoaDonChiTiet item : orderItems) {
+            SanPham sanPham = item.getSanPham();
+            if (sanPham == null || item.getSoLuongSanPham() == null) {
+                continue;
+            }
+            Integer currentStock = sanPham.getSoLuongTon() != null ? sanPham.getSoLuongTon() : 0;
+            sanPham.setSoLuongTon(currentStock + item.getSoLuongSanPham());
+            sanPhamRepository.save(sanPham);
+        }
     }
 }
 

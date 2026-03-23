@@ -1,18 +1,26 @@
 package com.example.sd50datn.Controller;
 
 import com.example.sd50datn.Entity.HoaDon;
+import com.example.sd50datn.Entity.KhachHang;
 import com.example.sd50datn.Entity.SanPham;
 import com.example.sd50datn.Service.BanHangService;
+import com.example.sd50datn.Service.KhachHangService;
+import com.example.sd50datn.Service.NhanVienHoatDongService;
 import com.example.sd50datn.Service.SanPhamService;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/ban-hang")
@@ -21,6 +29,9 @@ public class BanHangController {
 
     private final SanPhamService sanPhamService;
     private final BanHangService banHangService;
+    private final KhachHangService khachHangService;
+    private final NhanVienHoatDongService nhanVienHoatDongService;
+    private final Validator validator;
 
     @GetMapping
     public String index(Model model) {
@@ -52,9 +63,73 @@ public class BanHangController {
         return ResponseEntity.ok(data);
     }
 
+    @GetMapping("/api/tim-khach-hang")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> timKhachHang(
+            @RequestParam(value = "q", required = false) String q) {
+        List<Map<String, Object>> data = khachHangService.searchForPos(q).stream()
+                .map(this::toCustomerPayload)
+                .toList();
+        return ResponseEntity.ok(data);
+    }
+
+    @PostMapping("/api/khach-hang")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> taoKhachHang(@RequestBody Map<String, Object> request,
+                                                            HttpSession session) {
+        Map<String, Object> result = new HashMap<>();
+
+        KhachHang kh = new KhachHang();
+        kh.setTenKhachHang(readString(request.get("tenKhachHang")));
+        kh.setSdt(readString(request.get("sdt")));
+        kh.setEmail(readString(request.get("email")));
+        kh.setDiaChiKhachHang(readString(request.get("diaChiKhachHang")));
+        kh.setTrangThai(1);
+        kh.setNgayTao(LocalDateTime.now());
+        kh.setNgayCapNhat(LocalDateTime.now());
+
+        Set<ConstraintViolation<KhachHang>> violations = validator.validate(kh);
+        if (!violations.isEmpty()) {
+            result.put("success", false);
+            result.put("message", violations.iterator().next().getMessage());
+            return ResponseEntity.badRequest().body(result);
+        }
+
+        if (khachHangService.existsByPhone(kh.getSdt())) {
+            result.put("success", false);
+            result.put("message", "Số điện thoại đã tồn tại trong hệ thống");
+            return ResponseEntity.badRequest().body(result);
+        }
+
+        if (khachHangService.existsByEmail(kh.getEmail())) {
+            result.put("success", false);
+            result.put("message", "Email đã tồn tại trong hệ thống");
+            return ResponseEntity.badRequest().body(result);
+        }
+
+        KhachHang saved = khachHangService.createForPos(kh);
+
+        Integer nhanVienId = (Integer) session.getAttribute("nhanVienId");
+        String hoTen = (String) session.getAttribute("hoTen");
+        nhanVienHoatDongService.log(
+                nhanVienId,
+                hoTen,
+                "KH_TAO",
+                "KHACH_HANG",
+                saved.getKhachHangId(),
+                "Thêm khách hàng tại quầy: " + saved.getTenKhachHang() + " - " + saved.getSdt(),
+                null
+        );
+
+        result.put("success", true);
+        result.put("customer", toCustomerPayload(saved));
+        return ResponseEntity.ok(result);
+    }
+
     @PostMapping("/checkout")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> checkout(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<Map<String, Object>> checkout(@RequestBody Map<String, Object> request,
+                                                        HttpSession session) {
         try {
             String tenKhachHang = (String) request.get("tenKhachHang");
             String sdtKhachHang = (String) request.get("sdtKhachHang");
@@ -65,7 +140,14 @@ public class BanHangController {
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> items = (List<Map<String, Object>>) request.get("items");
 
-            HoaDon hoaDon = banHangService.checkout(tenKhachHang, sdtKhachHang, ghiChu, phuongThucThanhToan, tienKhachDua, items, promotionId);
+            // Read cashier identity from session
+            Integer nhanVienId = (Integer) session.getAttribute("nhanVienId");
+            String hoTenNhanVien = (String) session.getAttribute("hoTen");
+
+            HoaDon hoaDon = banHangService.checkout(
+                    tenKhachHang, sdtKhachHang, ghiChu, phuongThucThanhToan,
+                    tienKhachDua, items, promotionId,
+                    nhanVienId, hoTenNhanVien);
 
             Map<String, Object> result = new HashMap<>();
             result.put("success", true);
@@ -78,5 +160,23 @@ public class BanHangController {
             result.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(result);
         }
+    }
+
+    private Map<String, Object> toCustomerPayload(KhachHang kh) {
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", kh.getKhachHangId());
+        item.put("tenKhachHang", kh.getTenKhachHang());
+        item.put("sdt", kh.getSdt());
+        item.put("email", kh.getEmail());
+        item.put("diaChiKhachHang", kh.getDiaChiKhachHang());
+        return item;
+    }
+
+    private String readString(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String text = String.valueOf(value).trim();
+        return text.isEmpty() ? null : text;
     }
 }

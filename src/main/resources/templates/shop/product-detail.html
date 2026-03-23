@@ -1,0 +1,324 @@
+<div th:fragment="content">
+    <section class="shop-section shop-pd-section">
+        <div class="shop-container">
+            <div class="shop-pd shop-card">
+                <div class="shop-pd__media">
+                    <div class="shop-pd__image-wrap">
+                        <img th:if="${product.anh != null}"
+                             th:src="${product.anh.anhUrl}"
+                             th:alt="${product.tenSanPham}"
+                             class="shop-pd__image" />
+                        <div th:unless="${product.anh != null}" class="shop-pd__placeholder">
+                            <i class="bi bi-image"></i>
+                            <span>Chưa có hình ảnh</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="shop-pd__info">
+                    <div class="shop-pd__panel">
+                        <div class="shop-pd__header">
+                            <span class="shop-badge shop-badge--primary"
+                                  th:if="${product.danhMucSanPham != null}"
+                                  th:text="${product.danhMucSanPham.tenDanhMuc}">Danh mục</span>
+                            <h1 class="shop-pd__name" th:text="${product.tenSanPham}">Tên sản phẩm</h1>
+                            <div class="shop-pd__price-wrap">
+                                <span class="shop-price shop-pd__price"
+                                      th:text="${product.giaBan != null ? #numbers.formatInteger(product.giaBan, 0, 'DEFAULT') + 'đ' : 'Liên hệ'}">0đ</span>
+                            </div>
+                        </div>
+
+                        <div class="shop-pd__status-row">
+                            <div class="shop-pd__stock shop-pd__stock--in"
+                                 th:if="${product.soLuongTon != null and product.soLuongTon > 0}">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span th:text="'Sẵn hàng (' + ${product.soLuongTon} + ')'">Sẵn hàng</span>
+                            </div>
+                            <div class="shop-pd__stock shop-pd__stock--out"
+                                 th:unless="${product.soLuongTon != null and product.soLuongTon > 0}">
+                                <i class="bi bi-x-circle-fill"></i>
+                                <span>Hết hàng</span>
+                            </div>
+
+                            <div class="shop-pd__color" th:if="${product.mauSac != null}">
+                                <span class="shop-pd__label">Màu sắc</span>
+                                <div class="shop-pd__color-value">
+                                    <span class="shop-pd__swatch" th:style="'background-color:' + ${product.mauSac.maMauHex}"></span>
+                                    <span th:text="${product.mauSac.tenMau}">Xanh dương</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form class="shop-pd__purchase" th:action="@{/gio-hang/them}" method="post">
+                            <input type="hidden" name="sanPhamId" th:value="${product.id}" />
+
+                            <div class="shop-pd__purchase-grid">
+                                <div class="shop-pd__qty-row">
+                                    <label class="shop-pd__label" for="shopProductQty">Số lượng</label>
+                                    <div class="shop-pd__qty-block">
+                                        <div class="shop-qty" data-quantity-control>
+                                            <button type="button" class="shop-qty__btn" data-quantity-decrease>−</button>
+                                            <input type="number"
+                                                   id="shopProductQty"
+                                                   class="shop-qty__val"
+                                                   data-quantity-input
+                                                   value="1"
+                                                   min="1"
+                                                   th:max="${product.soLuongTon}"
+                                                   name="soLuong" />
+                                            <button type="button" class="shop-qty__btn" data-quantity-increase>+</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="shop-pd__cta-stack">
+                                    <button type="submit"
+                                            class="shop-btn shop-btn--primary shop-btn--lg shop-btn--full"
+                                            th:disabled="${product.soLuongTon == null or product.soLuongTon == 0}">
+                                        <i class="bi bi-bag-plus"></i>
+                                        <span th:text="${product.soLuongTon != null and product.soLuongTon > 0 ? 'Thêm vào giỏ hàng' : 'Tạm hết hàng'}">Thêm vào giỏ hàng</span>
+                                    </button>
+
+                                    <div class="shop-pd__quickbuy" th:if="${product.soLuongTon != null and product.soLuongTon > 0}">
+                                        <button type="button"
+                                                class="shop-btn shop-btn--outline shop-btn--lg shop-btn--full"
+                                                data-quickbuy-open
+                                                th:attr="data-product-id=${product.id},data-max-qty=${product.soLuongTon}">
+                                            <i class="bi bi-lightning-charge-fill"></i>
+                                            Mua ngay — không cần đăng nhập
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="shop-pd__content-grid">
+                        <div class="shop-pd__desc" th:if="${product.moTa != null and !#strings.isEmpty(product.moTa)}">
+                            <h2 class="shop-pd__section-title">Mô tả sản phẩm</h2>
+                            <p th:text="${product.moTa}">Mô tả sản phẩm</p>
+                        </div>
+
+                        <div class="shop-pd__desc" th:if="${product.moTa == null or #strings.isEmpty(product.moTa)}">
+                            <h2 class="shop-pd__section-title">Mô tả sản phẩm</h2>
+                            <p>Thông tin mô tả sẽ được cập nhật sớm để bạn hiểu rõ hơn về chất liệu, cảm giác cầm nắm và nhóm người chơi phù hợp.</p>
+                        </div>
+
+                        <details class="shop-pd__meta" th:open="${false}">
+                            <summary class="shop-pd__meta-summary">
+                                <span>Thông tin kỹ thuật</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </summary>
+                            <div class="shop-pd__meta-list">
+                                <div class="shop-pd__meta-item">
+                                    <span class="shop-pd__meta-label"><i class="bi bi-upc-scan"></i> Mã sản phẩm</span>
+                                    <strong th:text="${product.maSanPham}">SP001</strong>
+                                </div>
+                                <div class="shop-pd__meta-item">
+                                    <span class="shop-pd__meta-label"><i class="bi bi-tag"></i> SKU</span>
+                                    <strong th:text="${product.sku}">SKU001</strong>
+                                </div>
+                                <div class="shop-pd__meta-item" th:if="${product.barcode != null}">
+                                    <span class="shop-pd__meta-label"><i class="bi bi-qr-code"></i> Barcode</span>
+                                    <strong th:text="${product.barcode}">8930000000000</strong>
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="shop-section shop-section--sm" th:if="${relatedProducts != null and !#lists.isEmpty(relatedProducts)}">
+        <div class="shop-container">
+            <div class="shop-pd-related__header">
+                <h2 class="shop-section__title">Sản phẩm liên quan</h2>
+                <p class="shop-section__intro">Các lựa chọn cùng danh mục để bạn so sánh nhanh về màu sắc, mức giá và tình trạng tồn kho.</p>
+            </div>
+
+            <div class="shop-product-showcase shop-stagger">
+                <article class="shop-product-card"
+                         th:each="sp : ${relatedProducts}">
+                    <a class="shop-product-card__image-link"
+                       th:href="@{/cua-hang/{id}(id=${sp.id})}">
+                        <img th:if="${sp.anh != null}"
+                             th:src="${sp.anh.anhUrl}"
+                             th:alt="${sp.tenSanPham}"
+                             class="shop-product-card__image"
+                             loading="lazy" />
+                        <span th:unless="${sp.anh != null}"
+                              class="shop-product-card__placeholder">
+                            <i class="bi bi-image"></i>
+                        </span>
+
+                        <span class="shop-badge shop-badge--primary shop-product-card__badge"
+                              th:if="${sp.danhMucSanPham != null}"
+                              th:text="${sp.danhMucSanPham.tenDanhMuc}">Danh mục</span>
+                    </a>
+                    <div class="shop-product-card__body">
+                        <p class="shop-product-card__category"
+                           th:text="${sp.danhMucSanPham != null ? sp.danhMucSanPham.tenDanhMuc : ''}">Danh mục</p>
+                        <a class="shop-product-card__name"
+                           th:href="@{/cua-hang/{id}(id=${sp.id})}"
+                           th:text="${sp.tenSanPham}">Tên sản phẩm</a>
+                        <div class="shop-product-card__meta">
+                            <span th:if="${sp.mauSac != null}"><i class="bi bi-palette2"></i><span th:text="${sp.mauSac.tenMau}">Màu</span></span>
+                            <span><i class="bi bi-box-seam"></i><span th:text="${(sp.soLuongTon != null ? sp.soLuongTon : 0) + ' tồn kho'}">0 tồn kho</span></span>
+                        </div>
+                        <div class="shop-product-card__price-row">
+                            <span class="shop-price"
+                                  th:text="${sp.giaBan != null ? #numbers.formatInteger(sp.giaBan, 0, 'DEFAULT') + 'đ' : 'Liên hệ'}">0đ</span>
+                            <span class="shop-product-card__stock"
+                                  th:classappend="${sp.soLuongTon != null and sp.soLuongTon == 0} ? ' shop-product-card__stock--out'"
+                                  th:text="${sp.soLuongTon != null and sp.soLuongTon == 0 ? 'Hết hàng' : 'Sẵn hàng'}">Sẵn hàng</span>
+                        </div>
+                        <a class="shop-btn shop-btn--primary shop-btn--full" th:href="@{/cua-hang/{id}(id=${sp.id})}">
+                            <i class="bi bi-eye"></i>
+                            Xem chi tiết
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== Guest Quick-Buy Modal ===== -->
+    <div id="quickBuyModal" class="shop-modal" aria-hidden="true" role="dialog" aria-labelledby="quickBuyModalTitle">
+        <div class="shop-modal__backdrop" data-quickbuy-close></div>
+        <div class="shop-modal__dialog">
+            <div class="shop-modal__header">
+                <h2 id="quickBuyModalTitle" class="shop-modal__title">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    Đặt hàng nhanh
+                </h2>
+                <button type="button" class="shop-modal__close" data-quickbuy-close aria-label="Đóng">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <form class="shop-modal__body" id="quickBuyForm" action="/dat-hang-nhanh" method="post">
+                <input type="hidden" name="sanPhamId" id="qbSanPhamId" />
+
+                <!-- Product summary -->
+                <div class="shop-quickbuy-product">
+                    <img th:if="${product.anh != null}" th:src="${product.anh.anhUrl}"
+                         th:alt="${product.tenSanPham}" class="shop-quickbuy-product__img" />
+                    <div class="shop-quickbuy-product__info">
+                        <p class="shop-quickbuy-product__name" th:text="${product.tenSanPham}">Sản phẩm</p>
+                        <p class="shop-price shop-quickbuy-product__price"
+                           th:text="${product.giaBan != null ? #numbers.formatInteger(product.giaBan, 0, 'DEFAULT') + 'đ' : 'Liên hệ'}">0đ</p>
+                    </div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="shop-form-group">
+                    <label class="shop-form-label" for="qbSoLuong">Số lượng</label>
+                    <div class="shop-qty" data-quantity-control>
+                        <button type="button" class="shop-qty__btn" data-quantity-decrease>−</button>
+                        <input type="number" id="qbSoLuong" name="soLuong"
+                               class="shop-qty__val" data-quantity-input
+                               value="1" min="1"
+                               th:max="${product.soLuongTon}" />
+                        <button type="button" class="shop-qty__btn" data-quantity-increase>+</button>
+                    </div>
+                </div>
+
+                <hr class="shop-modal__divider" />
+                <p class="shop-modal__section-title"><i class="bi bi-person-lines-fill"></i> Thông tin nhận hàng</p>
+
+                <!-- Customer info -->
+                <div class="shop-form-grid">
+                    <div class="shop-form-group">
+                        <label class="shop-form-label" for="qbTen">Họ và tên <span class="shop-required">*</span></label>
+                        <input type="text" id="qbTen" name="tenKhachHang"
+                               class="shop-form-input" required
+                               placeholder="Nguyễn Văn A" />
+                    </div>
+                    <div class="shop-form-group">
+                        <label class="shop-form-label" for="qbSdt">Số điện thoại <span class="shop-required">*</span></label>
+                        <input type="tel" id="qbSdt" name="sdtKhachHang"
+                               class="shop-form-input" required
+                               placeholder="0912 345 678" />
+                    </div>
+                </div>
+
+                <div class="shop-form-group">
+                    <label class="shop-form-label" for="qbEmail">Email (không bắt buộc)</label>
+                    <input type="email" id="qbEmail" name="emailKhachHang"
+                           class="shop-form-input"
+                           placeholder="email@example.com" />
+                </div>
+
+                <div class="shop-form-group">
+                    <label class="shop-form-label" for="qbDiaChi">Địa chỉ giao hàng <span class="shop-required">*</span></label>
+                    <input type="text" id="qbDiaChi" name="diaChiKhachHang"
+                           class="shop-form-input" required
+                           placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" />
+                </div>
+
+                <div class="shop-form-group">
+                    <label class="shop-form-label" for="qbHttt">Phương thức thanh toán <span class="shop-required">*</span></label>
+                    <select id="qbHttt" name="hinhThucThanhToanId" class="shop-form-select" required>
+                        <option value="">— Chọn phương thức —</option>
+                        <option th:each="pm : ${paymentMethods}"
+                                th:value="${pm.id}"
+                                th:text="${pm.tenHinhThuc}">Tiền mặt</option>
+                    </select>
+                </div>
+
+                <div class="shop-form-group">
+                    <label class="shop-form-label" for="qbGhiChu">Ghi chú (không bắt buộc)</label>
+                    <textarea id="qbGhiChu" name="ghiChu" class="shop-form-input shop-form-textarea"
+                              rows="2" placeholder="Yêu cầu đặc biệt, thời gian giao hàng..."></textarea>
+                </div>
+
+                <div class="shop-modal__footer">
+                    <button type="button" class="shop-btn shop-btn--ghost" data-quickbuy-close>Huỷ</button>
+                    <button type="submit" class="shop-btn shop-btn--primary shop-btn--lg">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Xác nhận đặt hàng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        var modal = document.getElementById('quickBuyModal');
+        if (!modal) return;
+
+        // Open
+        document.querySelectorAll('[data-quickbuy-open]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var productId = btn.getAttribute('data-product-id');
+                var maxQty    = btn.getAttribute('data-max-qty');
+                document.getElementById('qbSanPhamId').value = productId;
+                var qtyInput = document.getElementById('qbSoLuong');
+                if (qtyInput && maxQty) qtyInput.max = maxQty;
+                // Sync qty from main page input
+                var mainQty = document.getElementById('shopProductQty');
+                if (mainQty && qtyInput) qtyInput.value = mainQty.value || '1';
+                modal.setAttribute('aria-hidden', 'false');
+                modal.classList.add('shop-modal--open');
+                document.body.style.overflow = 'hidden';
+                document.getElementById('qbTen').focus();
+            });
+        });
+
+        // Close
+        function closeModal() {
+            modal.setAttribute('aria-hidden', 'true');
+            modal.classList.remove('shop-modal--open');
+            document.body.style.overflow = '';
+        }
+        document.querySelectorAll('[data-quickbuy-close]').forEach(function (el) {
+            el.addEventListener('click', closeModal);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    })();
+    </script>
+</div>

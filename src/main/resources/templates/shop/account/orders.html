@@ -1,0 +1,94 @@
+<div th:fragment="content" xmlns:th="http://www.thymeleaf.org">
+    <section class="shop-section shop-account-section">
+        <div class="shop-container">
+            <div class="shop-account">
+                <aside class="shop-account-sidebar shop-card">
+                    <div class="shop-account-sidebar__customer">
+                        <span class="shop-account-sidebar__avatar" aria-hidden="true">
+                            <i class="bi bi-person-circle"></i>
+                        </span>
+                        <div>
+                            <h2 class="shop-account-sidebar__name" th:text="${customerName}">Khách hàng</h2>
+                            <p class="shop-account-sidebar__email" th:text="${customerEmail}">email@example.com</p>
+                        </div>
+                    </div>
+
+                    <nav class="shop-account-nav" aria-label="Điều hướng tài khoản">
+                        <a class="shop-account-nav__item"
+                           th:href="@{/tai-khoan}"
+                           th:classappend="${activeTab == 'dashboard'} ? ' shop-account-nav__item--active'">
+                            <i class="bi bi-grid-1x2"></i>
+                            <span>Tổng quan</span>
+                        </a>
+                        <a class="shop-account-nav__item"
+                           th:href="@{/tai-khoan/don-hang}"
+                           th:classappend="${activeTab == 'orders'} ? ' shop-account-nav__item--active'">
+                            <i class="bi bi-box-seam"></i>
+                            <span>Đơn hàng</span>
+                        </a>
+                        <a class="shop-account-nav__item"
+                           th:href="@{/tai-khoan/ho-so}"
+                           th:classappend="${activeTab == 'profile'} ? ' shop-account-nav__item--active'">
+                            <i class="bi bi-person-vcard"></i>
+                            <span>Hồ sơ</span>
+                        </a>
+                        <a class="shop-account-nav__item shop-account-nav__item--logout" th:href="@{/dang-xuat}">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </nav>
+                </aside>
+
+                <div class="shop-account-content">
+                    <section class="shop-account-panel shop-card">
+                        <div class="shop-account-panel__header">
+                            <div>
+                                <p class="shop-account__eyebrow">Lịch sử mua sắm</p>
+                                <h1 class="shop-h3">Đơn hàng của tôi</h1>
+                                <p>Danh sách toàn bộ đơn hàng đã tạo trên tài khoản hiện tại.</p>
+                            </div>
+                        </div>
+
+                        <div class="shop-account-table-wrap" th:if="${orders != null and !#lists.isEmpty(orders)}">
+                            <table class="shop-account-table">
+                                <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="order : ${orders}">
+                                    <td th:text="${'#' + order.id}">#1</td>
+                                    <td th:text="${order.ngayTao != null ? #temporals.format(order.ngayTao, 'dd/MM/yyyy HH:mm') : '--'}">01/01/2026 08:00</td>
+                                    <td th:text="${#numbers.formatInteger(order.tongTienSauKhiGiam, 0, 'DEFAULT') + 'đ'}">0đ</td>
+                                    <td>
+                                        <span class="shop-order-status"
+                                              th:classappend="${order.trangThai == 0} ? ' shop-order-status--pending' : (${order.trangThai == 1} ? ' shop-order-status--confirmed' : (${order.trangThai == 2} ? ' shop-order-status--shipping' : (${order.trangThai == 3} ? ' shop-order-status--completed' : ' shop-order-status--cancelled')))"
+                                              th:text="${order.trangThai == 0} ? 'Chờ xác nhận' : (${order.trangThai == 1} ? 'Đã xác nhận' : (${order.trangThai == 2} ? 'Đang giao' : (${order.trangThai == 3} ? 'Hoàn thành' : 'Đã hủy')))">
+                                            Chờ xác nhận
+                                        </span>
+                                    </td>
+                                    <td class="shop-account-table__action">
+                                        <a th:href="@{/tai-khoan/don-hang/{id}(id=${order.id})}">Chi tiết</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="shop-account-empty" th:if="${orders == null or #lists.isEmpty(orders)}">
+                            <span class="shop-account-empty__icon"><i class="bi bi-receipt-cutoff"></i></span>
+                            <h3>Bạn chưa có đơn hàng nào</h3>
+                            <p>Khi bạn hoàn tất mua hàng, danh sách đơn sẽ hiển thị tại đây để theo dõi trạng thái giao nhận.</p>
+                            <a class="shop-btn shop-btn--primary" th:href="@{/cua-hang}">Khám phá sản phẩm</a>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

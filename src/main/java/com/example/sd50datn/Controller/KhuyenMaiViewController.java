@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/khuyen-mai")
+@RequestMapping("/admin/khuyen-mai")
 @RequiredArgsConstructor
 public class KhuyenMaiViewController {
 

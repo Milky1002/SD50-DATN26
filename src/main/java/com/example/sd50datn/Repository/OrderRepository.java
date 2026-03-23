@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface OrderRepository extends JpaRepository<HoaDon, Integer> {
 
+    boolean existsByKhachHangId(Integer khachHangId);
+
     interface OrderRowProjection {
         Integer getId();
 

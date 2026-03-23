@@ -17,7 +17,7 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    @GetMapping({"/dashboard", "/"})
+    @GetMapping("/dashboard")
     public String dashboard(Model model) {
         DashboardViewModel dashboardView = dashboardService.getDashboardView();
 

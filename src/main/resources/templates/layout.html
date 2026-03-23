@@ -29,6 +29,7 @@
 
         <nav class="nav">
             <a class="nav__item"
+               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
                th:href="@{/dashboard}"
                th:classappend="${activeMenu == 'dashboard'} ? ' active'">
                 <span class="nav__icon"><i class="bi bi-grid-1x2-fill"></i></span>
@@ -36,7 +37,7 @@
             </a>
 
             <a class="nav__item"
-               th:if="${session.role == 'Quản lý' or session.role == 'Quan ly'}"
+               th:if="${session.roleCode == 'ADMIN' or session.role == 'Quản lý' or session.role == 'Quan ly'}"
                th:href="@{/nhan-vien}"
                th:classappend="${activeMenu == 'nhanvien'} ? ' active'">
                 <span class="nav__icon"><i class="bi bi-people-fill"></i></span>
@@ -44,50 +45,81 @@
             </a>
 
             <a class="nav__item"
-               th:href="@{/khachhang/hienthi}"
-               th:classappend="${activeMenu == 'khachhang'} ? ' active'">
+               th:if="${session.roleCode == 'ADMIN' or session.role == 'Quản lý' or session.role == 'Quan ly'}"
+               th:href="@{/quan-ly-tai-khoan}"
+               th:classappend="${activeMenu == 'quanlyuser'} ? ' active'">
+                <span class="nav__icon"><i class="bi bi-person-lock"></i></span>
+                <span class="nav__text">Quản lý tài khoản</span>
+            </a>
+
+            <a class="nav__item"
+               th:if="${session.roleCode == 'ADMIN' or session.role == 'Quản lý' or session.role == 'Quan ly'}"
+               th:href="@{/lich-su-nhan-vien}"
+               th:classappend="${activeMenu == 'lichsunhanvien'} ? ' active'">
+                <span class="nav__icon"><i class="bi bi-clock-history"></i></span>
+                <span class="nav__text">Lịch sử nhân viên</span>
+            </a>
+
+            <a class="nav__item"
+               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
+                th:href="@{/khachhang/hienthi}"
+                th:classappend="${activeMenu == 'khachhang'} ? ' active'">
                 <span class="nav__icon"><i class="bi bi-person-lines-fill"></i></span>
                 <span class="nav__text">Quản lý khách hàng</span>
             </a>
 
             <a class="nav__item"
-               th:href="@{/invoices}"
-               th:classappend="${activeMenu == 'hoadon'} ? ' active'">
+               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
+                th:href="@{/invoices}"
+                th:classappend="${activeMenu == 'hoadon'} ? ' active'">
                 <span class="nav__icon"><i class="bi bi-receipt-cutoff"></i></span>
                 <span class="nav__text">Quản lý hóa đơn</span>
             </a>
             <a class="nav__item"
-               th:href="@{/orders}"
-               th:classappend="${activeMenu == 'donhang'} ? ' active'">
+               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
+                th:href="@{/orders}"
+                th:classappend="${activeMenu == 'donhang'} ? ' active'">
                 <span class="nav__icon"><i class="bi bi-bag-check-fill"></i></span>
                 <span class="nav__text">Quản lý đơn hàng</span>
             </a>
             <a class="nav__item"
-               th:href="@{/khuyen-mai}"
-               th:classappend="${activeMenu == 'khuyenmai'} ? ' active'">
+               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
+                th:href="@{/admin/khuyen-mai}"
+                th:classappend="${activeMenu == 'khuyenmai'} ? ' active'">
                 <span class="nav__icon"><i class="bi bi-gift-fill"></i></span>
                 <span class="nav__text">Chương trình khuyến mãi</span>
             </a>
 
-            <div class="nav__section-title">
+            <div class="nav__section-title"
+                 th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}">
                 <span class="nav__text">SẢN PHẨM</span>
             </div>
 
+             <a class="nav__item"
+                th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
+                th:href="@{/san-pham}"
+                th:classappend="${activeMenu == 'sanpham'} ? ' active'">
+                 <span class="nav__icon"><i class="bi bi-box-seam-fill"></i></span>
+                 <span class="nav__text">Sản phẩm</span>
+             </a>
             <a class="nav__item"
-               th:href="@{/san-pham}"
-               th:classappend="${activeMenu == 'sanpham'} ? ' active'">
-                <span class="nav__icon"><i class="bi bi-box-seam-fill"></i></span>
-                <span class="nav__text">Sản phẩm</span>
+               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
+                th:href="@{/trang-chu-config}"
+                th:classappend="${activeMenu == 'trangchuconfig'} ? ' active'">
+                <span class="nav__icon"><i class="bi bi-stars"></i></span>
+                <span class="nav__text">Cấu hình trang chủ</span>
             </a>
             <a class="nav__item"
-               th:href="@{/danh-muc}"
-               th:classappend="${activeMenu == 'danhmuc'} ? ' active'">
+               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
+                th:href="@{/danh-muc}"
+                th:classappend="${activeMenu == 'danhmuc'} ? ' active'">
                 <span class="nav__icon"><i class="bi bi-tags-fill"></i></span>
                 <span class="nav__text">Danh mục sản phẩm</span>
             </a>
             <a class="nav__item"
-               th:href="@{/mau-sac}"
-               th:classappend="${activeMenu == 'mausac'} ? ' active'">
+               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
+                th:href="@{/mau-sac}"
+                th:classappend="${activeMenu == 'mausac'} ? ' active'">
                 <span class="nav__icon"><i class="bi bi-palette-fill"></i></span>
                 <span class="nav__text">Màu sắc</span>
             </a>
@@ -103,13 +135,15 @@
                 <span class="nav__text">Bán tại cửa hàng</span>
             </a>
 
-            <div class="nav__section-title">
+            <div class="nav__section-title"
+                 th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}">
                 <span class="nav__text">KHO HÀNG</span>
             </div>
 
             <a class="nav__item"
-               th:href="@{/xuat-kho}"
-               th:classappend="${activeMenu == 'xuatkho'} ? ' active'">
+               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
+                th:href="@{/xuat-kho}"
+                th:classappend="${activeMenu == 'xuatkho'} ? ' active'">
                 <span class="nav__icon"><i class="bi bi-box-arrow-up-right"></i></span>
                 <span class="nav__text">Xuất kho</span>
             </a>

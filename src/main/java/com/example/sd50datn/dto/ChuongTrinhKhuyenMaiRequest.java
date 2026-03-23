@@ -27,7 +27,7 @@ public class ChuongTrinhKhuyenMaiRequest {
 
     @NotNull(message = "Loại khuyến mại không được để trống")
     @Min(value = 1, message = "Loại khuyến mại không hợp lệ")
-    @Max(value = 4, message = "Loại khuyến mại không hợp lệ")
+    @Max(value = 1, message = "Chỉ hỗ trợ khuyến mại giảm giá hóa đơn")
     private Integer loaiKhuyenMai;
 
     @NotNull(message = "Loại giảm không được để trống")

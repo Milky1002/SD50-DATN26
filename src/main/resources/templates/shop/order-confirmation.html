@@ -1,0 +1,44 @@
+<div th:fragment="content" xmlns:th="http://www.thymeleaf.org">
+    <section class="shop-section shop-section--sm">
+        <div class="shop-container">
+            <div class="shop-confirm shop-card">
+                <div class="shop-confirm__icon">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+
+                <div class="shop-confirm__body" th:if="${orderId != null}">
+                    <p class="shop-confirm__eyebrow">Đơn hàng đã được ghi nhận</p>
+                    <h1 class="shop-confirm__title">Đặt hàng thành công!</h1>
+                    <div class="shop-confirm__meta">
+                        <div class="shop-confirm__meta-item">
+                            <span>Mã đơn hàng</span>
+                            <strong th:text="${orderId}">0</strong>
+                        </div>
+                        <div class="shop-confirm__meta-item">
+                            <span>Tổng thanh toán</span>
+                            <strong th:text="${#numbers.formatInteger(orderTotal, 0, 'DEFAULT')} + 'đ'">0đ</strong>
+                        </div>
+                    </div>
+                    <p class="shop-confirm__message">Chúng tôi sẽ liên hệ xác nhận đơn hàng trong thời gian sớm nhất.</p>
+                </div>
+
+                <div class="shop-confirm__body" th:if="${orderId == null}">
+                    <p class="shop-confirm__eyebrow">Cảm ơn bạn đã mua hàng</p>
+                    <h1 class="shop-confirm__title">Đặt hàng thành công!</h1>
+                    <p class="shop-confirm__message">Chúng tôi sẽ liên hệ xác nhận đơn hàng trong thời gian sớm nhất.</p>
+                </div>
+
+                <div class="shop-confirm__actions">
+                    <a class="shop-btn shop-btn--primary shop-btn--lg" th:href="@{/cua-hang}">
+                        <i class="bi bi-arrow-left-circle"></i>
+                        Tiếp tục mua sắm
+                    </a>
+                    <a class="shop-btn shop-btn--outline shop-btn--lg" th:href="@{/tai-khoan/don-hang}">
+                        <i class="bi bi-box-seam"></i>
+                        Xem đơn hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

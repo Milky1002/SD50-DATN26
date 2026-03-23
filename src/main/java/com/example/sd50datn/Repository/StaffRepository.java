@@ -14,6 +14,7 @@ import java.util.List;
 public interface StaffRepository extends JpaRepository<Staff, Integer> {
     // Bạn có thể thêm các hàm tìm kiếm tùy chỉnh tại đây
     List<Staff> findByTrangThai(Integer trangThai);
+    java.util.Optional<Staff> findByTaiKhoanId(Integer taiKhoanId);
 
     @Query("SELECT s FROM Staff s WHERE " +
             "(:keyword IS NULL OR s.hoTen LIKE %:keyword% OR s.sdt LIKE %:keyword%) AND " +

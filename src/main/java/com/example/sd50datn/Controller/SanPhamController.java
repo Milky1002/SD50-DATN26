@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.ByteArrayInputStream;
@@ -68,6 +69,8 @@ public class SanPhamController {
 
     @PostMapping("/save")
     public String save(@ModelAttribute("sp") SanPham sp,
+                       @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                       @RequestParam(value = "imageUrl", required = false) String imageUrl,
                        @RequestParam(value = "saveAndNew", required = false, defaultValue = "0") int saveAndNew,
                        RedirectAttributes ra) {
 
@@ -80,7 +83,7 @@ public class SanPhamController {
             return "redirect:/san-pham?openAdd=1";
         }
 
-        sanPhamService.save(sp);
+        sanPhamService.saveWithImage(sp, imageFile, imageUrl);
         ra.addFlashAttribute("success", "Lưu hàng hóa thành công");
 
         if (saveAndNew == 1) {

@@ -1,17 +1,29 @@
 package com.example.sd50datn.Service;
 
+import com.example.sd50datn.Entity.Anh;
 import com.example.sd50datn.Entity.SanPham;
+import com.example.sd50datn.Repository.AnhRepository;
 import com.example.sd50datn.Repository.DanhMucSanPhamRepository;
+import com.example.sd50datn.Repository.MauSacRepository;
 import com.example.sd50datn.Repository.SanPhamRepository;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -20,6 +32,11 @@ public class SanPhamService {
 
     private final SanPhamRepository sanPhamRepo;
     private final DanhMucSanPhamRepository danhMucRepo;
+    private final MauSacRepository mauSacRepo;
+    private final AnhRepository anhRepository;
+
+    @Value("${app.upload.dir:uploads}")
+    private String uploadDir;
 
     public List<SanPham> search(String keyword, Integer trangThai, Integer danhMucId) {
         String q = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
@@ -28,6 +45,10 @@ public class SanPhamService {
 
     public SanPham getById(Integer id) {
         return sanPhamRepo.findById(id).orElse(null);
+    }
+
+    public SanPham getByIdWithRelations(Integer id) {
+        return sanPhamRepo.findByIdWithRelations(id).orElse(null);
     }
 
     public SanPham findByBarcode(String barcode) {
@@ -53,6 +74,96 @@ public class SanPhamService {
 
     public SanPham save(SanPham sp) {
         return sanPhamRepo.save(sp);
+    }
+
+    @Transactional
+    public SanPham saveWithImage(SanPham sp, MultipartFile imageFile, String imageUrl) {
+        Anh currentImage = null;
+        if (sp.getId() != null) {
+            SanPham existing = getById(sp.getId());
+            if (existing != null) {
+                currentImage = existing.getAnh();
+            }
+        }
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            Anh anh = storeUploadedImage(imageFile, currentImage);
+            sp.setAnh(anh);
+        } else if (imageUrl != null && !imageUrl.isBlank()) {
+            Anh anh = currentImage != null ? currentImage : new Anh();
+            anh.setAnhUrl(imageUrl.trim());
+            anh.setTenFileGoc(null);
+            anh.setLoaiNguon("url");
+            anh.setKichThuocByte(null);
+            anh.setMimeType(null);
+            if (anh.getTrangThai() == null) {
+                anh.setTrangThai(1);
+            }
+            if (anh.getThuTu() == null) {
+                anh.setThuTu(0);
+            }
+            sp.setAnh(anhRepository.save(anh));
+        } else if (currentImage != null) {
+            sp.setAnh(currentImage);
+        }
+
+        // Resolve transient MauSac reference from form binding
+        if (sp.getMauSac() != null && sp.getMauSac().getMauSacId() != null) {
+            sp.setMauSac(mauSacRepo.findById(sp.getMauSac().getMauSacId()).orElse(null));
+        } else {
+            sp.setMauSac(null);
+        }
+
+        // Resolve transient DanhMucSanPham reference from form binding
+        if (sp.getDanhMucSanPham() != null && sp.getDanhMucSanPham().getDanhMucSanPhamId() != null) {
+            sp.setDanhMucSanPham(danhMucRepo.findById(sp.getDanhMucSanPham().getDanhMucSanPhamId()).orElse(null));
+        } else {
+            sp.setDanhMucSanPham(null);
+        }
+
+        return sanPhamRepo.save(sp);
+    }
+
+    public List<SanPham> getLatestProductsByCategory(Integer danhMucId, int limit) {
+        return sanPhamRepo.findLatestActiveByCategory(danhMucId)
+                .stream()
+                .limit(Math.max(limit, 0))
+                .toList();
+    }
+
+    private Anh storeUploadedImage(MultipartFile imageFile, Anh currentImage) {
+        try {
+            String originalFilename = imageFile.getOriginalFilename();
+            String extension = getExtension(originalFilename);
+            String fileName = UUID.randomUUID() + extension;
+            Path uploadRoot = Paths.get(uploadDir, "products");
+            Files.createDirectories(uploadRoot);
+            Path destination = uploadRoot.resolve(fileName);
+            Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+
+            Anh anh = currentImage != null ? currentImage : new Anh();
+            anh.setAnhUrl("/uploads/products/" + fileName);
+            anh.setTenFileGoc(originalFilename);
+            anh.setLoaiNguon("upload");
+            anh.setKichThuocByte(imageFile.getSize());
+            anh.setMimeType(imageFile.getContentType());
+            if (anh.getTrangThai() == null) {
+                anh.setTrangThai(1);
+            }
+            if (anh.getThuTu() == null) {
+                anh.setThuTu(0);
+            }
+            return anhRepository.save(anh);
+        } catch (IOException e) {
+            throw new RuntimeException("Không thể lưu ảnh sản phẩm: " + e.getMessage(), e);
+        }
+    }
+
+    private String getExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return "";
+        }
+        return filename.substring(filename.lastIndexOf('.'));
     }
 
     public void delete(Integer id) {

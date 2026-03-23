@@ -1,0 +1,300 @@
+<!--
+    shop/product-list.html — Storefront product listing fragment
+    Included by shop/shop-layout.html via: th:replace="~{${content} :: content}"
+
+    Model attributes expected:
+      products           — List<SanPham>  (already filtered + sorted)
+      danhMucList        — List<DanhMucSanPham>  (active categories for sidebar)
+      mauSacList         — List<MauSac>          (colors for sidebar)
+      q                  — String  (current keyword, empty string if none)
+      selectedDanhMucId  — Integer (null if no category selected)
+      selectedMauSacId   — Integer (null if no color selected)
+      selectedSort       — String  (newest | price_asc | price_desc | name)
+      conHang            — Boolean (true = only in-stock)
+      breadcrumbItems    — List<Map<String,String>> (label + url pairs)
+      cartItemCount      — Integer (placeholder, 0 until cart is wired)
+      pageTitle, activeMenu, pageCss, content — layout meta
+-->
+<div th:fragment="content" xmlns:th="http://www.thymeleaf.org">
+
+    <section class="shop-listing-section">
+        <div class="shop-container">
+
+            <!-- ======================================================
+                 PAGE HEADER
+                 ====================================================== -->
+            <div class="shop-listing-header" style="margin-bottom: 24px;">
+                <div>
+                    <h1>Tất cả sản phẩm</h1>
+                    <p class="shop-listing-count"
+                       th:text="${#lists.size(products)} + ' sản phẩm'">0 sản phẩm</p>
+                </div>
+            </div>
+
+            <!-- ======================================================
+                 TWO-COLUMN LAYOUT: Sidebar + Main
+                 ====================================================== -->
+            <div class="shop-listing-layout">
+
+                <!-- -------------------------------------------------- -->
+                <!-- SIDEBAR FILTERS                                      -->
+                <!-- -------------------------------------------------- -->
+                <aside class="shop-listing-sidebar">
+                    <p class="shop-sidebar-title"><i class="bi bi-funnel"></i> Bộ lọc</p>
+
+                    <!-- Clear all filters link (shown when any filter active) -->
+                    <a class="shop-filter-clear"
+                       th:if="${selectedDanhMucId != null or selectedMauSacId != null or conHang or (q != null and !q.isEmpty())}"
+                       th:href="@{/cua-hang}">
+                        <i class="bi bi-x-circle"></i> Xóa tất cả bộ lọc
+                    </a>
+
+                    <!-- ---- Category Filter ---- -->
+                    <div class="shop-filter-group">
+                        <h3 class="shop-filter-group__title">Danh mục</h3>
+                        <ul class="shop-filter-list">
+                            <li>
+                                <a th:href="@{/cua-hang(q=${q != '' ? q : null},sort=${selectedSort},mauSacId=${selectedMauSacId},conHang=${conHang ? 'true' : null})}"
+                                   th:classappend="${selectedDanhMucId == null} ? 'active'">
+                                    <i class="bi bi-grid"></i>
+                                    Tất cả danh mục
+                                </a>
+                            </li>
+                            <li th:each="cat : ${danhMucList}">
+                                <a th:href="@{/cua-hang(q=${q != '' ? q : null},danhMucId=${cat.danhMucSanPhamId},sort=${selectedSort},mauSacId=${selectedMauSacId},conHang=${conHang ? 'true' : null})}"
+                                   th:classappend="${selectedDanhMucId != null and selectedDanhMucId == cat.danhMucSanPhamId} ? 'active'">
+                                    <i class="bi bi-tag"></i>
+                                    <span th:text="${cat.tenDanhMuc}">Danh mục</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- ---- Color Filter ---- -->
+                    <div class="shop-filter-group" th:if="${mauSacList != null and !#lists.isEmpty(mauSacList)}">
+                        <h3 class="shop-filter-group__title">Màu sắc</h3>
+                        <ul class="shop-color-list">
+                            <li th:each="color : ${mauSacList}">
+                                <a th:href="@{/cua-hang(q=${q != '' ? q : null},danhMucId=${selectedDanhMucId},sort=${selectedSort},mauSacId=${color.mauSacId},conHang=${conHang ? 'true' : null})}"
+                                   th:classappend="${selectedMauSacId != null and selectedMauSacId == color.mauSacId} ? 'active'">
+                                    <span class="shop-color-swatch"
+                                          th:style="'background-color:' + (${color.maMauHex} ?: '#000000')"></span>
+                                    <span th:text="${color.tenMau}">Màu</span>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- Remove color filter when a color is selected -->
+                        <a class="shop-filter-clear"
+                           style="margin-top: 6px; font-size: 0.8rem;"
+                           th:if="${selectedMauSacId != null}"
+                           th:href="@{/cua-hang(q=${q != '' ? q : null},danhMucId=${selectedDanhMucId},sort=${selectedSort},conHang=${conHang ? 'true' : null})}">
+                            <i class="bi bi-x"></i> Bỏ lọc màu
+                        </a>
+                    </div>
+
+                    <!-- ---- In-Stock Filter ---- -->
+                    <div class="shop-filter-group">
+                        <h3 class="shop-filter-group__title">Tồn kho</h3>
+                        <!-- Link-based toggle to avoid JS requirement -->
+                        <a class="shop-stock-filter"
+                           th:href="${conHang}
+                               ? @{/cua-hang(q=${q != '' ? q : null},danhMucId=${selectedDanhMucId},sort=${selectedSort},mauSacId=${selectedMauSacId})}
+                               : @{/cua-hang(q=${q != '' ? q : null},danhMucId=${selectedDanhMucId},sort=${selectedSort},mauSacId=${selectedMauSacId},conHang='true')}">
+                            <i th:class="${conHang} ? 'bi bi-toggle-on' : 'bi bi-toggle-off'"
+                               th:style="${conHang} ? 'color:var(--shop-primary)' : ''"></i>
+                            Chỉ hiện sản phẩm còn hàng
+                        </a>
+                    </div>
+
+                </aside>
+
+                <!-- -------------------------------------------------- -->
+                <!-- MAIN: toolbar + product grid                         -->
+                <!-- -------------------------------------------------- -->
+                <div class="shop-listing-main">
+
+                    <!-- ---- Toolbar: keyword search + sort ---- -->
+                    <div class="shop-listing-toolbar">
+                        <!-- Keyword search -->
+                        <form class="shop-listing-search"
+                              th:action="@{/cua-hang}"
+                              method="get"
+                              role="search"
+                              style="flex:1; min-width: 200px;">
+                            <!-- Preserve current filters when submitting keyword search -->
+                            <input type="hidden" name="danhMucId" th:value="${selectedDanhMucId}" th:if="${selectedDanhMucId != null}" />
+                            <input type="hidden" name="mauSacId"  th:value="${selectedMauSacId}"  th:if="${selectedMauSacId  != null}" />
+                            <input type="hidden" name="sort"      th:value="${selectedSort}" />
+                            <input type="hidden" name="conHang"   value="true" th:if="${conHang}" />
+                            <input type="search"
+                                   name="q"
+                                   th:value="${q}"
+                                   placeholder="Tìm tên, mã sản phẩm, SKU..."
+                                   aria-label="Tìm kiếm sản phẩm" />
+                            <button type="submit" aria-label="Tìm kiếm">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </form>
+
+                        <!-- Sort selector -->
+                        <form class="shop-sort-wrap"
+                              th:action="@{/cua-hang}"
+                              method="get"
+                              id="sortForm">
+                            <!-- Preserve current filters when changing sort -->
+                            <input type="hidden" name="q"         th:value="${q}"                th:if="${q != null and !q.isEmpty()}" />
+                            <input type="hidden" name="danhMucId" th:value="${selectedDanhMucId}" th:if="${selectedDanhMucId != null}" />
+                            <input type="hidden" name="mauSacId"  th:value="${selectedMauSacId}"  th:if="${selectedMauSacId  != null}" />
+                            <input type="hidden" name="conHang"   value="true"                   th:if="${conHang}" />
+                            <label for="sortSelect">Sắp xếp:</label>
+                            <select id="sortSelect"
+                                    name="sort"
+                                    class="shop-sort-select"
+                                    onchange="document.getElementById('sortForm').submit()">
+                                <option value="newest"    th:selected="${selectedSort == 'newest'}">Mới nhất</option>
+                                <option value="price_asc" th:selected="${selectedSort == 'price_asc'}">Giá tăng dần</option>
+                                <option value="price_desc" th:selected="${selectedSort == 'price_desc'}">Giá giảm dần</option>
+                                <option value="name"      th:selected="${selectedSort == 'name'}">Tên A → Z</option>
+                            </select>
+                        </form>
+                    </div>
+
+                    <!-- ---- Active filter chips ---- -->
+                    <div class="shop-active-filters"
+                         th:if="${(q != null and !q.isEmpty()) or selectedDanhMucId != null or selectedMauSacId != null or conHang}">
+                        <span style="color: var(--shop-text-muted); font-size: 0.8rem;">Đang lọc:</span>
+
+                        <span class="shop-filter-chip" th:if="${q != null and !q.isEmpty()}">
+                            <i class="bi bi-search"></i>
+                            <span th:text="'&quot;' + ${q} + '&quot;'">từ khóa</span>
+                            <a th:href="@{/cua-hang(danhMucId=${selectedDanhMucId},mauSacId=${selectedMauSacId},sort=${selectedSort},conHang=${conHang ? 'true' : null})}"
+                               title="Xóa tìm kiếm">×</a>
+                        </span>
+
+                        <span class="shop-filter-chip" th:if="${selectedDanhMucId != null}">
+                            <i class="bi bi-tag"></i>
+                            <span th:each="cat : ${danhMucList}"
+                                  th:if="${cat.danhMucSanPhamId == selectedDanhMucId}"
+                                  th:text="${cat.tenDanhMuc}">Danh mục</span>
+                            <a th:href="@{/cua-hang(q=${q != '' ? q : null},mauSacId=${selectedMauSacId},sort=${selectedSort},conHang=${conHang ? 'true' : null})}"
+                               title="Xóa danh mục">×</a>
+                        </span>
+
+                        <span class="shop-filter-chip" th:if="${selectedMauSacId != null}">
+                            <i class="bi bi-palette2"></i>
+                            <span th:each="color : ${mauSacList}"
+                                  th:if="${color.mauSacId == selectedMauSacId}"
+                                  th:text="${color.tenMau}">Màu</span>
+                            <a th:href="@{/cua-hang(q=${q != '' ? q : null},danhMucId=${selectedDanhMucId},sort=${selectedSort},conHang=${conHang ? 'true' : null})}"
+                               title="Xóa màu">×</a>
+                        </span>
+
+                        <span class="shop-filter-chip" th:if="${conHang}">
+                            <i class="bi bi-box-seam"></i>
+                            Còn hàng
+                            <a th:href="@{/cua-hang(q=${q != '' ? q : null},danhMucId=${selectedDanhMucId},mauSacId=${selectedMauSacId},sort=${selectedSort})}"
+                               title="Bỏ lọc tồn kho">×</a>
+                        </span>
+                    </div>
+
+                    <!-- ---- Product grid ---- -->
+                    <div class="shop-product-grid shop-stagger"
+                         th:if="${products != null and !#lists.isEmpty(products)}">
+
+                        <article class="shop-card shop-product-card"
+                                 th:each="sp : ${products}">
+
+                            <!-- Product image / placeholder -->
+                            <a class="shop-product-card__image-link"
+                               th:href="@{/cua-hang/{id}(id=${sp.id})}">
+                                <img th:if="${sp.anh != null}"
+                                     th:src="${sp.anh.anhUrl}"
+                                     th:alt="${sp.tenSanPham}"
+                                     class="shop-product-card__image"
+                                     loading="lazy" />
+                                <span th:unless="${sp.anh != null}"
+                                      class="shop-product-card__placeholder">
+                                    <i class="bi bi-image"></i>
+                                </span>
+
+                                <!-- Stock badge overlay -->
+                                <span class="shop-badge shop-badge--danger shop-product-card__badge"
+                                      th:if="${sp.soLuongTon != null and sp.soLuongTon == 0}">
+                                    Hết hàng
+                                </span>
+                                <span class="shop-badge shop-badge--new shop-product-card__badge"
+                                      th:if="${sp.soLuongTon != null and sp.soLuongTon > 0 and sp.soLuongTon <= 5}">
+                                    Sắp hết
+                                </span>
+                            </a>
+
+                            <div class="shop-product-card__body">
+                                <!-- Category -->
+                                <p class="shop-product-card__category"
+                                   th:text="${sp.danhMucSanPham != null ? sp.danhMucSanPham.tenDanhMuc : ''}">Danh mục</p>
+
+                                <!-- Name -->
+                                <a class="shop-product-card__name"
+                                   th:href="@{/cua-hang/{id}(id=${sp.id})}"
+                                   th:text="${sp.tenSanPham}">Tên sản phẩm</a>
+
+                                <!-- Color + stock meta -->
+                                <div class="shop-product-card__meta">
+                                    <span th:if="${sp.mauSac != null}">
+                                        <span class="shop-color-swatch"
+                                              th:style="'background-color:' + (${sp.mauSac.maMauHex} ?: '#000000')"></span>
+                                        <span th:text="${sp.mauSac.tenMau}">Màu</span>
+                                    </span>
+                                    <span>
+                                        <i class="bi bi-box-seam"></i>
+                                        <span th:text="${(sp.soLuongTon ?: 0) + ' ' + (sp.donViTinh ?: 'cái')}">0 cái</span>
+                                    </span>
+                                </div>
+
+                                <!-- Price + stock status row -->
+                                <div class="shop-product-card__price-row">
+                                    <span class="shop-price"
+                                          th:text="${#numbers.formatInteger(sp.giaBan, 0, 'DEFAULT') + 'đ'}">0đ</span>
+                                    <span class="shop-product-card__stock"
+                                          th:classappend="${sp.soLuongTon != null and sp.soLuongTon == 0} ? ' shop-product-card__stock--out'"
+                                          th:text="${sp.soLuongTon != null and sp.soLuongTon == 0 ? 'Hết hàng' : 'Sẵn hàng'}">Sẵn hàng</span>
+                                </div>
+
+                                <!-- View detail button -->
+                                <a class="shop-btn shop-btn--primary shop-btn--full"
+                                   th:href="@{/cua-hang/{id}(id=${sp.id})}">
+                                    <i class="bi bi-eye"></i>
+                                    Xem chi tiết
+                                </a>
+                            </div>
+                        </article>
+
+                    </div>
+
+                    <!-- ---- Empty state ---- -->
+                    <div class="shop-empty-state"
+                         th:unless="${products != null and !#lists.isEmpty(products)}">
+                        <i class="bi bi-search shop-empty-state__icon"></i>
+                        <p class="shop-empty-state__msg">Không tìm thấy sản phẩm nào</p>
+                        <p class="shop-empty-state__sub"
+                           th:if="${q != null and !q.isEmpty()}"
+                           th:text="'Không có kết quả cho từ khóa &quot;' + ${q} + '&quot;'">
+                            Hãy thử từ khóa khác hoặc điều chỉnh bộ lọc.
+                        </p>
+                        <p class="shop-empty-state__sub"
+                           th:unless="${q != null and !q.isEmpty()}">
+                            Hãy thử điều chỉnh bộ lọc hoặc xem tất cả sản phẩm.
+                        </p>
+                        <a class="shop-btn shop-btn--primary" th:href="@{/cua-hang}">
+                            <i class="bi bi-arrow-left"></i>
+                            Xem tất cả sản phẩm
+                        </a>
+                    </div>
+
+                </div><!-- /.shop-listing-main -->
+            </div><!-- /.shop-listing-layout -->
+
+        </div><!-- /.shop-container -->
+    </section>
+
+</div>

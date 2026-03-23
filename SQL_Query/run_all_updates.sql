@@ -44,6 +44,21 @@ PRINT N'';
 -- Script 09: Khách hàng
 :r updates\09_them_khach_hang.sql
 
+-- Script 10: Storefront tables (cart + customer auth)
+:r updates\10_shop_tables.sql
+
+-- Script 11: Full storefront/homepage sync (cart/auth/image/homepage config)
+:r updates\11_sync_storefront_and_homepage.sql
+
+-- Script 12: Unify TaiKhoan (unified user model + customer account migration)
+:r updates\12_unify_tai_khoan.sql
+
+-- Script 13: Normalize customer-account links (backfill Tai_khoan_id, add FK + index)
+:r updates\13_normalize_customer_account_links.sql
+
+-- Script 14: Bảng lịch sử hoạt động nhân viên
+:r updates\14_lich_su_hoat_dong_nhan_vien.sql
+
 PRINT N'';
 PRINT N'========================================';
 PRINT N'  ✓ HOÀN TẤT CẬP NHẬT DỮ LIỆU!';

@@ -1,0 +1,133 @@
+<div th:fragment="content" xmlns:th="http://www.thymeleaf.org">
+    <section class="shop-section shop-account-section">
+        <div class="shop-container">
+            <div class="shop-account">
+                <aside class="shop-account-sidebar shop-card">
+                    <div class="shop-account-sidebar__customer">
+                        <span class="shop-account-sidebar__avatar" aria-hidden="true">
+                            <i class="bi bi-person-circle"></i>
+                        </span>
+                        <div>
+                            <h2 class="shop-account-sidebar__name" th:text="${customerName}">Khách hàng</h2>
+                            <p class="shop-account-sidebar__email" th:text="${customerEmail}">email@example.com</p>
+                        </div>
+                    </div>
+
+                    <nav class="shop-account-nav" aria-label="Điều hướng tài khoản">
+                        <a class="shop-account-nav__item"
+                           th:href="@{/tai-khoan}"
+                           th:classappend="${activeTab == 'dashboard'} ? ' shop-account-nav__item--active'">
+                            <i class="bi bi-grid-1x2"></i>
+                            <span>Tổng quan</span>
+                        </a>
+                        <a class="shop-account-nav__item"
+                           th:href="@{/tai-khoan/don-hang}"
+                           th:classappend="${activeTab == 'orders'} ? ' shop-account-nav__item--active'">
+                            <i class="bi bi-box-seam"></i>
+                            <span>Đơn hàng</span>
+                        </a>
+                        <a class="shop-account-nav__item"
+                           th:href="@{/tai-khoan/ho-so}"
+                           th:classappend="${activeTab == 'profile'} ? ' shop-account-nav__item--active'">
+                            <i class="bi bi-person-vcard"></i>
+                            <span>Hồ sơ</span>
+                        </a>
+                        <a class="shop-account-nav__item shop-account-nav__item--logout" th:href="@{/dang-xuat}">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span>Đăng xuất</span>
+                        </a>
+                    </nav>
+                </aside>
+
+                <div class="shop-account-content">
+                    <section class="shop-account-panel shop-card">
+                        <div class="shop-account-panel__header">
+                            <div>
+                                <p class="shop-account__eyebrow">Chi tiết đơn hàng</p>
+                                <h1 class="shop-h3" th:text="${'Đơn hàng #' + order.id}">Đơn hàng #1</h1>
+                                <p>Thông tin đơn, phương thức thanh toán và danh sách sản phẩm trong đơn.</p>
+                            </div>
+                            <a class="shop-btn shop-btn--ghost shop-btn--sm" th:href="@{/tai-khoan/don-hang}">
+                                <i class="bi bi-arrow-left"></i>
+                                Quay lại
+                            </a>
+                        </div>
+
+                        <div class="shop-order-detail">
+                            <article class="shop-order-detail__card">
+                                <h2 class="shop-order-detail__title">Thông tin đơn hàng</h2>
+                                <dl class="shop-order-detail__meta">
+                                    <div>
+                                        <dt>Ngày đặt</dt>
+                                        <dd th:text="${order.ngayTao != null ? #temporals.format(order.ngayTao, 'dd/MM/yyyy HH:mm') : '--'}">01/01/2026 08:00</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Trạng thái</dt>
+                                        <dd>
+                                            <span class="shop-order-status"
+                                                  th:classappend="${order.trangThai == 0} ? ' shop-order-status--pending' : (${order.trangThai == 1} ? ' shop-order-status--confirmed' : (${order.trangThai == 2} ? ' shop-order-status--shipping' : (${order.trangThai == 3} ? ' shop-order-status--completed' : ' shop-order-status--cancelled')))"
+                                                  th:text="${order.trangThai == 0} ? 'Chờ xác nhận' : (${order.trangThai == 1} ? 'Đã xác nhận' : (${order.trangThai == 2} ? 'Đang giao' : (${order.trangThai == 3} ? 'Hoàn thành' : 'Đã hủy')))">
+                                                Chờ xác nhận
+                                            </span>
+                                        </dd>
+                                    </div>
+                                    <div>
+                                        <dt>Địa chỉ giao hàng</dt>
+                                        <dd th:text="${order.diaChiKhachHang != null and !#strings.isEmpty(order.diaChiKhachHang) ? order.diaChiKhachHang : 'Chưa cập nhật'}">Chưa cập nhật</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Phương thức thanh toán</dt>
+                                        <dd th:text="${order.hinhThucThanhToanId != null ? 'Hình thức #' + order.hinhThucThanhToanId : 'Chưa xác định'}">Chưa xác định</dd>
+                                    </div>
+                                    <div>
+                                        <dt>Ghi chú</dt>
+                                        <dd th:text="${order.ghiChu != null and !#strings.isEmpty(order.ghiChu) ? order.ghiChu : 'Không có ghi chú'}">Không có ghi chú</dd>
+                                    </div>
+                                </dl>
+                            </article>
+
+                            <article class="shop-order-detail__card shop-order-items">
+                                <div class="shop-order-items__header">
+                                    <h2 class="shop-order-detail__title">Sản phẩm trong đơn</h2>
+                                </div>
+
+                                <div class="shop-account-table-wrap" th:if="${orderItems != null and !#lists.isEmpty(orderItems)}">
+                                    <table class="shop-account-table shop-order-items__table">
+                                        <thead>
+                                        <tr>
+                                            <th>Sản phẩm</th>
+                                            <th>Số lượng</th>
+                                            <th>Đơn giá</th>
+                                            <th>Thành tiền</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="item : ${orderItems}">
+                                            <td th:text="${item.sanPham != null ? item.sanPham.tenSanPham : 'Sản phẩm không xác định'}">Tên sản phẩm</td>
+                                            <td th:text="${item.soLuongSanPham}">1</td>
+                                            <td th:text="${#numbers.formatInteger(item.gia, 0, 'DEFAULT') + 'đ'}">0đ</td>
+                                            <td th:text="${#numbers.formatInteger(item.gia.multiply(T(java.math.BigDecimal).valueOf(item.soLuongSanPham)), 0, 'DEFAULT') + 'đ'}">0đ</td>
+                                        </tr>
+                                        </tbody>
+                                        <tfoot>
+                                        <tr>
+                                            <td colspan="3">Tổng cộng</td>
+                                            <td th:text="${#numbers.formatInteger(order.tongTienSauKhiGiam, 0, 'DEFAULT') + 'đ'}">0đ</td>
+                                        </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div class="shop-account-empty shop-account-empty--compact" th:if="${orderItems == null or #lists.isEmpty(orderItems)}">
+                                    <span class="shop-account-empty__icon"><i class="bi bi-box2-heart"></i></span>
+                                    <h3>Chưa có sản phẩm trong đơn</h3>
+                                    <p>Dữ liệu chi tiết sản phẩm của đơn hàng này hiện chưa khả dụng.</p>
+                                </div>
+                            </article>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

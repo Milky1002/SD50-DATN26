@@ -1,0 +1,265 @@
+<div th:fragment="content">
+    <section class="shop-hero">
+        <div class="shop-container shop-hero__inner">
+            <div class="shop-hero__text">
+                <p class="shop-hero__eyebrow">Bộ sưu tập mới 2026</p>
+                <h1 class="shop-hero__heading">Cửa hàng cầu lông<br/><span>chính hãng số 1</span></h1>
+                <p class="shop-hero__sub">Vợt, giày, phụ kiện Yonex &amp; Victor — giao hàng toàn quốc, cam kết chính hãng.</p>
+                <div class="shop-hero__actions">
+                    <a class="shop-btn shop-btn--primary shop-btn--lg" th:href="@{/cua-hang}">Mua ngay</a>
+                    <a class="shop-btn shop-btn--outline shop-btn--lg" th:href="@{/khuyen-mai}">Xem ưu đãi</a>
+                </div>
+            </div>
+
+            <div class="shop-hero__visual" aria-hidden="true">
+                <div class="shop-hero__racket"></div>
+                <div class="shop-hero__stats">
+                    <div class="shop-hero__stat">
+                        <strong>12h</strong>
+                        <span>Giao nhanh nội thành</span>
+                    </div>
+                    <div class="shop-hero__stat">
+                        <strong>100%</strong>
+                        <span>Cam kết chính hãng</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="shop-trust-strip shop-section--sm">
+        <div class="shop-container shop-trust-strip__grid">
+            <article class="shop-trust-card">
+                <span class="shop-trust-card__icon"><i class="bi bi-patch-check-fill"></i></span>
+                <div>
+                    <h3>Chính hãng minh bạch</h3>
+                    <p>Sản phẩm có mã SKU rõ ràng, đồng bộ cùng hệ thống quản trị hiện tại.</p>
+                </div>
+            </article>
+            <article class="shop-trust-card">
+                <span class="shop-trust-card__icon"><i class="bi bi-truck"></i></span>
+                <div>
+                    <h3>Giao nhanh toàn quốc</h3>
+                    <p>Tối ưu trải nghiệm đặt hàng, hiển thị trạng thái đơn rõ ràng theo từng bước.</p>
+                </div>
+            </article>
+            <article class="shop-trust-card">
+                <span class="shop-trust-card__icon"><i class="bi bi-arrow-repeat"></i></span>
+                <div>
+                    <h3>Đổi trả thuận tiện</h3>
+                    <p>Thông tin đổi trả, đơn hàng và chăm sóc hậu mãi được gom vào tài khoản khách hàng.</p>
+                </div>
+            </article>
+            <article class="shop-trust-card">
+                <span class="shop-trust-card__icon"><i class="bi bi-credit-card-2-front"></i></span>
+                <div>
+                    <h3>Thanh toán linh hoạt</h3>
+                    <p>Chuẩn bị sẵn cho COD, chuyển khoản, ví điện tử và các luồng thanh toán phổ biến.</p>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="shop-section" th:if="${activePromotions != null and !#lists.isEmpty(activePromotions)}">
+        <div class="shop-container">
+            <div class="shop-section__header">
+                <div>
+                    <h2 class="shop-section__title"><i class="bi bi-lightning-charge-fill"></i> Ưu đãi đang diễn ra</h2>
+                    <p class="shop-section__intro">Những chương trình khuyến mại có thể kết nối trực tiếp với dữ liệu backend hiện tại.</p>
+                </div>
+                <a class="shop-section__more" th:href="@{/khuyen-mai}">Xem trang khuyến mại <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="shop-promo-grid">
+                <div class="shop-promo-card"
+                     th:each="promo : ${activePromotions}">
+                    <div class="shop-promo-card__icon">
+                        <i class="bi bi-tag-fill"></i>
+                    </div>
+                    <div class="shop-promo-card__body">
+                        <span class="shop-promo-card__code" th:text="${promo.maChuongTrinh}">KM01</span>
+                        <p class="shop-promo-card__name" th:text="${promo.tenChuongTrinh}">Tên chương trình</p>
+                        <p class="shop-promo-card__desc" th:if="${promo.moTa != null}" th:text="${promo.moTa}">Mô tả</p>
+                        <p class="shop-promo-card__val"
+                           th:text="${promo.loaiGiam == 1 ? ('Giảm ' + promo.giaTriGiam + '%') : ('Giảm ' + #numbers.formatInteger(promo.giaTriGiam != null ? promo.giaTriGiam : 0, 0, 'DEFAULT') + 'đ')}">Giảm giá</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="shop-section" th:if="${categories != null and !#lists.isEmpty(categories)}">
+        <div class="shop-container">
+            <div class="shop-section__header">
+                <div>
+                    <h2 class="shop-section__title">Khám phá theo danh mục</h2>
+                    <p class="shop-section__intro">Chia module rõ ràng để người dùng đi từ nhu cầu đến sản phẩm thật nhanh.</p>
+                </div>
+                <a class="shop-section__more" th:href="@{/cua-hang}">Toàn bộ sản phẩm <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="shop-category-grid shop-stagger">
+                <a class="shop-category-card"
+                    th:each="cat : ${categories}"
+                    th:href="@{/cua-hang(danhMucId=${cat.danhMucSanPhamId})}">
+                    <span class="shop-category-card__icon"><i class="bi bi-grid-fill"></i></span>
+                    <strong class="shop-category-card__name" th:text="${cat.tenDanhMuc}">Danh mục</strong>
+                    <span class="shop-category-card__meta">
+                        <i class="bi bi-arrow-up-right"></i>
+                        <span>Xem sản phẩm</span>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="shop-section" th:if="${featuredProducts != null and !#lists.isEmpty(featuredProducts)}">
+        <div class="shop-container">
+            <div class="shop-section__header">
+                <h2 class="shop-section__title">Sản phẩm nổi bật</h2>
+                <a class="shop-section__more" th:href="@{/cua-hang}">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="shop-slider" data-drag-scroll>
+                <div class="shop-product-showcase shop-product-showcase--slider shop-stagger">
+                    <article class="shop-product-card"
+                      th:each="sp : ${featuredProducts}">
+                    <a class="shop-product-card__image-link"
+                        th:href="@{/cua-hang/{id}(id=${sp.id})}">
+                        <img th:if="${sp.anh != null}"
+                             th:src="${sp.anh.anhUrl}"
+                             th:alt="${sp.tenSanPham}"
+                             class="shop-product-card__image"
+                             loading="lazy" />
+                        <span th:unless="${sp.anh != null}"
+                              class="shop-product-card__placeholder">
+                            <i class="bi bi-image"></i>
+                        </span>
+
+                        <span class="shop-badge shop-badge--new shop-product-card__badge">Nổi bật</span>
+                    </a>
+                    <div class="shop-product-card__body">
+                        <p class="shop-product-card__category"
+                            th:text="${sp.danhMucSanPham != null ? sp.danhMucSanPham.tenDanhMuc : ''}">Danh mục</p>
+                        <a class="shop-product-card__name"
+                           th:href="@{/cua-hang/{id}(id=${sp.id})}"
+                           th:text="${sp.tenSanPham}">Tên sản phẩm</a>
+                        <div class="shop-product-card__meta">
+                            <span th:if="${sp.mauSac != null}"><i class="bi bi-palette2"></i><span th:text="${sp.mauSac.tenMau}">Màu</span></span>
+                            <span><i class="bi bi-box-seam"></i><span th:text="${(sp.soLuongTon != null ? sp.soLuongTon : 0) + ' tồn kho'}">0 tồn kho</span></span>
+                        </div>
+                        <div class="shop-product-card__price-row">
+                            <span class="shop-price"
+                                  th:text="${#numbers.formatInteger(sp.giaBan, 0, 'DEFAULT') + 'đ'}">0đ</span>
+                            <span class="shop-product-card__stock"
+                                  th:classappend="${sp.soLuongTon != null and sp.soLuongTon == 0} ? ' shop-product-card__stock--out'"
+                                  th:text="${sp.soLuongTon != null and sp.soLuongTon == 0 ? 'Hết hàng' : 'Sẵn hàng'}">Sẵn hàng</span>
+                        </div>
+                        <a class="shop-btn shop-btn--primary shop-btn--full" th:href="@{/cua-hang/{id}(id=${sp.id})}">
+                            <i class="bi bi-eye"></i>
+                            Xem chi tiết
+                        </a>
+                    </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="shop-section"
+             th:if="${homepageCategories != null and !#lists.isEmpty(homepageCategories)}"
+             th:each="category : ${homepageCategories}">
+        <div class="shop-container">
+            <div class="shop-section__header">
+                <div>
+                    <h2 class="shop-section__title" th:text="${category.tenDanhMuc}">Danh mục nổi bật</h2>
+                    <p class="shop-section__intro">Hiển thị các sản phẩm mới nhất trong danh mục được cấu hình trên trang chủ.</p>
+                </div>
+                <a class="shop-section__more"
+                   th:href="@{/cua-hang(danhMucId=${category.danhMucSanPhamId})}">Xem danh mục <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            <div class="shop-slider" data-drag-scroll>
+                <div class="shop-product-showcase shop-product-showcase--slider">
+                    <article class="shop-product-card"
+                             th:each="sp : ${homepageCategoryProducts[category.danhMucSanPhamId]}">
+                        <a class="shop-product-card__image-link"
+                           th:href="@{/cua-hang/{id}(id=${sp.id})}">
+                            <img th:if="${sp.anh != null}"
+                                 th:src="${sp.anh.anhUrl}"
+                                 th:alt="${sp.tenSanPham}"
+                                 class="shop-product-card__image"
+                                 loading="lazy" />
+                            <span th:unless="${sp.anh != null}" class="shop-product-card__placeholder">
+                                <i class="bi bi-image"></i>
+                            </span>
+                            <span class="shop-badge shop-badge--primary shop-product-card__badge">Mới nhất</span>
+                        </a>
+                        <div class="shop-product-card__body">
+                            <p class="shop-product-card__category"
+                               th:text="${sp.danhMucSanPham != null ? sp.danhMucSanPham.tenDanhMuc : ''}">Danh mục</p>
+                            <a class="shop-product-card__name"
+                               th:href="@{/cua-hang/{id}(id=${sp.id})}"
+                               th:text="${sp.tenSanPham}">Tên sản phẩm</a>
+                            <div class="shop-product-card__price-row">
+                                <span class="shop-price"
+                                      th:text="${#numbers.formatInteger(sp.giaBan, 0, 'DEFAULT') + 'đ'}">0đ</span>
+                                <a class="shop-btn shop-btn--ghost shop-btn--sm" th:href="@{/cua-hang/{id}(id=${sp.id})}">Chi tiết</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="shop-section" th:if="${newestProducts != null and !#lists.isEmpty(newestProducts)}">
+        <div class="shop-container">
+            <div class="shop-section__header">
+                <h2 class="shop-section__title">Hàng mới về</h2>
+                <a class="shop-section__more" th:href="@{/cua-hang(sort='newest')}">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="shop-product-showcase">
+                <article class="shop-product-card"
+                      th:each="sp : ${newestProducts}">
+                    <a class="shop-product-card__image-link"
+                       th:href="@{/cua-hang/{id}(id=${sp.id})}">
+                        <img th:if="${sp.anh != null}"
+                             th:src="${sp.anh.anhUrl}"
+                             th:alt="${sp.tenSanPham}"
+                             class="shop-product-card__image"
+                             loading="lazy" />
+                        <span th:unless="${sp.anh != null}"
+                              class="shop-product-card__placeholder">
+                            <i class="bi bi-image"></i>
+                        </span>
+                        <span class="shop-badge shop-badge--primary shop-product-card__badge">Mới</span>
+                    </a>
+                    <div class="shop-product-card__body">
+                        <p class="shop-product-card__category"
+                           th:text="${sp.danhMucSanPham != null ? sp.danhMucSanPham.tenDanhMuc : ''}">Danh mục</p>
+                        <a class="shop-product-card__name"
+                           th:href="@{/cua-hang/{id}(id=${sp.id})}"
+                           th:text="${sp.tenSanPham}">Tên sản phẩm</a>
+                        <div class="shop-product-card__price-row">
+                            <span class="shop-price"
+                                  th:text="${#numbers.formatInteger(sp.giaBan, 0, 'DEFAULT') + 'đ'}">0đ</span>
+                            <a class="shop-btn shop-btn--ghost shop-btn--sm" th:href="@{/cua-hang/{id}(id=${sp.id})}">Chi tiết</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="shop-section"
+             th:if="${(featuredProducts == null or #lists.isEmpty(featuredProducts))
+                   and (newestProducts   == null or #lists.isEmpty(newestProducts))}">
+        <div class="shop-container">
+            <div class="shop-empty-state">
+                <i class="bi bi-box-seam shop-empty-state__icon"></i>
+                <p class="shop-empty-state__msg">Chưa có sản phẩm nào. Hãy quay lại sau!</p>
+                <a class="shop-btn shop-btn--primary" th:href="@{/cua-hang}">Xem danh mục</a>
+            </div>
+        </div>
+    </section>
+
+</div>

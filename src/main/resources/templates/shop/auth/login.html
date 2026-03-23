@@ -1,0 +1,59 @@
+<div th:fragment="content" xmlns:th="http://www.thymeleaf.org">
+    <section class="shop-auth">
+        <div class="shop-container">
+            <div class="shop-auth__shell">
+                <article class="shop-auth__card shop-auth__card--login">
+                    <header class="shop-auth__header">
+                        <p class="shop-auth__eyebrow">Yonex Store</p>
+                        <h1 class="shop-auth__title">Đăng nhập</h1>
+                        <p class="shop-auth__subtitle">Đăng nhập để theo dõi đơn hàng và nhận ưu đãi</p>
+                    </header>
+
+                    <div class="shop-auth__alert shop-auth__alert--danger" th:if="${error}">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <span th:text="${error}">Email hoặc mật khẩu không đúng</span>
+                    </div>
+
+                    <form class="shop-auth__form" th:action="@{/dang-nhap}" method="post">
+                        <input type="hidden" name="redirect" th:value="${redirect}" />
+
+                        <div class="shop-field">
+                            <label class="shop-label" for="shopLoginEmail">Email</label>
+                            <input id="shopLoginEmail"
+                                   class="shop-input"
+                                   type="email"
+                                   name="email"
+                                   th:value="${emailValue}"
+                                   placeholder="nhapemail@example.com"
+                                   autocomplete="email"
+                                   required />
+                        </div>
+
+                        <div class="shop-field">
+                            <label class="shop-label" for="shopLoginPassword">Mật khẩu</label>
+                            <input id="shopLoginPassword"
+                                   class="shop-input"
+                                   type="password"
+                                   name="password"
+                                   placeholder="Nhập mật khẩu của bạn"
+                                   autocomplete="current-password"
+                                   required />
+                        </div>
+
+                        <button type="submit" class="shop-btn shop-btn--primary shop-btn--full shop-btn--lg">
+                            Đăng nhập
+                        </button>
+                    </form>
+
+                    <footer class="shop-auth__footer">
+                        <p>Chưa có tài khoản? <a th:href="@{/dang-ky}">Đăng ký ngay</a></p>
+                        <a class="shop-auth__back-link" th:href="@{/}">
+                            <i class="bi bi-arrow-left"></i>
+                            <span>Quay về trang chủ</span>
+                        </a>
+                    </footer>
+                </article>
+            </div>
+        </div>
+    </section>
+</div>

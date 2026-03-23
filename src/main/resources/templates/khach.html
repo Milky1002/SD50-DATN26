@@ -2,6 +2,19 @@
     <link rel="stylesheet" th:href="@{/css/khach.css}">
 
     <div class="kh-wrap">
+        <div class="kh-summary-grid">
+            <article class="kh-summary-card">
+                <span class="kh-summary-card__label">Khách có tài khoản online</span>
+                <strong class="kh-summary-card__value" th:text="${linkedAccountCount}">0</strong>
+                <small>Đã liên kết với bảng tài khoản</small>
+            </article>
+            <article class="kh-summary-card kh-summary-card--muted">
+                <span class="kh-summary-card__label">Khách chỉ mua tại quầy</span>
+                <strong class="kh-summary-card__value" th:text="${offlineCustomerCount}">0</strong>
+                <small>Chưa kích hoạt tài khoản website</small>
+            </article>
+        </div>
+
         <!-- TOOLBAR -->
         <div class="kh-toolbar">
             <form class="kh-search" th:action="@{/khachhang/hienthi}" method="get">
@@ -31,6 +44,7 @@
                     <th style="width:130px">SĐT</th>
                     <th>Email</th>
                     <th>Địa chỉ</th>
+                    <th style="width:170px">Liên kết tài khoản</th>
                     <th style="width:140px">Trạng thái</th>
                     <th style="width:120px">Ngày tạo</th>
                     <th style="width:160px; text-align:right;">Chức năng</th>
@@ -44,6 +58,16 @@
                     <td th:text="${kh.email}"></td>
                     <td th:text="${kh.diaChiKhachHang}"></td>
                     <td>
+                        <span th:if="${kh.hasLinkedAccount()}" class="pill pill--linked">
+                            <i class="bi bi-person-check-fill"></i>
+                            <span th:text="${kh.taiKhoan != null ? kh.taiKhoan.username : 'Đã liên kết'}">Đã liên kết</span>
+                        </span>
+                        <span th:if="${!kh.hasLinkedAccount()}" class="pill pill--pending-link">
+                            <i class="bi bi-person-dash-fill"></i>
+                            Chưa có tài khoản
+                        </span>
+                    </td>
+                    <td>
                         <span th:if="${kh.trangThai == 1}" class="pill pill--ok">Đang theo dõi</span>
                         <span th:if="${kh.trangThai == 0}" class="pill pill--off">Ngừng theo dõi</span>
                     </td>
@@ -56,7 +80,7 @@
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(list)}">
-                    <td colspan="8" class="empty">Không có dữ liệu khách hàng</td>
+                    <td colspan="9" class="empty">Không có dữ liệu khách hàng</td>
                 </tr>
                 </tbody>
             </table>
@@ -86,6 +110,7 @@
                         <div class="kh-field">
                             <label>Email <span class="req">*</span></label>
                             <input type="email" name="email" id="fEmail" placeholder="email@example.com" required>
+                            <small class="kh-field__hint">Nếu email đã có trong hệ thống tài khoản, khách hàng sẽ được tự động liên kết.</small>
                         </div>
                         <div class="kh-field kh-field--full">
                             <label>Địa chỉ <span class="req">*</span></label>
@@ -97,6 +122,10 @@
                                 <option value="1">Đang theo dõi</option>
                                 <option value="0">Ngừng theo dõi</option>
                             </select>
+                        </div>
+                        <div class="kh-field kh-field--full kh-field__info">
+                            <i class="bi bi-info-circle"></i>
+                            <span>Khách hàng mua tại quầy có thể chưa có tài khoản website. Khi họ đăng ký online bằng email/số điện thoại trùng khớp, hệ thống sẽ kích hoạt liên kết tự động.</span>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,68 @@
+<div th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/homepage-config.css}"/>
+
+    <div th:if="${success}" class="hp-config-alert hp-config-alert--success" th:text="${success}"></div>
+    <div th:if="${error}" class="hp-config-alert hp-config-alert--error" th:text="${error}"></div>
+
+    <div class="hp-config-wrap">
+        <div class="hp-config-summary">
+            <article class="hp-config-summary__card">
+                <span>Đang chọn sản phẩm hot</span>
+                <strong th:text="${selectedHotCount}">0</strong>
+                <small>Hiển thị trong cụm nổi bật đầu trang</small>
+            </article>
+            <article class="hp-config-summary__card">
+                <span>Đang chọn danh mục nổi bật</span>
+                <strong th:text="${selectedCategoryCount}">0</strong>
+                <small>Tự động lấy các sản phẩm mới nhất theo danh mục</small>
+            </article>
+        </div>
+
+        <form th:action="@{/trang-chu-config/save}" method="post" class="hp-config-form">
+            <section class="hp-config-card">
+                <input type="hidden" name="_hotSection" value="1"/>
+                <div class="hp-config-card__header">
+                    <h2>Sản phẩm HOT trên trang chủ</h2>
+                    <p>Chọn các sản phẩm cần ưu tiên hiển thị ở slider đầu trang.</p>
+                </div>
+                <div class="hp-config-grid">
+                    <label class="hp-config-option" th:each="sp : ${sanPhamList}">
+                        <input type="checkbox"
+                               name="hotProductIds"
+                               th:value="${sp.id}"
+                               th:checked="${selectedHotIds != null and #lists.contains(selectedHotIds, sp.id)}" />
+                        <span class="hp-config-option__body">
+                            <strong th:text="${sp.tenSanPham}">Sản phẩm</strong>
+                            <small th:text="${sp.danhMucSanPham != null ? sp.danhMucSanPham.tenDanhMuc : 'Chưa có danh mục'}">Danh mục</small>
+                        </span>
+                    </label>
+                </div>
+            </section>
+
+            <section class="hp-config-card">
+                <input type="hidden" name="_categorySection" value="1"/>
+                <div class="hp-config-card__header">
+                    <h2>Danh mục nổi bật trên trang chủ</h2>
+                    <p>Mỗi danh mục sẽ hiển thị tối đa 20 sản phẩm mới nhất trong slider riêng.</p>
+                </div>
+                <div class="hp-config-grid hp-config-grid--category">
+                    <label class="hp-config-option" th:each="dm : ${danhMucList}">
+                        <input type="checkbox"
+                               name="featuredCategoryIds"
+                               th:value="${dm.danhMucSanPhamId}"
+                               th:checked="${selectedCategoryIds != null and #lists.contains(selectedCategoryIds, dm.danhMucSanPhamId)}" />
+                        <span class="hp-config-option__body">
+                            <strong th:text="${dm.tenDanhMuc}">Danh mục</strong>
+                            <small>Hiển thị slider danh mục</small>
+                        </span>
+                    </label>
+                </div>
+            </section>
+
+            <div class="hp-config-actions">
+                <p class="hp-config-actions__note">Nếu chưa chọn mục nào, hệ thống sẽ không xóa cấu hình hiện tại.</p>
+                <button type="submit" class="sp-btn sp-btn--primary">Lưu cấu hình trang chủ</button>
+            </div>
+        </form>
+    </div>
+</div>
