@@ -101,22 +101,30 @@
                 formData = new FormData(form);
                 setSubmitButtonLoading(button, true);
 
-                fetch(form.action, {
+                var ajaxUrl = form.action.replace('/gio-hang/them', '/gio-hang/them-ajax');
+
+                fetch(ajaxUrl, {
                     method: 'POST',
                     body: formData,
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    credentials: 'same-origin',
-                    redirect: 'follow'
+                    credentials: 'same-origin'
                 })
                     .then(function (response) {
-                        if (!response.ok && !response.redirected) {
+                        if (!response.ok) {
                             throw new Error('ADD_TO_CART_FAILED');
                         }
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        if (!data || !data.success) {
+                            showToast(data && data.message ? data.message : 'Không thể thêm sản phẩm vào giỏ hàng.', 'error');
+                            return;
+                        }
 
-                        updateCartBadgeCount(readCartBadgeCount() + readAddedQuantity(form));
-                        showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
+                        updateCartBadgeCount(data.cartItemCount);
+                        showToast(data.message || 'Đã thêm sản phẩm vào giỏ hàng!', 'success');
                     })
                     .catch(function () {
                         setSubmitButtonLoading(button, false);

@@ -196,6 +196,24 @@
         </div>
     </div>
 
+    <div class="bh-modal" id="transferQrModal" aria-hidden="true">
+        <div class="bh-modal__overlay" onclick="document.getElementById('transferQrModal').classList.remove('is-open')"></div>
+        <div class="bh-modal__dialog bh-modal__dialog--success">
+            <div class="bh-modal__header">
+                <div class="bh-modal__title"><i class="bi bi-qr-code-scan"></i> Xác nhận chuyển khoản</div>
+                <button type="button" class="bh-modal__close" onclick="document.getElementById('transferQrModal').classList.remove('is-open')">&times;</button>
+            </div>
+            <div class="bh-modal__body" style="text-align:center">
+                <img id="transferQrImage" alt="VietQR" style="max-width:300px;width:100%;border:1px solid #e5e7eb;border-radius:16px;padding:10px;background:#fff" />
+                <p class="pos-success-message">Quét mã VietQR và bấm xác nhận để hoàn tất thanh toán chuyển khoản.</p>
+            </div>
+            <div class="modal-footer pos-success-actions">
+                <button type="button" class="btn-secondary" onclick="document.getElementById('transferQrModal').classList.remove('is-open')">Đóng</button>
+                <button type="button" class="btn-primary" id="btnConfirmTransferQr">Xác nhận thanh toán</button>
+            </div>
+        </div>
+    </div>
+
     <div class="bh-modal" id="paymentSuccessModal" aria-hidden="true">
         <div class="bh-modal__overlay" data-success-close></div>
         <div class="bh-modal__dialog bh-modal__dialog--success">
@@ -717,6 +735,11 @@
                 debtAmount.textContent = debt > 0 ? formatMoney(debt) : '0';
             }
 
+            var transferQrModal = document.getElementById('transferQrModal');
+            var transferQrImage = document.getElementById('transferQrImage');
+            var btnConfirmTransferQr = document.getElementById('btnConfirmTransferQr');
+            var pendingTransferResult = null;
+
             function showPaymentSuccess(result, paymentMethod) {
                 var methodText = paymentMethod === 'transfer' ? 'Đã ghi nhận thanh toán chuyển khoản.' : 'Đã ghi nhận thanh toán tiền mặt.';
                 latestReceiptUrl = '/ban-hang/' + result.hoaDonId + '/phieu-tinh-tien';
@@ -729,6 +752,40 @@
             function closePaymentSuccessModal() {
                 paymentSuccessModal.classList.remove('is-open');
             }
+
+            btnConfirmTransferQr.addEventListener('click', function () {
+                if (!pendingTransferResult || !pendingTransferResult.hoaDonId) {
+                    return;
+                }
+                btnConfirmTransferQr.disabled = true;
+                btnConfirmTransferQr.textContent = 'Đang xác nhận...';
+                fetch('/ban-hang/' + pendingTransferResult.hoaDonId + '/xac-nhan-chuyen-khoan', {
+                    method: 'POST'
+                })
+                .then(function (r) {
+                    return r.json().then(function (data) {
+                        return { ok: r.ok, data: data };
+                    });
+                })
+                .then(function (res) {
+                    if (!res.ok || !res.data.success) {
+                        throw new Error(res.data.message || 'Không thể xác nhận chuyển khoản');
+                    }
+                    transferQrModal.classList.remove('is-open');
+                    if (document.getElementById('chkPrint').checked) {
+                        window.open('/ban-hang/' + pendingTransferResult.hoaDonId + '/phieu-tinh-tien', '_blank');
+                    }
+                    showPaymentSuccess(pendingTransferResult, 'transfer');
+                    pendingTransferResult = null;
+                })
+                .catch(function (err) {
+                    alert(err.message);
+                })
+                .finally(function () {
+                    btnConfirmTransferQr.disabled = false;
+                    btnConfirmTransferQr.textContent = 'Xác nhận thanh toán';
+                });
+            });
 
             cashGiven.addEventListener('input', updateDebt);
 
@@ -762,10 +819,16 @@
                 })
                 .then(function (res) {
                     if (res.ok && res.data.success) {
-                        if (document.getElementById('chkPrint').checked) {
-                            window.open('/ban-hang/' + res.data.hoaDonId + '/phieu-tinh-tien', '_blank');
+                        if (res.data.isTransfer) {
+                            pendingTransferResult = res.data;
+                            transferQrImage.src = res.data.vietQrUrl;
+                            transferQrModal.classList.add('is-open');
+                        } else {
+                            if (document.getElementById('chkPrint').checked) {
+                                window.open('/ban-hang/' + res.data.hoaDonId + '/phieu-tinh-tien', '_blank');
+                            }
+                            showPaymentSuccess(res.data, paymentMethod);
                         }
-                        showPaymentSuccess(res.data, paymentMethod);
                         cart = [];
                         renderCart();
                         customerInput.value = '';

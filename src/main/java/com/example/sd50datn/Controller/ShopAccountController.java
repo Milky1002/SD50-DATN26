@@ -2,9 +2,12 @@ package com.example.sd50datn.Controller;
 
 import com.example.sd50datn.Entity.HoaDon;
 import com.example.sd50datn.Entity.HoaDonChiTiet;
+import com.example.sd50datn.Entity.HinhThucThanhToan;
 import com.example.sd50datn.Entity.KhachHang;
+import com.example.sd50datn.Repository.HinhThucThanhToanRepository;
 import com.example.sd50datn.Repository.HoaDonChiTietRepository;
 import com.example.sd50datn.Repository.InvoiceRepository;
+import com.example.sd50datn.Service.GioHangService;
 import com.example.sd50datn.Service.KhachHangService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +36,8 @@ public class ShopAccountController {
     private final KhachHangService khachHangService;
     private final InvoiceRepository hoaDonRepo;
     private final HoaDonChiTietRepository hoaDonChiTietRepo;
+    private final GioHangService gioHangService;
+    private final HinhThucThanhToanRepository hinhThucThanhToanRepo;
 
     private void addCommonAttributes(Model model, HttpSession session, String activeTab) {
         Integer customerId = (Integer) session.getAttribute("shopCustomerId");
@@ -42,7 +47,7 @@ public class ShopAccountController {
         model.addAttribute("activeTab", activeTab);
         model.addAttribute("activeMenu", "account");
         model.addAttribute("pageCss", "/shop/css/shop-account.css");
-        model.addAttribute("cartItemCount", 0);
+        model.addAttribute("cartItemCount", gioHangService.getCartItemCount(session));
     }
 
     @GetMapping
@@ -109,9 +114,13 @@ public class ShopAccountController {
         }
 
         List<HoaDonChiTiet> orderItems = hoaDonChiTietRepo.findByHoaDonId(id);
+        HinhThucThanhToan paymentMethod = order.getHinhThucThanhToanId() != null
+                ? hinhThucThanhToanRepo.findById(order.getHinhThucThanhToanId()).orElse(null)
+                : null;
 
         model.addAttribute("order", order);
         model.addAttribute("orderItems", orderItems);
+        model.addAttribute("paymentMethodName", paymentMethod != null ? paymentMethod.getTenHinhThuc() : null);
         model.addAttribute("pageTitle", "Đơn hàng #" + id + " — Yonex Store");
         model.addAttribute("content", "shop/account/order-detail");
 

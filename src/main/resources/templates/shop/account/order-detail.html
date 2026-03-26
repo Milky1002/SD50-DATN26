@@ -65,8 +65,8 @@
                                         <dt>Trạng thái</dt>
                                         <dd>
                                             <span class="shop-order-status"
-                                                  th:classappend="${order.trangThai == 0} ? ' shop-order-status--pending' : (${order.trangThai == 1} ? ' shop-order-status--confirmed' : (${order.trangThai == 2} ? ' shop-order-status--shipping' : (${order.trangThai == 3} ? ' shop-order-status--completed' : ' shop-order-status--cancelled')))"
-                                                  th:text="${order.trangThai == 0} ? 'Chờ xác nhận' : (${order.trangThai == 1} ? 'Đã xác nhận' : (${order.trangThai == 2} ? 'Đang giao' : (${order.trangThai == 3} ? 'Hoàn thành' : 'Đã hủy')))">
+                                                  th:classappend="${order.trangThai == 0} ? ' shop-order-status--pending' : (${order.trangThai == 1} ? ' shop-order-status--shipping' : (${order.trangThai == 2} ? ' shop-order-status--completed' : ' shop-order-status--cancelled'))"
+                                                  th:text="${order.trangThai == 0} ? 'Chờ xác nhận' : (${order.trangThai == 1} ? 'Đang giao' : (${order.trangThai == 2} ? 'Hoàn tất' : 'Đã hủy'))">
                                                 Chờ xác nhận
                                             </span>
                                         </dd>
@@ -77,7 +77,11 @@
                                     </div>
                                     <div>
                                         <dt>Phương thức thanh toán</dt>
-                                        <dd th:text="${order.hinhThucThanhToanId != null ? 'Hình thức #' + order.hinhThucThanhToanId : 'Chưa xác định'}">Chưa xác định</dd>
+                                        <dd th:text="${paymentMethodName != null ? paymentMethodName : 'Chưa xác định'}">Chưa xác định</dd>
+                                    </div>
+                                    <div th:if="${order.thongTinVoucher != null and !#strings.isEmpty(order.thongTinVoucher)}">
+                                        <dt>Voucher áp dụng</dt>
+                                        <dd th:text="${order.thongTinVoucher}">Không có</dd>
                                     </div>
                                     <div>
                                         <dt>Ghi chú</dt>
@@ -106,7 +110,7 @@
                                             <td th:text="${item.sanPham != null ? item.sanPham.tenSanPham : 'Sản phẩm không xác định'}">Tên sản phẩm</td>
                                             <td th:text="${item.soLuongSanPham}">1</td>
                                             <td th:text="${#numbers.formatInteger(item.gia, 0, 'DEFAULT') + 'đ'}">0đ</td>
-                                            <td th:text="${#numbers.formatInteger(item.gia.multiply(T(java.math.BigDecimal).valueOf(item.soLuongSanPham)), 0, 'DEFAULT') + 'đ'}">0đ</td>
+                                            <td th:text="${#numbers.formatInteger(item.gia * item.soLuongSanPham, 0, 'DEFAULT') + 'đ'}">0đ</td>
                                         </tr>
                                         </tbody>
                                         <tfoot>

@@ -1,6 +1,7 @@
 package com.example.sd50datn.Controller;
 
 import com.example.sd50datn.Entity.KhachHang;
+import com.example.sd50datn.Service.GioHangService;
 import com.example.sd50datn.Service.ShopAuthService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ShopAuthController {
 
     private final ShopAuthService shopAuthService;
+    private final GioHangService gioHangService;
 
     @GetMapping("/dang-nhap")
     public String loginPage(@RequestParam(value = "redirect", required = false) String redirect,
@@ -27,7 +29,7 @@ public class ShopAuthController {
         model.addAttribute("pageTitle", "Đăng nhập — Yonex Store");
         model.addAttribute("pageCss", "/shop/css/shop-auth.css");
         model.addAttribute("content", "shop/auth/login");
-        model.addAttribute("cartItemCount", 0);
+        model.addAttribute("cartItemCount", gioHangService.getCartItemCount(session));
         return "shop/shop-layout";
     }
 
@@ -54,7 +56,7 @@ public class ShopAuthController {
         model.addAttribute("pageTitle", "Đăng ký — Yonex Store");
         model.addAttribute("pageCss", "/shop/css/shop-auth.css");
         model.addAttribute("content", "shop/auth/register");
-        model.addAttribute("cartItemCount", 0);
+        model.addAttribute("cartItemCount", gioHangService.getCartItemCount(session));
         return "shop/shop-layout";
     }
 

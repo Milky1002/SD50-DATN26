@@ -572,6 +572,12 @@
     font-family: inherit;
 }
 
+.shop-form-select option,
+.shop-form-select optgroup {
+    color: var(--shop-text, #111);
+    background-color: #fff;
+}
+
 .shop-form-input:focus,
 .shop-form-select:focus {
     outline: none;

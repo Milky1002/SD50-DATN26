@@ -140,7 +140,6 @@ public class BanHangController {
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> items = (List<Map<String, Object>>) request.get("items");
 
-            // Read cashier identity from session
             Integer nhanVienId = (Integer) session.getAttribute("nhanVienId");
             String hoTenNhanVien = (String) session.getAttribute("hoTen");
 
@@ -153,6 +152,27 @@ public class BanHangController {
             result.put("success", true);
             result.put("hoaDonId", hoaDon.getId());
             result.put("tongTien", hoaDon.getTongTienSauKhiGiam());
+            result.put("isTransfer", "transfer".equalsIgnoreCase(phuongThucThanhToan));
+            result.put("vietQrUrl", "https://img.vietqr.io/image/vietinbank-101878509895-compact2.jpg?amount="
+                    + hoaDon.getTongTienSauKhiGiam().longValue()
+                    + "&addInfo=SEVQR%20POS%20" + hoaDon.getId()
+                    + "&accountName=Vu%20Bao%20Linh");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(result);
+        }
+    }
+
+    @PostMapping("/{hoaDonId}/xac-nhan-chuyen-khoan")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> confirmTransfer(@PathVariable Integer hoaDonId) {
+        try {
+            banHangService.confirmTransferPayment(hoaDonId);
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             Map<String, Object> result = new HashMap<>();

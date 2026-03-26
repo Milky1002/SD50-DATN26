@@ -5,6 +5,9 @@ import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.example.sd50datn.Util.OrderStatusUtil;
 
 @Getter
 @AllArgsConstructor
@@ -39,27 +42,15 @@ public class OrderSummaryDTO {
     }
 
     public String getDisplayShippingStatus() {
-        if (orderStatus == null) {
-            return "Chờ xử lý";
-        }
-        return switch (orderStatus) {
-            case 1 -> "Đang giao";
-            case 2 -> "Hoàn tất";
-            case 3 -> "Đã hủy";
-            default -> "Chờ xử lý";
-        };
+        return OrderStatusUtil.getLabel(orderStatus);
     }
 
     public String getTabKey() {
-        if (orderStatus == null) {
-            return "waiting";
-        }
-        return switch (orderStatus) {
-            case 1 -> "shipping";
-            case 2 -> "done";
-            case 3 -> "cancelled";
-            default -> "waiting";
-        };
+        return OrderStatusUtil.getTabKey(orderStatus);
+    }
+
+    public List<Integer> getAllowedTransitions() {
+        return OrderStatusUtil.getAllowedTransitions(orderStatus);
     }
 
     public String getInitials() {

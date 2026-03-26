@@ -67,8 +67,8 @@
                                     <td th:text="${#numbers.formatInteger(order.tongTienSauKhiGiam, 0, 'DEFAULT') + 'đ'}">0đ</td>
                                     <td>
                                         <span class="shop-order-status"
-                                              th:classappend="${order.trangThai == 0} ? ' shop-order-status--pending' : (${order.trangThai == 1} ? ' shop-order-status--confirmed' : (${order.trangThai == 2} ? ' shop-order-status--shipping' : (${order.trangThai == 3} ? ' shop-order-status--completed' : ' shop-order-status--cancelled')))"
-                                              th:text="${order.trangThai == 0} ? 'Chờ xác nhận' : (${order.trangThai == 1} ? 'Đã xác nhận' : (${order.trangThai == 2} ? 'Đang giao' : (${order.trangThai == 3} ? 'Hoàn thành' : 'Đã hủy')))">
+                                              th:classappend="${order.trangThai == 0} ? ' shop-order-status--pending' : (${order.trangThai == 1} ? ' shop-order-status--shipping' : (${order.trangThai == 2} ? ' shop-order-status--completed' : ' shop-order-status--cancelled'))"
+                                              th:text="${order.trangThai == 0} ? 'Chờ xác nhận' : (${order.trangThai == 1} ? 'Đang giao' : (${order.trangThai == 2} ? 'Hoàn tất' : 'Đã hủy'))">
                                             Chờ xác nhận
                                         </span>
                                     </td>

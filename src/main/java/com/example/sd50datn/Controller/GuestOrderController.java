@@ -7,6 +7,7 @@ import com.example.sd50datn.Repository.HinhThucThanhToanRepository;
 import com.example.sd50datn.Repository.HoaDonChiTietRepository;
 import com.example.sd50datn.Repository.InvoiceRepository;
 import com.example.sd50datn.Repository.SanPhamRepository;
+import com.example.sd50datn.Service.GioHangService;
 import com.example.sd50datn.Service.SanPhamService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
@@ -43,6 +44,7 @@ public class GuestOrderController {
     private final HoaDonChiTietRepository  hoaDonChiTietRepo;
     private final HinhThucThanhToanRepository hinhThucThanhToanRepo;
     private final SanPhamRepository        sanPhamRepo;
+    private final GioHangService gioHangService;
 
     /** POST /dat-hang-nhanh — create order from single-product quick-buy form */
     @PostMapping
@@ -120,11 +122,11 @@ public class GuestOrderController {
 
     /** GET /dat-hang-nhanh/xac-nhan — confirmation page (no auth required) */
     @GetMapping("/xac-nhan")
-    public String confirmation(Model model) {
+    public String confirmation(HttpSession session, Model model) {
         model.addAttribute("pageTitle",    "Đặt hàng thành công — Yonex Store");
         model.addAttribute("pageCss",      "/shop/css/shop-checkout.css");
         model.addAttribute("content",      "shop/order-confirmation");
-        model.addAttribute("cartItemCount", 0);
+        model.addAttribute("cartItemCount", gioHangService.getCartItemCount(session));
         model.addAttribute("activeMenu",   "products");
         return "shop/shop-layout";
     }

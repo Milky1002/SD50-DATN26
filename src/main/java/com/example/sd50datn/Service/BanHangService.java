@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ public class BanHangService {
     private final HoaDonChiTietRepository hoaDonChiTietRepo;
     private final SanPhamRepository sanPhamRepo;
     private final HinhThucThanhToanRepository hinhThucThanhToanRepo;
+    private final ThanhToanRepository thanhToanRepo;
     private final ChuongTrinhKhuyenMaiRepository chuongTrinhKhuyenMaiRepo;
     private final LichSuApDungKhuyenMaiRepository lichSuApDungRepo;
     private final NhanVienHoatDongService nhanVienHoatDongService;
@@ -140,6 +142,10 @@ public class BanHangService {
                 "SALE_OFFLINE", "HOA_DON", hoaDon.getId(),
                 moTa, tongTienSauGiam);
 
+        if (!"transfer".equalsIgnoreCase(phuongThucThanhToan)) {
+            saveSuccessfulPayment(hoaDon, hinhThucThanhToanId, tongTienSauGiam, "POS-CASH-" + hoaDon.getId());
+        }
+
         return hoaDon;
     }
 
@@ -193,6 +199,31 @@ public class BanHangService {
     private Integer getDefaultPaymentMethodId() {
         List<HinhThucThanhToan> all = hinhThucThanhToanRepo.findAll();
         return all.isEmpty() ? null : all.get(0).getId();
+    }
+
+    @Transactional
+    public void confirmTransferPayment(Integer hoaDonId) {
+        HoaDon hoaDon = hoaDonRepo.findById(hoaDonId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn"));
+        Integer paymentMethodId = hoaDon.getHinhThucThanhToanId();
+        saveSuccessfulPayment(hoaDon, paymentMethodId, hoaDon.getTongTienSauKhiGiam(), "POS-QR-" + hoaDon.getId());
+    }
+
+    private void saveSuccessfulPayment(HoaDon hoaDon,
+                                       Integer paymentMethodId,
+                                       BigDecimal amount,
+                                       String transactionCode) {
+        if (hoaDon == null || paymentMethodId == null) {
+            return;
+        }
+        ThanhToan thanhToan = thanhToanRepo.findByHoaDonId(hoaDon.getId()).orElseGet(ThanhToan::new);
+        thanhToan.setHoaDonId(hoaDon.getId());
+        thanhToan.setHinhThucThanhToanId(paymentMethodId);
+        thanhToan.setSoTien(amount != null ? amount : BigDecimal.ZERO);
+        thanhToan.setPaidAt(LocalDateTime.now());
+        thanhToan.setMaGiaoDich(transactionCode);
+        thanhToan.setTrangThai(1);
+        thanhToanRepo.save(thanhToan);
     }
 
     /**

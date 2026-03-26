@@ -2,6 +2,8 @@
     <link rel="stylesheet" th:href="@{/css/order-management.css}"/>
 
     <div class="card order-card">
+        <div th:if="${success}" class="xk-alert xk-alert--ok" th:text="${success}"></div>
+        <div th:if="${error}" class="xk-alert xk-alert--err" th:text="${error}"></div>
         <div class="order-card__header">
             <div>
                 <h2 class="order-card__title"><i class="bi bi-bag-check"></i> Danh sách đơn hàng</h2>
@@ -80,12 +82,15 @@
                         </span>
                     </td>
                     <td>
-                        <form th:action="@{'/orders/' + ${order.id} + '/status'}" method="post">
+                        <form th:action="@{'/orders/' + ${order.id} + '/status'}" method="post"
+                              onsubmit="return confirmStatusChange(this)">
                             <select name="status" class="status-select" onchange="this.form.submit()">
-                                <option th:value="0" th:selected="${order.orderStatus == 0}">Chờ xử lý</option>
-                                <option th:value="1" th:selected="${order.orderStatus == 1}">Đang giao</option>
-                                <option th:value="2" th:selected="${order.orderStatus == 2}">Hoàn tất</option>
-                                <option th:value="3" th:selected="${order.orderStatus == 3}">Đã hủy</option>
+                                <option th:value="${order.orderStatus}" selected th:text="${order.displayShippingStatus}">Chờ xác nhận</option>
+                                <option th:each="nextStatus : ${order.allowedTransitions}"
+                                        th:value="${nextStatus}"
+                                        th:text="${statusLabels[nextStatus]}">
+                                    Trạng thái
+                                </option>
                             </select>
                         </form>
                     </td>
@@ -113,6 +118,24 @@
             </div>
         </div>
     </div>
+
+    <script>
+    function confirmStatusChange(form) {
+        var select = form.querySelector('select[name="status"]');
+        var selectedOption = select.options[select.selectedIndex];
+        var label = selectedOption ? selectedOption.textContent.trim() : '';
+
+        if (!label) {
+            return true;
+        }
+
+        if (label === 'Đã hủy') {
+            return confirm('Bạn có chắc muốn hủy đơn hàng này? Thao tác này không thể hoàn tác.');
+        }
+
+        return confirm('Xác nhận chuyển trạng thái sang: ' + label + '?');
+    }
+    </script>
 
     <script>
     (function () {

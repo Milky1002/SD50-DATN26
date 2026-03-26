@@ -7,8 +7,8 @@
                 </div>
 
                 <div class="shop-confirm__body" th:if="${orderId != null}">
-                    <p class="shop-confirm__eyebrow">Đơn hàng đã được ghi nhận</p>
-                    <h1 class="shop-confirm__title">Đặt hàng thành công!</h1>
+                    <p class="shop-confirm__eyebrow" th:text="${isTransferPending} ? 'Vui lòng xác nhận chuyển khoản' : 'Đơn hàng đã được ghi nhận'">Đơn hàng đã được ghi nhận</p>
+                    <h1 class="shop-confirm__title" th:text="${isTransferPending} ? 'Xác nhận thanh toán chuyển khoản' : 'Đặt hàng thành công!'">Đặt hàng thành công!</h1>
                     <div class="shop-confirm__meta">
                         <div class="shop-confirm__meta-item">
                             <span>Mã đơn hàng</span>
@@ -18,8 +18,23 @@
                             <span>Tổng thanh toán</span>
                             <strong th:text="${#numbers.formatInteger(orderTotal, 0, 'DEFAULT')} + 'đ'">0đ</strong>
                         </div>
+                        <div class="shop-confirm__meta-item" th:if="${paymentMethodName != null}">
+                            <span>Phương thức</span>
+                            <strong th:text="${paymentMethodName}">Thanh toán</strong>
+                        </div>
                     </div>
-                    <p class="shop-confirm__message">Chúng tôi sẽ liên hệ xác nhận đơn hàng trong thời gian sớm nhất.</p>
+                    <div th:if="${isTransferPending}" style="margin:24px 0;text-align:center;">
+                        <img th:src="${vietQrUrl}" alt="VietQR thanh toán" style="max-width:300px;width:100%;border:1px solid #e5e7eb;border-radius:16px;padding:10px;background:#fff" />
+                        <p class="shop-confirm__message">Quét mã VietQR để chuyển khoản. Sau khi hoàn tất, bấm xác nhận thanh toán để hệ thống ghi nhận thành công.</p>
+                        <form th:action="@{/thanh-toan/xac-nhan-chuyen-khoan}" method="post" style="margin-top:16px;">
+                            <input type="hidden" name="orderId" th:value="${orderId}" />
+                            <button type="submit" class="shop-btn shop-btn--primary shop-btn--lg">
+                                <i class="bi bi-check-circle"></i>
+                                Xác nhận thanh toán
+                            </button>
+                        </form>
+                    </div>
+                    <p class="shop-confirm__message" th:unless="${isTransferPending}">Chúng tôi sẽ liên hệ xác nhận đơn hàng trong thời gian sớm nhất.</p>
                 </div>
 
                 <div class="shop-confirm__body" th:if="${orderId == null}">

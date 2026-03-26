@@ -3,7 +3,9 @@ package com.example.sd50datn.Controller;
 import com.example.sd50datn.Dto.ChuongTrinhKhuyenMaiDTO;
 import com.example.sd50datn.Entity.SanPham;
 import com.example.sd50datn.Service.ChuongTrinhKhuyenMaiService;
+import com.example.sd50datn.Service.GioHangService;
 import com.example.sd50datn.Service.SanPhamService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,9 +23,10 @@ public class ShopSearchController {
 
     private final SanPhamService sanPhamService;
     private final ChuongTrinhKhuyenMaiService khuyenMaiService;
+    private final GioHangService gioHangService;
 
     @GetMapping("/tim-kiem")
-    public String search(@RequestParam(value = "q", required = false) String q, Model model) {
+    public String search(@RequestParam(value = "q", required = false) String q, HttpSession session, Model model) {
         List<SanPham> results = new ArrayList<>();
         if (q != null && !q.trim().isEmpty()) {
             results = sanPhamService.search(q.trim(), 1, null);
@@ -37,7 +40,7 @@ public class ShopSearchController {
         model.addAttribute("pageCss", "/shop/css/shop-home.css");
         model.addAttribute("pageCss2", "/shop/css/shop-search.css");
         model.addAttribute("content", "shop/search");
-        model.addAttribute("cartItemCount", 0);
+        model.addAttribute("cartItemCount", gioHangService.getCartItemCount(session));
 
         List<Map<String, String>> breadcrumbItems = new ArrayList<>();
         Map<String, String> searchCrumb = new HashMap<>();
@@ -50,7 +53,7 @@ public class ShopSearchController {
     }
 
     @GetMapping("/khuyen-mai")
-    public String promotions(Model model) {
+    public String promotions(HttpSession session, Model model) {
         List<ChuongTrinhKhuyenMaiDTO> activePromotions = khuyenMaiService.getActivePromotions();
         List<ChuongTrinhKhuyenMaiDTO> allPromotions = khuyenMaiService.getAllPromotions();
 
@@ -60,7 +63,7 @@ public class ShopSearchController {
         model.addAttribute("activeMenu", "");
         model.addAttribute("pageCss", "/shop/css/shop-search.css");
         model.addAttribute("content", "shop/promotions");
-        model.addAttribute("cartItemCount", 0);
+        model.addAttribute("cartItemCount", gioHangService.getCartItemCount(session));
 
         List<Map<String, String>> breadcrumbItems = new ArrayList<>();
         Map<String, String> promoCrumb = new HashMap<>();

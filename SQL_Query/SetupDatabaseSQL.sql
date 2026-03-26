@@ -295,6 +295,14 @@ CREATE TABLE [dbo].[NhaCungCap](
 );
 GO
 
+INSERT INTO [dbo].[NhaCungCap] ([Ten_nha_cung_cap], [Nguoi_lien_he], [SDT], [Email], [Dia_chi], [Trang_thai])
+VALUES
+    (N'Yonex Việt Nam', N'Nguyễn Văn Minh', '0901234567', 'contact@yonex.vn', N'268 Tô Hiến Thành, Hai Bà Trưng, Hà Nội', 1),
+    (N'Lining Official Store', N'Trần Thu Hà', '0912345678', 'sales@lining.vn', N'12 Nguyễn Trãi, Thanh Xuân, Hà Nội', 1),
+    (N'Victor Sports Vietnam', N'Lê Hoàng Nam', '0923456789', 'support@victor.vn', N'45 Lê Văn Sỹ, Phú Nhuận, TP. Hồ Chí Minh', 1),
+    (N'Mizuno Distributor', N'Phạm Quang Huy', '0934567890', 'biz@mizuno.vn', N'88 Cộng Hòa, Tân Bình, TP. Hồ Chí Minh', 1);
+GO
+
 CREATE TABLE [dbo].[PhieuNhap](
     [Phieu_nhap_id] INT IDENTITY(1,1) PRIMARY KEY,
     [Ma_phieu_nhap] NVARCHAR(50) NOT NULL UNIQUE,

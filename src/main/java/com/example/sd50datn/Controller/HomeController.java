@@ -5,8 +5,10 @@ import com.example.sd50datn.Entity.DanhMucSanPham;
 import com.example.sd50datn.Entity.SanPham;
 import com.example.sd50datn.Service.ChuongTrinhKhuyenMaiService;
 import com.example.sd50datn.Service.DanhMucSanPhamService;
+import com.example.sd50datn.Service.GioHangService;
 import com.example.sd50datn.Service.HomepageConfigService;
 import com.example.sd50datn.Service.SanPhamService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,9 +31,10 @@ public class HomeController {
     private final DanhMucSanPhamService danhMucService;
     private final ChuongTrinhKhuyenMaiService khuyenMaiService;
     private final HomepageConfigService homepageConfigService;
+    private final GioHangService gioHangService;
 
     @GetMapping("/")
-    public String home(Model model) {
+    public String home(HttpSession session, Model model) {
         List<SanPham> activeProducts = sanPhamService.search(null, 1, null);
 
         List<SanPham> featuredProducts = homepageConfigService.getHotProducts();
@@ -54,7 +57,7 @@ public class HomeController {
         model.addAttribute("activeMenu",      "home");
         model.addAttribute("content",         "shop/home");
         model.addAttribute("pageCss",         "/shop/css/shop-home.css");
-        model.addAttribute("cartItemCount",   0);
+        model.addAttribute("cartItemCount",   gioHangService.getCartItemCount(session));
         model.addAttribute("featuredProducts", featuredProducts);
         model.addAttribute("newestProducts",   newestProducts);
         model.addAttribute("categories",       categories);

@@ -3,9 +3,11 @@ package com.example.sd50datn.Controller;
 import com.example.sd50datn.Entity.DanhMucSanPham;
 import com.example.sd50datn.Entity.SanPham;
 import com.example.sd50datn.Service.DanhMucSanPhamService;
+import com.example.sd50datn.Service.GioHangService;
 import com.example.sd50datn.Service.MauSacService;
 import com.example.sd50datn.Service.SanPhamService;
 import com.example.sd50datn.Repository.HinhThucThanhToanRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,6 +51,7 @@ public class StorefrontSanPhamController {
     private final DanhMucSanPhamService danhMucService;
     private final MauSacService mauSacService;
     private final HinhThucThanhToanRepository hinhThucThanhToanRepo;
+    private final GioHangService gioHangService;
 
     @GetMapping
     public String list(
@@ -57,6 +60,7 @@ public class StorefrontSanPhamController {
             @RequestParam(value = "mauSacId",  required = false)                  Integer mauSacId,
             @RequestParam(value = "conHang",   required = false, defaultValue = "false") boolean conHang,
             @RequestParam(value = "sort",      required = false, defaultValue = "newest") String sort,
+            HttpSession session,
             Model model) {
 
         // --- Fetch: active products only (trangThai = 1), with keyword + category filter ---
@@ -133,7 +137,7 @@ public class StorefrontSanPhamController {
         model.addAttribute("conHang",            conHang);
 
         model.addAttribute("breadcrumbItems",    breadcrumbItems);
-        model.addAttribute("cartItemCount",      0); // placeholder until cart service is wired
+        model.addAttribute("cartItemCount",      gioHangService.getCartItemCount(session));
         model.addAttribute("pageTitle",          "Sản phẩm — Yonex Store");
         model.addAttribute("activeMenu",         "products");
         // pageCss loads shared product-card styles; pageCss2 loads listing-layout-specific styles
@@ -145,7 +149,7 @@ public class StorefrontSanPhamController {
     }
 
     @GetMapping("/{id}")
-    public String detail(@PathVariable Integer id, Model model) {
+    public String detail(@PathVariable Integer id, HttpSession session, Model model) {
         SanPham product = sanPhamService.getByIdWithRelations(id);
         if (product == null) {
             return "redirect:/cua-hang";
@@ -181,7 +185,7 @@ public class StorefrontSanPhamController {
         model.addAttribute("product", product);
         model.addAttribute("relatedProducts", relatedProducts);
         model.addAttribute("breadcrumbItems", breadcrumbItems);
-        model.addAttribute("cartItemCount", 0);
+        model.addAttribute("cartItemCount", gioHangService.getCartItemCount(session));
         model.addAttribute("paymentMethods", hinhThucThanhToanRepo.findAll());
         model.addAttribute("pageTitle", product.getTenSanPham() + " — Yonex Store");
         model.addAttribute("activeMenu", "products");

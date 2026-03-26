@@ -147,6 +147,13 @@
                 <span class="nav__icon"><i class="bi bi-box-arrow-up-right"></i></span>
                 <span class="nav__text">Xuất kho</span>
             </a>
+            <a class="nav__item"
+               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
+                th:href="@{/nhap-kho}"
+                th:classappend="${activeMenu == 'nhapkho'} ? ' active'">
+                <span class="nav__icon"><i class="bi bi-box-arrow-in-down-left"></i></span>
+                <span class="nav__text">Nhập kho</span>
+            </a>
         </nav>
 
         <div class="sidebar__bottom">

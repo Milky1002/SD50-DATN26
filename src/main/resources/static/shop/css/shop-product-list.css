@@ -288,6 +288,12 @@
     transition: border-color var(--shop-transition);
 }
 
+.shop-sort-select option,
+.shop-sort-select optgroup {
+    color: var(--shop-text);
+    background-color: var(--shop-white);
+}
+
 .shop-sort-select:focus {
     border-color: var(--shop-primary);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);

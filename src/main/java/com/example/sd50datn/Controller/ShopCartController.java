@@ -5,6 +5,7 @@ import com.example.sd50datn.Entity.GioHangChiTiet;
 import com.example.sd50datn.Service.GioHangService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/gio-hang")
@@ -51,6 +54,25 @@ public class ShopCartController {
             ra.addFlashAttribute("success", "Đã thêm sản phẩm vào giỏ hàng!");
         }
         return "redirect:/gio-hang";
+    }
+
+    @PostMapping("/them-ajax")
+    public ResponseEntity<Map<String, Object>> addToCartAjax(@RequestParam Integer sanPhamId,
+                                                             @RequestParam(defaultValue = "1") Integer soLuong,
+                                                             HttpSession session) {
+        String error = gioHangService.addToCart(session, sanPhamId, soLuong);
+        Map<String, Object> response = new HashMap<>();
+
+        if (error != null) {
+            response.put("success", false);
+            response.put("message", error);
+        } else {
+            response.put("success", true);
+            response.put("message", "Đã thêm sản phẩm vào giỏ hàng!");
+        }
+        response.put("cartItemCount", gioHangService.getCartItemCount(session));
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/cap-nhat")

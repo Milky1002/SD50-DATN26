@@ -222,10 +222,16 @@
     border: 1px solid var(--admin-border);
     font-size: 12px;
     font-weight: 600;
+    color: var(--admin-text);
     background: #f8fafc;
     outline: none;
     cursor: pointer;
     transition: var(--admin-transition);
+}
+.status-select option,
+.status-select optgroup {
+    color: var(--admin-text);
+    background-color: #fff;
 }
 .status-select:focus {
     border-color: var(--admin-primary);

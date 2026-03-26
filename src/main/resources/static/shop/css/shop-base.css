@@ -300,6 +300,11 @@ a:hover {
     cursor: pointer;
     transition: all var(--shop-transition);
 }
+.shop-select option,
+.shop-select optgroup {
+    color: var(--shop-text);
+    background-color: var(--shop-white);
+}
 .shop-select:focus {
     border-color: var(--shop-primary);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);

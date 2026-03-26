@@ -8,6 +8,7 @@ import com.example.sd50datn.Repository.HoaDonChiTietRepository;
 import com.example.sd50datn.Repository.OrderRepository;
 import com.example.sd50datn.Repository.SanPhamRepository;
 import com.example.sd50datn.Service.OrderService;
+import com.example.sd50datn.Util.OrderStatusUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,36 +54,19 @@ public class OrderServiceImpl implements OrderService {
         }
         orderRepository.findById(id).ifPresent(order -> {
             Integer previousStatus = order.getTrangThai();
-
-            if (!isStockManagedStatus(previousStatus) && isStockManagedStatus(status)) {
-                reserveStock(order.getId());
+            if (!OrderStatusUtil.isValidTransition(previousStatus, status)) {
+                throw new IllegalStateException(
+                        "Không thể chuyển trạng thái từ '" + OrderStatusUtil.getLabel(previousStatus)
+                                + "' sang '" + OrderStatusUtil.getLabel(status) + "'");
             }
 
-            if (isStockManagedStatus(previousStatus) && status == 3) {
+            if (status == OrderStatusUtil.DA_HUY) {
                 restoreStock(order.getId());
             }
 
             order.setTrangThai(status);
             orderRepository.save(order);
         });
-    }
-
-    private boolean isStockManagedStatus(Integer status) {
-        return status != null && status != 3;
-    }
-
-    private void reserveStock(Integer orderId) {
-        List<HoaDonChiTiet> orderItems = hoaDonChiTietRepository.findByHoaDonId(orderId);
-        for (HoaDonChiTiet item : orderItems) {
-            SanPham sanPham = item.getSanPham();
-            if (sanPham == null || item.getSoLuongSanPham() == null) {
-                continue;
-            }
-            Integer currentStock = sanPham.getSoLuongTon() != null ? sanPham.getSoLuongTon() : 0;
-            int remaining = Math.max(0, currentStock - item.getSoLuongSanPham());
-            sanPham.setSoLuongTon(remaining);
-            sanPhamRepository.save(sanPham);
-        }
     }
 
     private void restoreStock(Integer orderId) {

@@ -69,7 +69,8 @@
                                 <input type="radio"
                                        name="hinhThucThanhToanId"
                                        th:value="${pm.id}"
-                                       th:checked="${stat.first}" />
+                                       th:checked="${stat.first}"
+                                       th:attr="data-payment-name=${pm.tenHinhThuc}" />
                                 <span class="shop-checkout__payment-content">
                                     <span class="shop-checkout__payment-name" th:text="${pm.tenHinhThuc}">Thanh toán khi nhận hàng</span>
                                     <span class="shop-checkout__payment-note"
@@ -77,11 +78,36 @@
                                 </span>
                             </label>
                         </div>
+
+                        <div class="shop-checkout__banking" id="checkoutBankingInfo" hidden>
+                            <p class="shop-checkout__summary-note">Quét mã VietQR để chuyển khoản. Sau đó bấm xác nhận thanh toán ở bước tiếp theo.</p>
+                            <img id="checkoutVietQrPreview"
+                                 src="https://img.vietqr.io/image/vietinbank-101878509895-compact2.jpg?amount=0&addInfo=SEVQR%20CHECKOUT&accountName=Vu%20Bao%20Linh"
+                                 alt="VietQR thanh toán"
+                                 style="max-width:260px;width:100%;border-radius:12px;border:1px solid #e5e7eb;padding:8px;background:#fff" />
+                        </div>
                     </section>
 
                     <section class="shop-checkout__section shop-card">
                         <div class="shop-checkout__section-head">
                             <span class="shop-badge shop-badge--primary">Bước 3</span>
+                            <h2 class="shop-checkout__section-title">Mã giảm giá</h2>
+                        </div>
+
+                        <div class="shop-field shop-field--last">
+                            <label class="shop-label" for="checkoutVoucherCode">Mã voucher</label>
+                            <input id="checkoutVoucherCode"
+                                   class="shop-input"
+                                   type="text"
+                                   name="voucherCode"
+                                   th:value="${voucherCode}"
+                                   placeholder="Nhập mã giảm giá nếu có" />
+                        </div>
+                    </section>
+
+                    <section class="shop-checkout__section shop-card">
+                        <div class="shop-checkout__section-head">
+                            <span class="shop-badge shop-badge--primary">Bước 4</span>
                             <h2 class="shop-checkout__section-title">Ghi chú</h2>
                         </div>
 
@@ -121,15 +147,30 @@
                                        th:text="|${item.soLuong != null ? item.soLuong : 0} × ${#numbers.formatInteger(item.giaTaiThoiDiem != null ? item.giaTaiThoiDiem : item.sanPham.giaBan, 0, 'DEFAULT')}đ|">1 × 0đ</p>
                                 </div>
                                 <strong class="shop-checkout__item-total"
-                                        th:text="${#numbers.formatDecimal((item.giaTaiThoiDiem != null ? item.giaTaiThoiDiem : item.sanPham.giaBan).multiply(T(java.math.BigDecimal).valueOf(item.soLuong != null ? item.soLuong : 0)), 0, 'DEFAULT', 0, 'DEFAULT')} + 'đ'">0đ</strong>
+                                        th:text="${#numbers.formatDecimal((item.giaTaiThoiDiem != null ? item.giaTaiThoiDiem : item.sanPham.giaBan) * (item.soLuong != null ? item.soLuong : 0), 0, 'DEFAULT', 0, 'DEFAULT')} + 'đ'">0đ</strong>
                             </div>
                         </div>
 
                         <hr class="shop-divider" />
 
                         <div class="shop-checkout__total">
+                            <span>Tạm tính</span>
+                            <strong th:text="${#numbers.formatInteger(cartSubtotal, 0, 'DEFAULT')} + 'đ'">0đ</strong>
+                        </div>
+
+                        <div class="shop-checkout__total" th:if="${discountAmount != null and discountAmount > 0}">
+                            <span>Giảm giá</span>
+                            <strong th:text="'-' + ${#numbers.formatInteger(discountAmount, 0, 'DEFAULT')} + 'đ'">-0đ</strong>
+                        </div>
+
+                        <div class="shop-checkout__total" th:if="${voucherInfo != null and !#strings.isEmpty(voucherInfo)}">
+                            <span>Voucher</span>
+                            <strong th:text="${voucherInfo}">Voucher</strong>
+                        </div>
+
+                        <div class="shop-checkout__total">
                             <span>Tổng thanh toán</span>
-                            <strong th:text="${#numbers.formatInteger(cartTotal, 0, 'DEFAULT')} + 'đ'">0đ</strong>
+                            <strong id="checkoutTotalText" th:text="${#numbers.formatInteger(cartTotal, 0, 'DEFAULT')} + 'đ'">0đ</strong>
                         </div>
 
                         <p class="shop-checkout__summary-note">
@@ -147,4 +188,38 @@
             </div>
         </div>
     </section>
+
+    <script>
+    (function () {
+        var paymentInputs = document.querySelectorAll('input[name="hinhThucThanhToanId"]');
+        var bankingInfo = document.getElementById('checkoutBankingInfo');
+        var qrPreview = document.getElementById('checkoutVietQrPreview');
+        var totalText = document.getElementById('checkoutTotalText');
+
+        function parseAmount() {
+            if (!totalText) return 0;
+            var text = (totalText.textContent || '0').replace(/[^0-9]/g, '');
+            return text ? parseInt(text, 10) : 0;
+        }
+
+        function updateBankingInfo() {
+            var checked = document.querySelector('input[name="hinhThucThanhToanId"]:checked');
+            var paymentName = checked ? (checked.getAttribute('data-payment-name') || '').toLowerCase() : '';
+            var isTransfer = paymentName.indexOf('chuyển khoản') >= 0 || paymentName.indexOf('chuyen khoan') >= 0;
+
+            if (!bankingInfo) return;
+            bankingInfo.hidden = !isTransfer;
+
+            if (isTransfer && qrPreview) {
+                var amount = parseAmount();
+                qrPreview.src = 'https://img.vietqr.io/image/vietinbank-101878509895-compact2.jpg?amount=' + amount + '&addInfo=SEVQR%20CHECKOUT&accountName=Vu%20Bao%20Linh';
+            }
+        }
+
+        paymentInputs.forEach(function (input) {
+            input.addEventListener('change', updateBankingInfo);
+        });
+        updateBankingInfo();
+    })();
+    </script>
 </div>
