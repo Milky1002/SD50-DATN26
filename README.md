@@ -61,27 +61,28 @@ git clone https://github.com/Milky1002/SD50-DATN26.git
 cd SD50-DATN26
 ```
 
-### Bước 2: Tạo database bằng 1 file SQL thống nhất
+### Bước 2: Tạo database bằng 1 lệnh
 
-Đã bổ sung file cài đặt đầy đủ:
-
-- `SQL_Query/install_full_database.sql`
-
-File này sẽ:
-
-1. tạo database `sd50`
-2. chạy `SetupDatabaseSQL.sql`
-3. chạy toàn bộ các script trong `SQL_Query/updates/`
-
-#### Cách chạy với `sqlcmd`
+Toàn bộ schema + dữ liệu mẫu đã được tổ chức thành 18 file nhỏ trong `SQL_Query/`.  
+Chỉ cần chạy **một file duy nhất** để cài đặt toàn bộ:
 
 ```bash
 cd SQL_Query
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -i install_full_database.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -i 00_install_all.sql
 cd ..
 ```
 
-> **Lưu ý:** vì file có dùng `:r` nên nên chạy từ thư mục `SQL_Query` để các đường dẫn tương đối hoạt động đúng.
+Hoặc mở `SQL_Query/00_install_all.sql` trong **SSMS** → bật **SQLCMD Mode** (`Query > SQLCMD Mode`) → nhấn **Execute**.
+
+> **Lưu ý:** phải chạy từ thư mục `SQL_Query` vì file dùng `:r` (đường dẫn tương đối).
+
+Script sẽ tự động:
+
+1. Tạo database `sd50` (bỏ qua nếu đã tồn tại)
+2. Tạo toàn bộ 25 bảng theo đúng thứ tự dependency
+3. Chèn dữ liệu mẫu vào tất cả các bảng (mỗi bảng ≥ 20 bản ghi)
+
+Script **idempotent** — chạy lại nhiều lần không bị lỗi (mỗi bước đều kiểm tra `IF NOT EXISTS`).
 
 ### Bước 3: Build và chạy ứng dụng
 
