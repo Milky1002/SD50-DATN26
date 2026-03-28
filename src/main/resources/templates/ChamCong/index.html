@@ -1,0 +1,369 @@
+<div th:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/chamcong.css}">
+
+    <div class="cc-page">
+        <section class="cc-summary-grid">
+            <article class="cc-summary-card">
+                <div class="cc-summary-card__icon">
+                    <i class="bi bi-calendar-check"></i>
+                </div>
+                <div class="cc-summary-card__content">
+                    <span class="cc-summary-card__label">Tổng ca làm</span>
+                    <strong class="cc-summary-card__value" th:text="${totalCa}">0</strong>
+                </div>
+            </article>
+
+            <article class="cc-summary-card">
+                <div class="cc-summary-card__icon cc-summary-card__icon--primary">
+                    <i class="bi bi-receipt"></i>
+                </div>
+                <div class="cc-summary-card__content">
+                    <span class="cc-summary-card__label">Tổng hóa đơn</span>
+                    <strong class="cc-summary-card__value" th:text="${totalHoaDon}">0</strong>
+                </div>
+            </article>
+
+            <article class="cc-summary-card">
+                <div class="cc-summary-card__icon cc-summary-card__icon--warning">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="cc-summary-card__content">
+                    <span class="cc-summary-card__label">Tổng sản phẩm</span>
+                    <strong class="cc-summary-card__value" th:text="${totalSanPham}">0</strong>
+                </div>
+            </article>
+
+            <article class="cc-summary-card">
+                <div class="cc-summary-card__icon cc-summary-card__icon--success">
+                    <i class="bi bi-cash-coin"></i>
+                </div>
+                <div class="cc-summary-card__content">
+                    <span class="cc-summary-card__label">Tổng doanh thu</span>
+                    <strong class="cc-summary-card__value cc-summary-card__value--money"
+                            th:text="${#numbers.formatDecimal(totalTien, 0, 'COMMA', 0, 'POINT') + ' đ'}">0 đ</strong>
+                </div>
+            </article>
+        </section>
+
+        <section class="admin-card cc-panel">
+            <div class="cc-panel__header">
+                <div>
+                    <h2 class="cc-panel__title">Bảng chấm công</h2>
+                    <p class="cc-panel__subtitle">Theo dõi ca làm, hiệu suất bán hàng và doanh thu theo từng nhân viên.</p>
+                </div>
+            </div>
+
+            <form class="cc-filter-bar" th:action="@{/cham-cong}" method="get">
+                <div class="admin-field cc-filter-field">
+                    <label for="dateFrom">Từ ngày</label>
+                    <input id="dateFrom" name="dateFrom" type="date" th:value="${dateFrom}">
+                </div>
+
+                <div class="admin-field cc-filter-field">
+                    <label for="dateTo">Đến ngày</label>
+                    <input id="dateTo" name="dateTo" type="date" th:value="${dateTo}">
+                </div>
+
+                <div class="admin-field cc-filter-field" th:if="${isAdmin}">
+                    <label for="filterNhanVienId">Nhân viên ID</label>
+                    <input id="filterNhanVienId"
+                           name="filterNhanVienId"
+                           type="text"
+                           inputmode="numeric"
+                           placeholder="Nhập mã nhân viên"
+                           th:value="${filterNhanVienId}">
+                </div>
+
+                <div class="cc-filter-actions">
+                    <button type="submit" class="admin-btn admin-btn--primary">
+                        <i class="bi bi-funnel"></i>
+                        <span>Lọc</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="cc-table-wrap">
+                <table class="admin-table cc-table">
+                    <thead>
+                    <tr>
+                        <th style="width: 64px;">#</th>
+                        <th>Nhân viên</th>
+                        <th>Bắt đầu</th>
+                        <th>Kết thúc</th>
+                        <th>Thời gian</th>
+                        <th>Hóa đơn</th>
+                        <th>Sản phẩm</th>
+                        <th>Doanh thu</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(danhSachCa)}">
+                        <td colspan="9" class="empty cc-empty-state">
+                            <div class="cc-empty-state__inner">
+                                <i class="bi bi-calendar-x"></i>
+                                <span>Không có dữ liệu chấm công trong khoảng thời gian đã chọn.</span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr th:each="ca, stat : ${danhSachCa}"
+                        class="cc-row"
+                        th:attr="data-shift-id=${ca.id}">
+                        <td th:text="${stat.index + 1}">1</td>
+                        <td>
+                            <div class="cc-employee">
+                                <strong th:text="${ca.hoTenNhanVien}">Nguyễn Văn A</strong>
+                                <span class="muted" th:text="${'NV#' + ca.nhanVienId}">NV#1</span>
+                            </div>
+                        </td>
+                        <td th:text="${#temporals.format(ca.thoiGianBatDau, 'dd/MM/yyyy HH:mm')}">28/03/2026 08:00</td>
+                        <td th:text="${ca.thoiGianKetThuc != null ? #temporals.format(ca.thoiGianKetThuc, 'dd/MM/yyyy HH:mm') : '--'}">--</td>
+                        <td>
+                            <span class="cc-duration mono"
+                                  th:attr="data-start=${ca.thoiGianBatDau},data-end=${ca.thoiGianKetThuc}"
+                                  th:text="${ca.thoiGianKetThuc == null ? '--' : ''}">--</span>
+                        </td>
+                        <td th:text="${ca.tongHoaDon}">0</td>
+                        <td th:text="${ca.tongSanPham}">0</td>
+                        <td class="cc-money"
+                            th:text="${#numbers.formatDecimal(ca.tongTien, 0, 'COMMA', 0, 'POINT') + ' đ'}">0 đ</td>
+                        <td>
+                            <span class="admin-pill"
+                                  th:classappend="${ca.trangThai == 1} ? ' admin-pill--ok cc-status cc-status--active' : ' cc-status cc-status--done'"
+                                  th:text="${ca.trangThai == 1 ? 'Đang làm' : 'Đã kết thúc'}">Đang làm</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div class="admin-modal cc-modal" id="shiftDetailModal" aria-hidden="true">
+        <div class="admin-modal__overlay" data-modal-close></div>
+        <div class="admin-modal__dialog cc-modal__dialog">
+            <div class="admin-modal__header">
+                <div>
+                    <div class="admin-modal__title">Chi tiết ca làm việc</div>
+                    <p class="cc-modal__subtitle">Thông tin chấm công và kết quả bán hàng theo ca.</p>
+                </div>
+                <button type="button" class="admin-modal__close" data-modal-close>&times;</button>
+            </div>
+            <div class="admin-modal__body">
+                <div class="cc-modal__loading" id="shiftDetailLoading">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <span>Đang tải chi tiết ca làm...</span>
+                </div>
+
+                <div class="cc-modal__content" id="shiftDetailContent" hidden>
+                    <div class="cc-detail-grid">
+                        <div class="cc-detail-item">
+                            <span class="cc-detail-item__label">Mã ca</span>
+                            <strong class="cc-detail-item__value" data-detail="id">--</strong>
+                        </div>
+                        <div class="cc-detail-item">
+                            <span class="cc-detail-item__label">Nhân viên</span>
+                            <strong class="cc-detail-item__value" data-detail="nhanVien">--</strong>
+                        </div>
+                        <div class="cc-detail-item">
+                            <span class="cc-detail-item__label">Bắt đầu</span>
+                            <strong class="cc-detail-item__value" data-detail="batDau">--</strong>
+                        </div>
+                        <div class="cc-detail-item">
+                            <span class="cc-detail-item__label">Kết thúc</span>
+                            <strong class="cc-detail-item__value" data-detail="ketThuc">--</strong>
+                        </div>
+                        <div class="cc-detail-item">
+                            <span class="cc-detail-item__label">Thời gian làm</span>
+                            <strong class="cc-detail-item__value mono" data-detail="thoiGian">--</strong>
+                        </div>
+                        <div class="cc-detail-item">
+                            <span class="cc-detail-item__label">Trạng thái</span>
+                            <strong class="cc-detail-item__value" data-detail="trangThai">--</strong>
+                        </div>
+                        <div class="cc-detail-item">
+                            <span class="cc-detail-item__label">Tổng hóa đơn</span>
+                            <strong class="cc-detail-item__value" data-detail="tongHoaDon">0</strong>
+                        </div>
+                        <div class="cc-detail-item">
+                            <span class="cc-detail-item__label">Tổng sản phẩm</span>
+                            <strong class="cc-detail-item__value" data-detail="tongSanPham">0</strong>
+                        </div>
+                        <div class="cc-detail-item cc-detail-item--full">
+                            <span class="cc-detail-item__label">Tổng doanh thu</span>
+                            <strong class="cc-detail-item__value cc-detail-item__value--money" data-detail="tongTien">0 đ</strong>
+                        </div>
+                        <div class="cc-detail-item cc-detail-item--full">
+                            <span class="cc-detail-item__label">Ghi chú</span>
+                            <div class="cc-detail-note" data-detail="ghiChu">Không có ghi chú.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cc-modal__error" id="shiftDetailError" hidden>
+                    <i class="bi bi-exclamation-octagon"></i>
+                    <span>Không thể tải chi tiết ca làm. Vui lòng thử lại.</span>
+                </div>
+            </div>
+            <div class="admin-modal__footer">
+                <button type="button" class="admin-btn admin-btn--outline" data-modal-close>Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var modal = document.getElementById('shiftDetailModal');
+            var loadingState = document.getElementById('shiftDetailLoading');
+            var contentState = document.getElementById('shiftDetailContent');
+            var errorState = document.getElementById('shiftDetailError');
+
+            function padNumber(value) {
+                return String(value).padStart(2, '0');
+            }
+
+            function parseDateTime(value) {
+                if (!value) {
+                    return null;
+                }
+                var normalized = String(value).replace(' ', 'T');
+                var date = new Date(normalized);
+                return isNaN(date.getTime()) ? null : date;
+            }
+
+            function formatDateTime(value) {
+                var date = value instanceof Date ? value : parseDateTime(value);
+                if (!date) {
+                    return '--';
+                }
+                return padNumber(date.getDate()) + '/'
+                    + padNumber(date.getMonth() + 1) + '/'
+                    + date.getFullYear() + ' '
+                    + padNumber(date.getHours()) + ':'
+                    + padNumber(date.getMinutes());
+            }
+
+            function formatMoney(value) {
+                var amount = Number(value || 0);
+                return amount.toLocaleString('vi-VN') + ' đ';
+            }
+
+            function formatDuration(startValue, endValue) {
+                var start = parseDateTime(startValue);
+                var end = parseDateTime(endValue);
+                if (!start || !end) {
+                    return '--';
+                }
+
+                var diff = end.getTime() - start.getTime();
+                if (diff < 0) {
+                    return '--';
+                }
+
+                var totalMinutes = Math.floor(diff / 60000);
+                var hours = Math.floor(totalMinutes / 60);
+                var minutes = totalMinutes % 60;
+
+                return padNumber(hours) + ':' + padNumber(minutes);
+            }
+
+            function renderDurations() {
+                document.querySelectorAll('.cc-duration').forEach(function (element) {
+                    var start = element.getAttribute('data-start');
+                    var end = element.getAttribute('data-end');
+                    element.textContent = end ? formatDuration(start, end) : '--';
+                });
+            }
+
+            function setDetailValue(name, value) {
+                var element = document.querySelector('[data-detail="' + name + '"]');
+                if (element) {
+                    element.textContent = value;
+                }
+            }
+
+            function showLoadingState() {
+                loadingState.hidden = false;
+                contentState.hidden = true;
+                errorState.hidden = true;
+            }
+
+            function showContentState() {
+                loadingState.hidden = true;
+                contentState.hidden = false;
+                errorState.hidden = true;
+            }
+
+            function showErrorState() {
+                loadingState.hidden = true;
+                contentState.hidden = true;
+                errorState.hidden = false;
+            }
+
+            function openModal() {
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeModal() {
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            function renderShiftDetail(data) {
+                setDetailValue('id', data.id != null ? '#' + data.id : '--');
+                setDetailValue('nhanVien', (data.hoTenNhanVien || '--') + (data.nhanVienId != null ? ' · NV#' + data.nhanVienId : ''));
+                setDetailValue('batDau', formatDateTime(data.thoiGianBatDau));
+                setDetailValue('ketThuc', data.thoiGianKetThuc ? formatDateTime(data.thoiGianKetThuc) : '--');
+                setDetailValue('thoiGian', data.thoiGianKetThuc ? formatDuration(data.thoiGianBatDau, data.thoiGianKetThuc) : '--');
+                setDetailValue('trangThai', Number(data.trangThai) === 1 ? 'Đang làm' : 'Đã kết thúc');
+                setDetailValue('tongHoaDon', Number(data.tongHoaDon || 0).toLocaleString('vi-VN'));
+                setDetailValue('tongSanPham', Number(data.tongSanPham || 0).toLocaleString('vi-VN'));
+                setDetailValue('tongTien', formatMoney(data.tongTien));
+                setDetailValue('ghiChu', data.ghiChu && String(data.ghiChu).trim() ? data.ghiChu : 'Không có ghi chú.');
+                showContentState();
+            }
+
+            function loadShiftDetail(shiftId) {
+                showLoadingState();
+                openModal();
+
+                fetch('/api/ca-lam-viec/' + encodeURIComponent(shiftId))
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('Không thể tải dữ liệu');
+                        }
+                        return response.json();
+                    })
+                    .then(function (data) {
+                        renderShiftDetail(data || {});
+                    })
+                    .catch(function () {
+                        showErrorState();
+                    });
+            }
+
+            document.querySelectorAll('.cc-row').forEach(function (row) {
+                row.addEventListener('click', function () {
+                    var shiftId = row.getAttribute('data-shift-id');
+                    if (shiftId) {
+                        loadShiftDetail(shiftId);
+                    }
+                });
+            });
+
+            document.querySelectorAll('[data-modal-close]').forEach(function (button) {
+                button.addEventListener('click', closeModal);
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeModal();
+                }
+            });
+
+            renderDurations();
+        })();
+    </script>
+</div>

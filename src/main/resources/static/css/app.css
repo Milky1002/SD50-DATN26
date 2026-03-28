@@ -823,3 +823,97 @@ select optgroup {
     background: var(--admin-warning);
     color: #fff;
 }
+
+/* ===== SHIFT BUTTON ===== */
+.shift-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid #a7f3d0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    color: var(--admin-success);
+    box-shadow: 0 8px 20px rgba(5, 150, 105, .12);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--admin-transition);
+}
+.shift-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(5, 150, 105, .16);
+}
+.shift-btn i {
+    font-size: 14px;
+}
+.shift-btn--active {
+    border-color: #fdba74;
+    background: linear-gradient(135deg, #fff7ed, #ffedd5);
+    color: #c2410c;
+    box-shadow: 0 10px 24px rgba(234, 88, 12, .18);
+    animation: shiftPulse 1.8s ease-in-out infinite;
+}
+.shift-timer {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #0f172a;
+    color: #e2e8f0;
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+}
+
+@keyframes shiftPulse {
+    0%,
+    100% {
+        box-shadow: 0 10px 24px rgba(234, 88, 12, .18);
+    }
+    50% {
+        box-shadow: 0 14px 30px rgba(234, 88, 12, .28);
+    }
+}
+
+/* ===== TOAST NOTIFICATIONS ===== */
+.toast-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    top: auto;
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 280px;
+    max-width: 420px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: #0f172a;
+    color: #fff;
+    box-shadow: 0 14px 32px rgba(15, 23, 42, .18);
+    transform: translateY(16px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+}
+.toast--show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.toast--success {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: #fff;
+}
+.toast--error {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: #fff;
+}

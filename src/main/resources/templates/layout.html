@@ -135,6 +135,13 @@
                 <span class="nav__text">Bán tại cửa hàng</span>
             </a>
 
+            <a class="nav__item"
+               th:href="@{/cham-cong}"
+               th:classappend="${activeMenu == 'chamcong'} ? ' active'">
+                <span class="nav__icon"><i class="bi bi-clock-fill"></i></span>
+                <span class="nav__text">Chấm công</span>
+            </a>
+
             <div class="nav__section-title"
                  th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}">
                 <span class="nav__text">KHO HÀNG</span>
@@ -169,6 +176,14 @@
         <header class="topbar">
             <div class="topbar__title" th:text="${pageHeading} ?: 'Bàn làm việc'">Bàn làm việc</div>
             <div class="topbar__right">
+                <!-- Ca làm việc check-in/check-out -->
+                <button class="pill shift-btn" type="button" id="btnShift"
+                        style="display:none">
+                    <i class="bi bi-play-circle" id="btnShiftIcon"></i>
+                    <span id="btnShiftText">Bắt đầu làm việc</span>
+                </button>
+                <span class="shift-timer" id="shiftTimer" style="display:none"></span>
+
                 <a th:href="@{/ban-hang}" class="pill"><i class="bi bi-cart3"></i> Bán hàng</a>
                 <button class="icon-btn topbar-icon" type="button" aria-label="Thông báo">
                     <i class="bi bi-bell-fill"></i>
@@ -203,6 +218,133 @@
 </div>
 
 <script th:src="@{/js/app.js}"></script>
+
+<!-- Shift check-in / check-out logic -->
+<script>
+(function() {
+    var btnShift = document.getElementById('btnShift');
+    var btnShiftIcon = document.getElementById('btnShiftIcon');
+    var btnShiftText = document.getElementById('btnShiftText');
+    var shiftTimer = document.getElementById('shiftTimer');
+    var timerInterval = null;
+    var shiftStartTime = null;
+
+    function formatDuration(ms) {
+        var totalSec = Math.floor(ms / 1000);
+        var h = Math.floor(totalSec / 3600);
+        var m = Math.floor((totalSec % 3600) / 60);
+        var s = totalSec % 60;
+        return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    function startTimer(startIso) {
+        shiftStartTime = new Date(startIso);
+        shiftTimer.style.display = '';
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(function() {
+            var elapsed = Date.now() - shiftStartTime.getTime();
+            shiftTimer.textContent = formatDuration(elapsed);
+        }, 1000);
+        // Trigger immediately
+        var elapsed = Date.now() - shiftStartTime.getTime();
+        shiftTimer.textContent = formatDuration(elapsed);
+    }
+
+    function stopTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        shiftTimer.style.display = 'none';
+        shiftTimer.textContent = '';
+    }
+
+    function setWorking() {
+        btnShift.className = 'pill shift-btn shift-btn--active';
+        btnShiftIcon.className = 'bi bi-stop-circle';
+        btnShiftText.textContent = 'Kết thúc ca';
+    }
+
+    function setIdle() {
+        btnShift.className = 'pill shift-btn';
+        btnShiftIcon.className = 'bi bi-play-circle';
+        btnShiftText.textContent = 'Bắt đầu làm việc';
+        stopTimer();
+    }
+
+    // Load trạng thái ban đầu
+    fetch('/api/ca-lam-viec/trang-thai')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            btnShift.style.display = '';
+            if (data.dangLamViec) {
+                setWorking();
+                startTimer(data.thoiGianBatDau);
+            } else {
+                setIdle();
+            }
+        })
+        .catch(function() {
+            // Không hiển thị nút nếu chưa đăng nhập
+        });
+
+    btnShift.addEventListener('click', function() {
+        var isWorking = btnShift.classList.contains('shift-btn--active');
+
+        if (!isWorking) {
+            // Bắt đầu ca
+            fetch('/api/ca-lam-viec/bat-dau', { method: 'POST' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        setWorking();
+                        startTimer(data.thoiGianBatDau);
+                        showToast('Đã bắt đầu ca làm việc', 'success');
+                    }
+                })
+                .catch(function() {
+                    showToast('Lỗi khi bắt đầu ca', 'error');
+                });
+        } else {
+            // Kết thúc ca — xác nhận
+            if (!confirm('Bạn có chắc muốn kết thúc ca làm việc?')) return;
+
+            fetch('/api/ca-lam-viec/ket-thuc', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    setIdle();
+                    var msg = 'Đã kết thúc ca: ' + data.tongHoaDon + ' hóa đơn, ' +
+                              data.tongSanPham + ' sản phẩm, ' +
+                              Number(data.tongTien).toLocaleString('vi-VN') + 'đ';
+                    showToast(msg, 'success');
+                } else {
+                    showToast(data.error || 'Lỗi khi kết thúc ca', 'error');
+                }
+            })
+            .catch(function() {
+                showToast('Lỗi kết nối server', 'error');
+            });
+        }
+    });
+
+    // Toast helper (reuse existing toast container)
+    function showToast(msg, type) {
+        var container = document.getElementById('toastContainer');
+        if (!container) return;
+        var toast = document.createElement('div');
+        toast.className = 'toast toast--' + (type || 'info');
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(function() { toast.classList.add('toast--show'); }, 10);
+        setTimeout(function() {
+            toast.classList.remove('toast--show');
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 4000);
+    }
+})();
+</script>
 
 <!-- Change Password Modal -->
 <div class="admin-modal-overlay" id="changePasswordOverlay" style="display:none" onclick="closeChangePasswordModal()">

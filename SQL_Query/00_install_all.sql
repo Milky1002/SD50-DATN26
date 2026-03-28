@@ -93,6 +93,12 @@ GO
 PRINT N'[10] Schema misc: DONE';
 GO
 
+-- 18 — Schema ca làm việc (chấm công)
+:r 18_schema_ca_lam_viec.sql
+
+PRINT N'[18] Schema ca làm việc: DONE';
+GO
+
 -- 11 — Seed core
 :r 11_seed_core.sql
 

@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # install.ps1  –  Cài đặt database sd50 (UTF-8 safe)
 #
 # Chạy từ thư mục SQL_Query:
@@ -109,6 +109,7 @@ $files = @(
     "08_schema_warehouse.sql",
     "09_schema_cart.sql",
     "10_schema_misc.sql",
+    "18_schema_ca_lam_viec.sql",
     "11_seed_core.sql",
     "12_seed_product.sql",
     "13_seed_customer.sql",
