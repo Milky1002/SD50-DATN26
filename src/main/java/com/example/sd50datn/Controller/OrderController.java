@@ -1,7 +1,6 @@
 package com.example.sd50datn.Controller;
 
 import com.example.sd50datn.Service.OrderService;
-import com.example.sd50datn.Util.OrderStatusUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,7 +21,6 @@ public class OrderController {
         model.addAttribute("pageTitle", "Quản lý đơn hàng");
         model.addAttribute("pageHeading", "Quản lý đơn hàng");
         model.addAttribute("orders", orderService.getOrderSummaries());
-        model.addAttribute("statusLabels", OrderStatusUtil.getAllStatuses());
 
         model.addAttribute("activeMenu", "donhang");
         model.addAttribute("content", "order-management");

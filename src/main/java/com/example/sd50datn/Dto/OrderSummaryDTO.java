@@ -53,6 +53,13 @@ public class OrderSummaryDTO {
         return OrderStatusUtil.getAllowedTransitions(orderStatus);
     }
 
+    /** Returns pairs of [statusValue, statusLabel] for template rendering — avoids Integer key map lookup issues. */
+    public List<String[]> getAllowedTransitionLabels() {
+        return OrderStatusUtil.getAllowedTransitions(orderStatus).stream()
+                .map(s -> new String[]{ String.valueOf(s), OrderStatusUtil.getLabel(s) })
+                .toList();
+    }
+
     public String getInitials() {
         if (customerName == null || customerName.isBlank()) {
             return "--";

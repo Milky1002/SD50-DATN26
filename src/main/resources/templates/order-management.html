@@ -86,9 +86,9 @@
                               onsubmit="return confirmStatusChange(this)">
                             <select name="status" class="status-select" onchange="this.form.submit()">
                                 <option th:value="${order.orderStatus}" selected th:text="${order.displayShippingStatus}">Chờ xác nhận</option>
-                                <option th:each="nextStatus : ${order.allowedTransitions}"
-                                        th:value="${nextStatus}"
-                                        th:text="${statusLabels[nextStatus]}">
+                                <option th:each="entry : ${order.allowedTransitionLabels}"
+                                        th:value="${entry[0]}"
+                                        th:text="${entry[1]}">
                                     Trạng thái
                                 </option>
                             </select>
