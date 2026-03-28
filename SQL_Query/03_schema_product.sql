@@ -71,6 +71,46 @@ ELSE
 GO
 
 -- -------------------------------------------------------
+-- Anh – patch: thêm cột còn thiếu nếu bảng đã tồn tại từ phiên bản cũ
+-- -------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Anh') AND name = 'Kich_thuoc_byte')
+BEGIN
+    ALTER TABLE dbo.Anh ADD Kich_thuoc_byte BIGINT NULL;
+    PRINT N'Đã thêm cột Kich_thuoc_byte vào bảng Anh.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Anh') AND name = 'Ten_file_goc')
+BEGIN
+    ALTER TABLE dbo.Anh ADD Ten_file_goc NVARCHAR(255) NULL;
+    PRINT N'Đã thêm cột Ten_file_goc vào bảng Anh.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Anh') AND name = 'Loai_nguon')
+BEGIN
+    ALTER TABLE dbo.Anh ADD Loai_nguon NVARCHAR(100) NULL;
+    PRINT N'Đã thêm cột Loai_nguon vào bảng Anh.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Anh') AND name = 'Mime_type')
+BEGIN
+    ALTER TABLE dbo.Anh ADD Mime_type NVARCHAR(100) NULL;
+    PRINT N'Đã thêm cột Mime_type vào bảng Anh.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Anh') AND name = 'Mo_ta')
+BEGIN
+    ALTER TABLE dbo.Anh ADD Mo_ta NVARCHAR(MAX) NULL;
+    PRINT N'Đã thêm cột Mo_ta vào bảng Anh.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Anh') AND name = 'Thu_tu')
+BEGIN
+    ALTER TABLE dbo.Anh ADD Thu_tu INT NOT NULL DEFAULT 0;
+    PRINT N'Đã thêm cột Thu_tu vào bảng Anh.';
+END
+GO
+
+-- -------------------------------------------------------
 -- SanPham (Product)
 -- -------------------------------------------------------
 IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'SanPham' AND schema_id = SCHEMA_ID('dbo'))

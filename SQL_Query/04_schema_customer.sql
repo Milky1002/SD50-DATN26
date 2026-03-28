@@ -31,3 +31,25 @@ END
 ELSE
     PRINT N'Bảng Khach_hang đã tồn tại.';
 GO
+
+-- -------------------------------------------------------
+-- Khach_hang – patch: thêm cột còn thiếu nếu bảng đã tồn tại từ phiên bản cũ
+-- -------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Khach_hang') AND name = 'Mat_khau')
+BEGIN
+    ALTER TABLE dbo.Khach_hang ADD Mat_khau NVARCHAR(255) NULL;
+    PRINT N'Đã thêm cột Mat_khau vào bảng Khach_hang.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Khach_hang') AND name = 'Tai_khoan_id')
+BEGIN
+    ALTER TABLE dbo.Khach_hang ADD Tai_khoan_id INT NULL;
+    PRINT N'Đã thêm cột Tai_khoan_id vào bảng Khach_hang.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Khach_hang') AND name = 'Dia_chi_khach_hang')
+BEGIN
+    ALTER TABLE dbo.Khach_hang ADD Dia_chi_khach_hang NVARCHAR(MAX) NULL;
+    PRINT N'Đã thêm cột Dia_chi_khach_hang vào bảng Khach_hang.';
+END
+GO
