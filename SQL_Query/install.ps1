@@ -1,13 +1,17 @@
-﻿# ============================================================
-# install.ps1  –  Cài đặt database sd50 (UTF-8 safe)
+# ============================================================
+# install.ps1  -  Cai dat database sd50 (UTF-8 safe, khong can -f)
 #
-# Chạy từ thư mục SQL_Query:
+# Chay tu thu muc SQL_Query:
 #   cd SQL_Query
 #   .\install.ps1
 #
-# Tuỳ chọn tham số:
+# Tuy chon tham so:
 #   .\install.ps1 -Server ".\SQLEXPRESS" -User "sa" -Password "123"
-#   .\install.ps1 -PatchOnly   # Chỉ chạy 99_patch_missing_columns.sql
+#   .\install.ps1 -PatchOnly   # Chi chay 99_patch_missing_columns.sql
+#
+# Ghi chu: Script nay KHONG dung -f 65001 nen chay duoc voi moi phien ban sqlcmd.
+#          Thay vao do, script doc file UTF-8 bang PowerShell roi ghi tam sang
+#          UTF-16 LE (Unicode) truoc khi truyen vao sqlcmd.
 # ============================================================
 param(
     [string]$Server   = "127.0.0.1,1433",
@@ -19,81 +23,65 @@ param(
 $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
+# Chay 1 file SQL: doc UTF-8 -> ghi UTF-16 LE -> sqlcmd -i (khong can -f)
 function Invoke-SqlFile {
     param([string]$FilePath)
     $fileName = Split-Path -Leaf $FilePath
     Write-Host ""
     Write-Host ">>> $fileName" -ForegroundColor Cyan
 
-    # Đọc nội dung file bằng UTF-8, bỏ BOM nếu có
+    # Doc noi dung file voi encoding UTF-8
     $content = [System.IO.File]::ReadAllText($FilePath, [System.Text.Encoding]::UTF8)
 
-    # Tách thành các batch theo GO
+    # Tach batch theo GO (moi dong rieng)
     $batches = $content -split '(?im)^\s*GO\s*$'
 
+    $batchIndex = 0
     foreach ($batch in $batches) {
         $trimmed = $batch.Trim()
         if ([string]::IsNullOrWhiteSpace($trimmed)) { continue }
+        $batchIndex++
 
-        # Chạy qua sqlcmd với encoding Unicode để tránh lỗi font
-        $tmpFile = [System.IO.Path]::GetTempFileName() + ".sql"
+        # Ghi batch vao file tam voi encoding UTF-16 LE (sqlcmd doc duoc khong can -f)
+        $tmpFile = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "sd50_batch_$batchIndex.sql")
         [System.IO.File]::WriteAllText($tmpFile, $trimmed, [System.Text.Encoding]::Unicode)
 
-        & sqlcmd -S $Server -U $User -P $Password `
-                 -f 65001 `
-                 -b `
-                 -Q $trimmed 2>&1 | ForEach-Object {
-            if ($_ -match "^Msg \d") {
-                Write-Host "  $_" -ForegroundColor Red
-            } elseif ($_ -match "^\[OK\]|đã được tạo|đã tồn tại|rows affected") {
-                Write-Host "  $_" -ForegroundColor Green
-            } else {
-                Write-Host "  $_"
-            }
-        }
+        $output = & sqlcmd -S $Server -U $User -P $Password -b -i $tmpFile 2>&1
+        $exitCode = $LASTEXITCODE
 
         Remove-Item $tmpFile -ErrorAction SilentlyContinue
 
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "FAILED on batch in $fileName (exit $LASTEXITCODE)" -ForegroundColor Red
-            exit $LASTEXITCODE
+        foreach ($line in $output) {
+            $lineStr = "$line"
+            if ($lineStr -match "^Msg \d|error|Error") {
+                Write-Host "  $lineStr" -ForegroundColor Red
+            } elseif ($lineStr -match "rows affected|affected") {
+                Write-Host "  $lineStr" -ForegroundColor DarkGray
+            } else {
+                Write-Host "  $lineStr"
+            }
         }
-    }
-}
 
-function Invoke-SqlFileRaw {
-    param([string]$FilePath)
-    $fileName = Split-Path -Leaf $FilePath
-    Write-Host ""
-    Write-Host ">>> $fileName" -ForegroundColor Cyan
-
-    & sqlcmd -S $Server -U $User -P $Password `
-             -f 65001 `
-             -b `
-             -i $FilePath 2>&1 | ForEach-Object {
-        if ($_ -match "Msg \d") {
-            Write-Host "  $_" -ForegroundColor Red
-        } else {
-            Write-Host "  $_"
+        if ($exitCode -ne 0) {
+            Write-Host "  THAT BAI o batch $batchIndex trong $fileName (exit $exitCode)" -ForegroundColor Red
+            exit $exitCode
         }
     }
 
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "FAILED: $fileName (exit $LASTEXITCODE)" -ForegroundColor Red
-        exit $LASTEXITCODE
-    }
+    Write-Host "  OK: $fileName" -ForegroundColor Green
 }
 
 Write-Host "================================================" -ForegroundColor Yellow
 Write-Host " SD50 Database Installer" -ForegroundColor Yellow
 Write-Host " Server  : $Server" -ForegroundColor Yellow
 Write-Host " Database: sd50" -ForegroundColor Yellow
+Write-Host " Encoding: UTF-16 LE temp files (khong dung -f)" -ForegroundColor Yellow
 Write-Host "================================================" -ForegroundColor Yellow
 
 if ($PatchOnly) {
     Write-Host "`nChay patch only mode..." -ForegroundColor Magenta
     $patchFile = Join-Path $ScriptDir "99_patch_missing_columns.sql"
-    Invoke-SqlFileRaw $patchFile
+    Invoke-SqlFile $patchFile
     Write-Host "`nPatch xong!" -ForegroundColor Green
     exit 0
 }
@@ -126,7 +114,7 @@ foreach ($file in $files) {
         Write-Host "SKIP (khong tim thay): $file" -ForegroundColor DarkGray
         continue
     }
-    Invoke-SqlFileRaw $path
+    Invoke-SqlFile $path
 }
 
 Write-Host ""

@@ -88,37 +88,21 @@ Tham số tuỳ chọn:
 .\install.ps1 -PatchOnly
 ```
 
-#### Cách 2 — sqlcmd với flag encoding (tránh lỗi font)
+#### Cách 2 — SSMS (không bị lỗi font, không cần sqlcmd)
 
-```powershell
-cd SQL_Query
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 01_create_database.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 02_schema_core.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 03_schema_product.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 04_schema_customer.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 05_schema_payment.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 06_schema_invoice.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 07_schema_promotion.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 08_schema_warehouse.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 09_schema_cart.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 10_schema_misc.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 11_seed_core.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 12_seed_product.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 13_seed_customer.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 14_seed_invoice.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 15_seed_promotion.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 16_seed_warehouse.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 17_seed_misc.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 99_patch_missing_columns.sql
+Mở từng file trong thư mục `SQL_Query/` theo thứ tự bằng **SSMS** rồi nhấn **Execute** từng file:
+
+```
+01_create_database.sql
+02_schema_core.sql  →  10_schema_misc.sql
+18_schema_ca_lam_viec.sql
+11_seed_core.sql    →  17_seed_misc.sql
+99_patch_missing_columns.sql
 ```
 
-> **Tại sao bị lỗi font?** `sqlcmd` mặc định đọc file theo code page Windows (CP1252), không phải UTF-8. Flag `-f 65001` ép sqlcmd đọc UTF-8. Tất cả file SQL trong repo đã được lưu với **UTF-8 BOM** để sqlcmd nhận diện đúng encoding.
+Hoặc mở `SQL_Query/00_install_all.sql` trong SSMS → bật **SQLCMD Mode** (`Query > SQLCMD Mode`) → nhấn **Execute** (chạy từ thư mục `SQL_Query`).
 
-#### Cách 3 — SSMS (không bị lỗi font)
-
-Mở `SQL_Query/00_install_all.sql` trong **SSMS** → bật **SQLCMD Mode** (`Query > SQLCMD Mode`) → nhấn **Execute**.
-
-> **Lưu ý:** phải mở file từ thư mục `SQL_Query` hoặc chạy SSMS từ thư mục đó vì file dùng `:r` (đường dẫn tương đối).
+> **Lưu ý:** `-f 65001` chỉ có ở sqlcmd phiên bản mới (đi kèm SSMS 18+/19+). Nếu sqlcmd báo `Unknown Option`, hãy dùng `install.ps1` (Cách 1) hoặc SSMS (Cách 2).
 
 Script sẽ tự động:
 
