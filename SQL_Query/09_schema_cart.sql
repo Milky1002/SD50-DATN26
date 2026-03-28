@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- 09_schema_cart.sql
 -- Tạo bảng: Gio_hang, Gio_hang_chi_tiet
 -- Phải chạy SAU 04_schema_customer.sql, 03_schema_product.sql

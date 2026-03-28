@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- 08_schema_warehouse.sql
 -- Tạo bảng: NhaCungCap, PhieuNhap, PhieuNhapChiTiet, PhieuXuat, PhieuXuatChiTiet
 -- Phải chạy SAU 02_schema_core.sql, 03_schema_product.sql

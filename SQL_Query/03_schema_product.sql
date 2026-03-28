@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- 03_schema_product.sql
 -- Tạo bảng: Danh_muc_san_pham, Mau_sac, Anh, SanPham
 -- Phải chạy SAU 02_schema_core.sql

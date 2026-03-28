@@ -63,18 +63,62 @@ cd SD50-DATN26
 
 ### Bước 2: Tạo database bằng 1 lệnh
 
-Toàn bộ schema + dữ liệu mẫu đã được tổ chức thành 18 file nhỏ trong `SQL_Query/`.  
-Chỉ cần chạy **một file duy nhất** để cài đặt toàn bộ:
+Toàn bộ schema + dữ liệu mẫu đã được tổ chức thành 18 file nhỏ trong `SQL_Query/`.
 
-```bash
+#### Cách 1 — PowerShell script (khuyến nghị, không bị lỗi font tiếng Việt)
+
+```powershell
 cd SQL_Query
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -i 00_install_all.sql
-cd ..
+.\install.ps1
 ```
 
-Hoặc mở `SQL_Query/00_install_all.sql` trong **SSMS** → bật **SQLCMD Mode** (`Query > SQLCMD Mode`) → nhấn **Execute**.
+Nếu PowerShell báo lỗi policy, chạy một lần lệnh sau rồi thử lại:
 
-> **Lưu ý:** phải chạy từ thư mục `SQL_Query` vì file dùng `:r` (đường dẫn tương đối).
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+
+Tham số tuỳ chọn:
+
+```powershell
+# Server khác (ví dụ SQL Express)
+.\install.ps1 -Server ".\SQLEXPRESS" -User "sa" -Password "matkhau"
+
+# Chỉ chạy patch (thêm cột thiếu vào DB đã tồn tại)
+.\install.ps1 -PatchOnly
+```
+
+#### Cách 2 — sqlcmd với flag encoding (tránh lỗi font)
+
+```powershell
+cd SQL_Query
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 01_create_database.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 02_schema_core.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 03_schema_product.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 04_schema_customer.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 05_schema_payment.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 06_schema_invoice.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 07_schema_promotion.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 08_schema_warehouse.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 09_schema_cart.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 10_schema_misc.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 11_seed_core.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 12_seed_product.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 13_seed_customer.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 14_seed_invoice.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 15_seed_promotion.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 16_seed_warehouse.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 17_seed_misc.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 99_patch_missing_columns.sql
+```
+
+> **Tại sao bị lỗi font?** `sqlcmd` mặc định đọc file theo code page Windows (CP1252), không phải UTF-8. Flag `-f 65001` ép sqlcmd đọc UTF-8. Tất cả file SQL trong repo đã được lưu với **UTF-8 BOM** để sqlcmd nhận diện đúng encoding.
+
+#### Cách 3 — SSMS (không bị lỗi font)
+
+Mở `SQL_Query/00_install_all.sql` trong **SSMS** → bật **SQLCMD Mode** (`Query > SQLCMD Mode`) → nhấn **Execute**.
+
+> **Lưu ý:** phải mở file từ thư mục `SQL_Query` hoặc chạy SSMS từ thư mục đó vì file dùng `:r` (đường dẫn tương đối).
 
 Script sẽ tự động:
 

@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- 01_create_database.sql
 -- Tạo database sd50 nếu chưa tồn tại
 -- Chạy với user có quyền CREATE DATABASE (sa hoặc sysadmin)

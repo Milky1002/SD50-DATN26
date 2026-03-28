@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- 07_schema_promotion.sql
 -- Tạo bảng: Chuong_trinh_khuyen_mai, chi_tiet, lich_su
 -- Phải chạy SAU 03_schema_product.sql, 06_schema_invoice.sql

@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- 02_schema_core.sql
 -- Tạo bảng lõi: ChucVu, TaiKhoan, NhanVien
 -- Phải chạy SAU 01_create_database.sql
@@ -49,6 +49,46 @@ ELSE
 GO
 
 -- -------------------------------------------------------
+-- TaiKhoan – patch: thêm cột còn thiếu nếu bảng đã tồn tại từ phiên bản cũ
+-- -------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TaiKhoan') AND name = 'Role_code')
+BEGIN
+    ALTER TABLE dbo.TaiKhoan ADD Role_code NVARCHAR(50) NOT NULL DEFAULT 'STAFF';
+    PRINT N'Đã thêm cột Role_code vào bảng TaiKhoan.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TaiKhoan') AND name = 'Email')
+BEGIN
+    ALTER TABLE dbo.TaiKhoan ADD Email NVARCHAR(255) NULL;
+    PRINT N'Đã thêm cột Email vào bảng TaiKhoan.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TaiKhoan') AND name = 'Ho_ten')
+BEGIN
+    ALTER TABLE dbo.TaiKhoan ADD Ho_ten NVARCHAR(255) NULL;
+    PRINT N'Đã thêm cột Ho_ten vào bảng TaiKhoan.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TaiKhoan') AND name = 'So_dien_thoai')
+BEGIN
+    ALTER TABLE dbo.TaiKhoan ADD So_dien_thoai NVARCHAR(50) NULL;
+    PRINT N'Đã thêm cột So_dien_thoai vào bảng TaiKhoan.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TaiKhoan') AND name = 'Ngay_tao')
+BEGIN
+    ALTER TABLE dbo.TaiKhoan ADD Ngay_tao DATETIME2 NULL;
+    PRINT N'Đã thêm cột Ngay_tao vào bảng TaiKhoan.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TaiKhoan') AND name = 'Ngay_cap_nhat')
+BEGIN
+    ALTER TABLE dbo.TaiKhoan ADD Ngay_cap_nhat DATETIME2 NULL;
+    PRINT N'Đã thêm cột Ngay_cap_nhat vào bảng TaiKhoan.';
+END
+GO
+
+-- -------------------------------------------------------
 -- NhanVien (Staff)
 -- -------------------------------------------------------
 IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'NhanVien' AND schema_id = SCHEMA_ID('dbo'))
@@ -74,4 +114,20 @@ BEGIN
 END
 ELSE
     PRINT N'Bảng NhanVien đã tồn tại.';
+GO
+
+-- -------------------------------------------------------
+-- NhanVien – patch: thêm cột còn thiếu nếu bảng đã tồn tại từ phiên bản cũ
+-- -------------------------------------------------------
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.NhanVien') AND name = 'Tai_khoan_id')
+BEGIN
+    ALTER TABLE dbo.NhanVien ADD Tai_khoan_id INT NULL;
+    PRINT N'Đã thêm cột Tai_khoan_id vào bảng NhanVien.';
+END
+GO
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.NhanVien') AND name = 'Ngay_cap_nhat')
+BEGIN
+    ALTER TABLE dbo.NhanVien ADD Ngay_cap_nhat DATETIME2 NULL;
+    PRINT N'Đã thêm cột Ngay_cap_nhat vào bảng NhanVien.';
+END
 GO

@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- 11_seed_core.sql
 -- Dữ liệu mẫu: ChucVu (5), TaiKhoan (22), NhanVien (20)
 -- Mật khẩu BCrypt tương ứng "admin@123"
@@ -28,36 +28,36 @@ GO
 
 -- -------------------------------------------------------
 -- TaiKhoan
--- BCrypt hash của "admin@123":
--- $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
+-- Mật khẩu lưu dạng plaintext "admin@123" — AuthService sẽ
+-- tự động migrate sang BCrypt khi đăng nhập thành công lần đầu
 -- -------------------------------------------------------
 IF NOT EXISTS (SELECT 1 FROM dbo.TaiKhoan WHERE User_name = 'admin')
 BEGIN
     INSERT INTO dbo.TaiKhoan
         (User_name, Pass_word, Trang_thai, Role_code, Email, Ho_ten, So_dien_thoai, Ngay_tao)
     VALUES
-        ('admin',      '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'ADMIN', 'admin@badminton.vn',       N'Nguyễn Admin',       '0901000001', SYSDATETIME()),
-        ('nhanvien01', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv01@badminton.vn',        N'Trần Văn An',        '0901000002', SYSDATETIME()),
-        ('nhanvien02', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv02@badminton.vn',        N'Lê Thị Bình',        '0901000003', SYSDATETIME()),
-        ('nhanvien03', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv03@badminton.vn',        N'Phạm Thị Cúc',       '0901000004', SYSDATETIME()),
-        ('nhanvien04', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv04@badminton.vn',        N'Hoàng Văn Dũng',     '0901000005', SYSDATETIME()),
-        ('nhanvien05', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv05@badminton.vn',        N'Vũ Thị Em',          '0901000006', SYSDATETIME()),
-        ('nhanvien06', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv06@badminton.vn',        N'Đỗ Văn Phúc',        '0901000007', SYSDATETIME()),
-        ('nhanvien07', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv07@badminton.vn',        N'Ngô Thị Giang',      '0901000008', SYSDATETIME()),
-        ('nhanvien08', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv08@badminton.vn',        N'Bùi Văn Hải',        '0901000009', SYSDATETIME()),
-        ('nhanvien09', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv09@badminton.vn',        N'Đinh Thị Hoa',       '0901000010', SYSDATETIME()),
-        ('nhanvien10', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv10@badminton.vn',        N'Lý Văn Kiên',        '0901000011', SYSDATETIME()),
-        ('nhanvien11', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv11@badminton.vn',        N'Trịnh Thị Lan',      '0901000012', SYSDATETIME()),
-        ('nhanvien12', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv12@badminton.vn',        N'Nguyễn Văn Minh',    '0901000013', SYSDATETIME()),
-        ('nhanvien13', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv13@badminton.vn',        N'Phan Thị Ngọc',      '0901000014', SYSDATETIME()),
-        ('nhanvien14', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv14@badminton.vn',        N'Võ Văn Oanh',        '0901000015', SYSDATETIME()),
-        ('nhanvien15', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv15@badminton.vn',        N'Cao Thị Phương',     '0901000016', SYSDATETIME()),
-        ('nhanvien16', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv16@badminton.vn',        N'Lưu Văn Quang',      '0901000017', SYSDATETIME()),
-        ('nhanvien17', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv17@badminton.vn',        N'Hà Thị Ry',          '0901000018', SYSDATETIME()),
-        ('nhanvien18', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv18@badminton.vn',        N'Đặng Văn Sơn',       '0901000019', SYSDATETIME()),
-        ('nhanvien19', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv19@badminton.vn',        N'Kiều Thị Thu',       '0901000020', SYSDATETIME()),
-        ('nhanvien20', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'STAFF', 'nv20@badminton.vn',        N'Mai Văn Thành',      '0901000021', SYSDATETIME()),
-        ('quanly01',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 1, 'ADMIN', 'ql01@badminton.vn',        N'Nguyễn Quản Lý',     '0901000022', SYSDATETIME());
+        ('admin',      'admin@123', 1, 'ADMIN', 'admin@badminton.vn',       N'Nguyễn Admin',       '0901000001', SYSDATETIME()),
+        ('nhanvien01', 'admin@123', 1, 'STAFF', 'nv01@badminton.vn',        N'Trần Văn An',        '0901000002', SYSDATETIME()),
+        ('nhanvien02', 'admin@123', 1, 'STAFF', 'nv02@badminton.vn',        N'Lê Thị Bình',        '0901000003', SYSDATETIME()),
+        ('nhanvien03', 'admin@123', 1, 'STAFF', 'nv03@badminton.vn',        N'Phạm Thị Cúc',       '0901000004', SYSDATETIME()),
+        ('nhanvien04', 'admin@123', 1, 'STAFF', 'nv04@badminton.vn',        N'Hoàng Văn Dũng',     '0901000005', SYSDATETIME()),
+        ('nhanvien05', 'admin@123', 1, 'STAFF', 'nv05@badminton.vn',        N'Vũ Thị Em',          '0901000006', SYSDATETIME()),
+        ('nhanvien06', 'admin@123', 1, 'STAFF', 'nv06@badminton.vn',        N'Đỗ Văn Phúc',        '0901000007', SYSDATETIME()),
+        ('nhanvien07', 'admin@123', 1, 'STAFF', 'nv07@badminton.vn',        N'Ngô Thị Giang',      '0901000008', SYSDATETIME()),
+        ('nhanvien08', 'admin@123', 1, 'STAFF', 'nv08@badminton.vn',        N'Bùi Văn Hải',        '0901000009', SYSDATETIME()),
+        ('nhanvien09', 'admin@123', 1, 'STAFF', 'nv09@badminton.vn',        N'Đinh Thị Hoa',       '0901000010', SYSDATETIME()),
+        ('nhanvien10', 'admin@123', 1, 'STAFF', 'nv10@badminton.vn',        N'Lý Văn Kiên',        '0901000011', SYSDATETIME()),
+        ('nhanvien11', 'admin@123', 1, 'STAFF', 'nv11@badminton.vn',        N'Trịnh Thị Lan',      '0901000012', SYSDATETIME()),
+        ('nhanvien12', 'admin@123', 1, 'STAFF', 'nv12@badminton.vn',        N'Nguyễn Văn Minh',    '0901000013', SYSDATETIME()),
+        ('nhanvien13', 'admin@123', 1, 'STAFF', 'nv13@badminton.vn',        N'Phan Thị Ngọc',      '0901000014', SYSDATETIME()),
+        ('nhanvien14', 'admin@123', 1, 'STAFF', 'nv14@badminton.vn',        N'Võ Văn Oanh',        '0901000015', SYSDATETIME()),
+        ('nhanvien15', 'admin@123', 1, 'STAFF', 'nv15@badminton.vn',        N'Cao Thị Phương',     '0901000016', SYSDATETIME()),
+        ('nhanvien16', 'admin@123', 1, 'STAFF', 'nv16@badminton.vn',        N'Lưu Văn Quang',      '0901000017', SYSDATETIME()),
+        ('nhanvien17', 'admin@123', 1, 'STAFF', 'nv17@badminton.vn',        N'Hà Thị Ry',          '0901000018', SYSDATETIME()),
+        ('nhanvien18', 'admin@123', 1, 'STAFF', 'nv18@badminton.vn',        N'Đặng Văn Sơn',       '0901000019', SYSDATETIME()),
+        ('nhanvien19', 'admin@123', 1, 'STAFF', 'nv19@badminton.vn',        N'Kiều Thị Thu',       '0901000020', SYSDATETIME()),
+        ('nhanvien20', 'admin@123', 1, 'STAFF', 'nv20@badminton.vn',        N'Mai Văn Thành',      '0901000021', SYSDATETIME()),
+        ('quanly01',   'admin@123', 1, 'ADMIN', 'ql01@badminton.vn',        N'Nguyễn Quản Lý',     '0901000022', SYSDATETIME());
     PRINT N'Seed TaiKhoan: OK';
 END
 ELSE

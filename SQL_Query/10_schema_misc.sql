@@ -1,4 +1,4 @@
--- ============================================================
+﻿-- ============================================================
 -- 10_schema_misc.sql
 -- Tạo bảng: Lich_su_hoat_dong_nhan_vien,
 --           Trang_chu_danh_muc_noi_bat, Trang_chu_san_pham_hot
