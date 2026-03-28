@@ -71,7 +71,9 @@
     border:1px solid var(--admin-border);
     font-size:13px;
     outline:none;
+    color: #1e293b;
     background: #f8fafc;
+    color-scheme: light;
     transition: var(--admin-transition);
 }
 

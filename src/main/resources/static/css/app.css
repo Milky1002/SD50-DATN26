@@ -50,8 +50,9 @@ body{
 select,
 select option,
 select optgroup {
-    color: var(--admin-text);
+    color: #1e293b;
     background-color: #fff;
+    color-scheme: light;
 }
 
 /* ===== ANIMATIONS ===== */
