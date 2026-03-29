@@ -24,11 +24,7 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public DashboardViewModel getDashboardView() {
         LocalDate currentToDate = dashboardRepository.fetchLatestInvoiceDate().orElse(LocalDate.now());
-        LocalDate currentFromDate = dashboardRepository.fetchEarliestInvoiceDate().orElse(currentToDate);
-        if (currentFromDate.isAfter(currentToDate)) {
-            currentFromDate = currentToDate;
-        }
-
+        LocalDate currentFromDate = currentToDate.minusDays(6);
         long rangeDays = ChronoUnit.DAYS.between(currentFromDate, currentToDate);
         LocalDate previousToDate = currentFromDate.minusDays(1);
         LocalDate previousFromDate = previousToDate.minusDays(rangeDays);

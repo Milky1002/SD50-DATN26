@@ -18,7 +18,7 @@ public final class OrderStatusUtil {
     );
 
     private static final Map<Integer, List<Integer>> TRANSITIONS = Map.of(
-            CHO_XAC_NHAN, List.of(DANG_GIAO, DA_HUY),
+            CHO_XAC_NHAN, List.of(DANG_GIAO, HOAN_TAT, DA_HUY),
             DANG_GIAO, List.of(HOAN_TAT, DA_HUY),
             HOAN_TAT, List.of(),
             DA_HUY, List.of()
@@ -52,5 +52,9 @@ public final class OrderStatusUtil {
 
     public static Map<Integer, String> getAllStatuses() {
         return LABELS;
+    }
+
+    public static List<Integer> getShippingStatuses() {
+        return List.of(DANG_GIAO, HOAN_TAT, DA_HUY);
     }
 }

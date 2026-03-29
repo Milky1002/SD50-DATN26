@@ -3,6 +3,10 @@ package com.example.sd50datn.Controller;
 import com.example.sd50datn.Service.OrderService;
 import com.example.sd50datn.Util.OrderStatusUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,11 +27,21 @@ public class OrderController {
         model.addAttribute("pageHeading", "Quản lý đơn hàng");
         model.addAttribute("orders", orderService.getOrderSummaries());
         model.addAttribute("statusLabels", OrderStatusUtil.getAllStatuses());
+        model.addAttribute("shippingStatuses", OrderStatusUtil.getShippingStatuses());
 
         model.addAttribute("activeMenu", "donhang");
         model.addAttribute("content", "order-management");
         model.addAttribute("pageCss", "/css/order-management.css");
         return "layout";
+    }
+
+    @GetMapping("/orders/export/pdf")
+    public ResponseEntity<InputStreamResource> exportOrdersPdf() {
+        InputStreamResource resource = new InputStreamResource(orderService.exportOrdersPdf());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=don-hang.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(resource);
     }
 
     @PostMapping("/orders/{id}/delete")

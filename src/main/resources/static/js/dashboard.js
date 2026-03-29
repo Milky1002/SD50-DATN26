@@ -8,66 +8,64 @@
         return Math.max.apply(null, values.concat([10]));
     }
 
-    function drawLineChart(values) {
+    function drawBarChart(values) {
         if (!chart) return;
 
         var width = 760;
         var height = 280;
-        var padding = {top: 20, right: 20, bottom: 36, left: 60};
+        var padding = {top: 30, right: 20, bottom: 42, left: 72};
         var innerWidth = width - padding.left - padding.right;
         var innerHeight = height - padding.top - padding.bottom;
-
         var labels = metrics.labels || [];
-        var stepX = labels.length > 1 ? innerWidth / (labels.length - 1) : innerWidth;
+        var count = Math.max(labels.length, values.length, 1);
         var ceiling = maxValue(values);
-
-        var points = [];
-        for (var i = 0; i < values.length; i++) {
-            var x = padding.left + i * stepX;
-            var y = padding.top + innerHeight - (values[i] / ceiling) * innerHeight;
-            points.push(x + "," + y);
-        }
+        var slotWidth = innerWidth / count;
+        var barWidth = count === 1
+            ? Math.min(72, innerWidth * 0.16)
+            : Math.min(56, Math.max(24, slotWidth * 0.6));
 
         var gridY = "";
         for (var j = 0; j <= 4; j++) {
             var gy = padding.top + (innerHeight / 4) * j;
             var labelVal = Math.round(ceiling - (ceiling / 4) * j);
-            gridY += '<line x1="' + padding.left + '" y1="' + gy + '" x2="' + (width - padding.right) + '" y2="' + gy + '" stroke="#e2e8f0" stroke-width="1" />';
-            gridY += '<text x="' + (padding.left - 8) + '" y="' + (gy + 4) + '" text-anchor="end" font-size="11" fill="#94a3b8">' + labelVal.toLocaleString('vi-VN') + '</text>';
+            gridY += '<line x1="' + padding.left + '" y1="' + gy + '" x2="' + (width - padding.right)
+                + '" y2="' + gy + '" stroke="#e2e8f0" stroke-width="1" />';
+            gridY += '<text x="' + (padding.left - 10) + '" y="' + (gy + 4)
+                + '" text-anchor="end" font-size="11" fill="#94a3b8">' + labelVal.toLocaleString("vi-VN") + '</text>';
         }
 
         var xLabels = "";
-        for (var k = 0; k < labels.length; k++) {
-            var lx = padding.left + k * stepX;
-            xLabels += '<text x="' + lx + '" y="' + (height - 8) + '" text-anchor="middle" font-size="11" fill="#94a3b8">' + labels[k] + '</text>';
+        var bars = '<defs><linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">'
+            + '<stop offset="0%" stop-color="#7c83ff"/>'
+            + '<stop offset="100%" stop-color="#4f46e5"/>'
+            + '</linearGradient></defs>';
+
+        for (var i = 0; i < count; i++) {
+            var value = Number(values[i] || 0);
+            var x = padding.left + slotWidth * i + (slotWidth - barWidth) / 2;
+            var barHeight = ceiling > 0 ? (value / ceiling) * innerHeight : 0;
+            var y = padding.top + innerHeight - barHeight;
+            var labelX = padding.left + slotWidth * i + slotWidth / 2;
+            var textY = Math.max(18, y - 8);
+
+            xLabels += '<text x="' + labelX + '" y="' + (height - 10)
+                + '" text-anchor="middle" font-size="11" font-weight="600" fill="#64748b">'
+                + (labels[i] || "") + '</text>';
+
+            if (value <= 0) {
+                bars += '<rect x="' + x + '" y="' + (padding.top + innerHeight - 4)
+                    + '" width="' + barWidth + '" height="4" rx="2" ry="2" fill="#cbd5e1"/>';
+                continue;
+            }
+
+            bars += '<rect x="' + x + '" y="' + y + '" width="' + barWidth + '" height="' + barHeight
+                + '" rx="12" ry="12" fill="url(#barGrad)"/>';
+            bars += '<text x="' + labelX + '" y="' + textY
+                + '" text-anchor="middle" font-size="11" font-weight="700" fill="#475569">'
+                + value.toLocaleString("vi-VN") + '</text>';
         }
 
-        // Gradient area fill
-        var areaPath = "";
-        if (points.length > 1) {
-            areaPath = '<defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">'
-                + '<stop offset="0%" stop-color="#4f46e5" stop-opacity="0.15"/>'
-                + '<stop offset="100%" stop-color="#4f46e5" stop-opacity="0.01"/>'
-                + '</linearGradient></defs>';
-            var firstPt = points[0].split(",");
-            var lastPt = points[points.length - 1].split(",");
-            areaPath += '<polygon points="' + firstPt[0] + ',' + (padding.top + innerHeight) + ' '
-                + points.join(" ") + ' '
-                + lastPt[0] + ',' + (padding.top + innerHeight) + '" fill="url(#areaGrad)"/>';
-        }
-
-        var polyline = points.length > 1
-            ? '<polyline points="' + points.join(" ") + '" fill="none" stroke="#4f46e5" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'
-            : "";
-
-        // Data points
-        var dots = "";
-        for (var d = 0; d < points.length; d++) {
-            var pt = points[d].split(",");
-            dots += '<circle cx="' + pt[0] + '" cy="' + pt[1] + '" r="3.5" fill="#4f46e5" stroke="#fff" stroke-width="2"/>';
-        }
-
-        chart.innerHTML = '<g>' + areaPath + gridY + xLabels + polyline + dots + '</g>';
+        chart.innerHTML = '<g>' + gridY + xLabels + bars + '</g>';
     }
 
     function drawDonut() {
@@ -94,13 +92,13 @@
             + "#dc2626 " + (completedDeg + shippingDeg) + "deg " + (completedDeg + shippingDeg + canceledDeg) + "deg)";
     }
 
-    drawLineChart(metrics.current || []);
+    drawBarChart(metrics.current || []);
     drawDonut();
 
-    radios.forEach(function(radio) {
+    radios.forEach(function (radio) {
         radio.addEventListener("change", function () {
             var values = this.value === "previous" ? (metrics.previous || []) : (metrics.current || []);
-            drawLineChart(values);
+            drawBarChart(values);
         });
     });
 })();

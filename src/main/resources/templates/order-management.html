@@ -10,8 +10,7 @@
                 <p class="order-card__subtitle">Quản lý, theo dõi và xử lý các đơn hàng của cửa hàng</p>
             </div>
             <div class="order-card__header-actions">
-                <button id="btnExport" class="admin-btn admin-btn--outline" type="button"><i class="bi bi-download"></i> Xuất file</button>
-                <button id="btnCreateOrder" class="admin-btn admin-btn--primary" type="button"><i class="bi bi-plus-lg"></i> Tạo đơn hàng</button>
+                <a id="btnExport" class="admin-btn admin-btn--outline" th:href="@{/orders/export/pdf}"><i class="bi bi-download"></i> Xuất file</a>
             </div>
         </div>
 
@@ -85,10 +84,15 @@
                         <form th:action="@{'/orders/' + ${order.id} + '/status'}" method="post"
                               onsubmit="return confirmStatusChange(this)">
                             <select name="status" class="status-select" onchange="this.form.submit()">
-                                <option th:value="${order.orderStatus}" selected th:text="${order.displayShippingStatus}">Chờ xác nhận</option>
-                                <option th:each="nextStatus : ${order.allowedTransitions}"
+                                <option th:if="${!#lists.contains(shippingStatuses, order.orderStatus)}"
+                                        th:value="${order.orderStatus}"
+                                        selected
+                                        th:text="${order.displayShippingStatus}">Chờ xác nhận</option>
+                                <option th:each="nextStatus : ${shippingStatuses}"
                                         th:value="${nextStatus}"
-                                        th:text="${statusLabels[nextStatus]}">
+                                        th:selected="${nextStatus == order.orderStatus}"
+                                        th:disabled="${nextStatus != order.orderStatus and !#lists.contains(order.allowedTransitions, nextStatus)}"
+                                        th:text="${T(com.example.sd50datn.Util.OrderStatusUtil).getLabel(nextStatus)}">
                                     Trạng thái
                                 </option>
                             </select>

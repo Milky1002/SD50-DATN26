@@ -60,6 +60,7 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
                         COALESCE(SUM(h.Tong_tien_sau_khi_giam), 0) AS totalRevenue
                     FROM HoaDon h
                     WHERE CAST(h.Ngay_tao AS date) BETWEEN :fromDate AND :toDate
+                      AND h.Trang_thai = 2
                       AND EXISTS (
                           SELECT 1
                           FROM ThanhToan tt
@@ -93,6 +94,7 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
                         COALESCE(SUM(h.Tong_tien_sau_khi_giam), 0) AS revenue
                     FROM HoaDon h
                     WHERE CAST(h.Ngay_tao AS date) BETWEEN :fromDate AND :toDate
+                      AND h.Trang_thai = 2
                       AND EXISTS (
                           SELECT 1
                           FROM ThanhToan tt
