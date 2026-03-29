@@ -842,6 +842,8 @@
                         clearPromotionSelection(true);
                         // Also save the cleared state
                         saveCurrentOrder();
+                    } else if (res.data.needCheckin) {
+                        window.location.href = res.data.redirect || '/cham-cong';
                     } else {
                         alert('Lỗi thanh toán: ' + (res.data.message || 'Không xác định'));
                         btnCheckout.disabled = false;

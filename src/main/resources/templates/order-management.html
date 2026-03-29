@@ -84,15 +84,10 @@
                         <form th:action="@{'/orders/' + ${order.id} + '/status'}" method="post"
                               onsubmit="return confirmStatusChange(this)">
                             <select name="status" class="status-select" onchange="this.form.submit()">
-                                <option th:if="${!#lists.contains(shippingStatuses, order.orderStatus)}"
-                                        th:value="${order.orderStatus}"
-                                        selected
-                                        th:text="${order.displayShippingStatus}">Chờ xác nhận</option>
-                                <option th:each="nextStatus : ${shippingStatuses}"
+                                <option th:value="${order.orderStatus}" selected th:text="${order.displayShippingStatus}">Chờ xác nhận</option>
+                                <option th:each="nextStatus : ${order.allowedTransitions}"
                                         th:value="${nextStatus}"
-                                        th:selected="${nextStatus == order.orderStatus}"
-                                        th:disabled="${nextStatus != order.orderStatus and !#lists.contains(order.allowedTransitions, nextStatus)}"
-                                        th:text="${T(com.example.sd50datn.Util.OrderStatusUtil).getLabel(nextStatus)}">
+                                        th:text="${statusLabels[nextStatus]}">
                                     Trạng thái
                                 </option>
                             </select>

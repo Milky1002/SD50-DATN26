@@ -189,6 +189,12 @@
     text-align: center;
 }
 
+/* HTML [hidden] attribute must win over display:flex */
+.cc-modal__loading[hidden],
+.cc-modal__error[hidden] {
+    display: none !important;
+}
+
 .cc-modal__loading i,
 .cc-modal__error i {
     font-size: 24px;

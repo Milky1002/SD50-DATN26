@@ -2,6 +2,13 @@
     <link rel="stylesheet" th:href="@{/css/chamcong.css}">
 
     <div class="cc-page">
+        <!-- Alert when redirected from POS because staff has not checked in -->
+        <div class="cc-alert cc-alert--warning" th:if="${param.error != null && param.error[0] == 'chua_cham_cong'}"
+             style="background:#fff3cd;border:1px solid #ffc107;color:#856404;padding:12px 16px;border-radius:8px;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>Bạn cần <strong>chấm công</strong> (bắt đầu ca) trước khi bán hàng. Vui lòng nhấn nút bên dưới để bắt đầu ca làm việc.</span>
+        </div>
+
         <section class="cc-summary-grid">
             <article class="cc-summary-card">
                 <div class="cc-summary-card__icon">

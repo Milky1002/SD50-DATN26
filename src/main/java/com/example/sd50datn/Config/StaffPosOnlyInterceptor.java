@@ -27,7 +27,11 @@ public class StaffPosOnlyInterceptor implements HandlerInterceptor {
         }
 
         String uri = request.getRequestURI();
-        boolean allowed = uri.startsWith("/ban-hang") || uri.equals("/logout") || uri.equals("/login");
+        boolean allowed = uri.startsWith("/ban-hang")
+                || uri.equals("/cham-cong")
+                || uri.startsWith("/api/ca-lam-viec")
+                || uri.equals("/logout")
+                || uri.equals("/login");
         if (!allowed) {
             response.sendRedirect("/ban-hang?error=staff_pos_only");
             return false;

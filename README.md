@@ -61,18 +61,19 @@ git clone https://github.com/Milky1002/SD50-DATN26.git
 cd SD50-DATN26
 ```
 
-### Bước 2: Tạo database bằng 1 lệnh
+### Bước 2: Tạo database
 
-Toàn bộ schema + dữ liệu mẫu đã được tổ chức thành 18 file nhỏ trong `SQL_Query/`.
+Toàn bộ schema + dữ liệu mẫu được tổ chức thành các file nhỏ trong `SQL_Query/`.  
+**Không cần Python.** Script tự xử lý encoding tiếng Việt hoàn toàn trong PowerShell.
 
-#### Cách 1 — PowerShell script (khuyến nghị, không bị lỗi font tiếng Việt)
+#### Cách 1 — PowerShell script (khuyến nghị)
 
 ```powershell
-cd SQL_Query
+cd D:\ProjectWeb\WebDoAn\SD50-DATN26\SQL_Query
 .\install.ps1
 ```
 
-Nếu PowerShell báo lỗi policy, chạy một lần lệnh sau rồi thử lại:
+Nếu PowerShell báo lỗi execution policy, chạy một lần rồi thử lại:
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
@@ -84,47 +85,29 @@ Tham số tuỳ chọn:
 # Server khác (ví dụ SQL Express)
 .\install.ps1 -Server ".\SQLEXPRESS" -User "sa" -Password "matkhau"
 
-# Chỉ chạy patch (thêm cột thiếu vào DB đã tồn tại)
+# Chỉ chạy patch (thêm cột thiếu vào DB đã tồn tại, an toàn khi chạy lại)
 .\install.ps1 -PatchOnly
 ```
 
-#### Cách 2 — sqlcmd với flag encoding (tránh lỗi font)
+> **Cách hoạt động:** Script đọc từng file SQL bằng UTF-8 trong PowerShell, ghi lại thành file tạm UTF-16 LE (có BOM), rồi truyền cho `sqlcmd -i`. sqlcmd nhận diện BOM tự động và xử lý `GO` nội bộ — **không cần flag `-f 65001`**, không cần Python.
 
-```powershell
-cd SQL_Query
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 01_create_database.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 02_schema_core.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 03_schema_product.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 04_schema_customer.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 05_schema_payment.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 06_schema_invoice.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 07_schema_promotion.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 08_schema_warehouse.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 09_schema_cart.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 10_schema_misc.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 11_seed_core.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 12_seed_product.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 13_seed_customer.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 14_seed_invoice.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 15_seed_promotion.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 16_seed_warehouse.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 17_seed_misc.sql
-sqlcmd -S 127.0.0.1,1433 -U sa -P 123 -f 65001 -i 99_patch_missing_columns.sql
+#### Cách 2 — SSMS (nếu không dùng được PowerShell)
+
+Mở từng file trong thư mục `SQL_Query/` theo thứ tự trong SSMS rồi nhấn **Execute**:
+
 ```
-
-> **Tại sao bị lỗi font?** `sqlcmd` mặc định đọc file theo code page Windows (CP1252), không phải UTF-8. Flag `-f 65001` ép sqlcmd đọc UTF-8. Tất cả file SQL trong repo đã được lưu với **UTF-8 BOM** để sqlcmd nhận diện đúng encoding.
-
-#### Cách 3 — SSMS (không bị lỗi font)
-
-Mở `SQL_Query/00_install_all.sql` trong **SSMS** → bật **SQLCMD Mode** (`Query > SQLCMD Mode`) → nhấn **Execute**.
-
-> **Lưu ý:** phải mở file từ thư mục `SQL_Query` hoặc chạy SSMS từ thư mục đó vì file dùng `:r` (đường dẫn tương đối).
+01_create_database.sql
+02_schema_core.sql → 10_schema_misc.sql
+18_schema_ca_lam_viec.sql
+11_seed_core.sql → 17_seed_misc.sql
+99_patch_missing_columns.sql
+```
 
 Script sẽ tự động:
 
 1. Tạo database `sd50` (bỏ qua nếu đã tồn tại)
-2. Tạo toàn bộ 25 bảng theo đúng thứ tự dependency
-3. Chèn dữ liệu mẫu vào tất cả các bảng (mỗi bảng ≥ 20 bản ghi)
+2. Tạo toàn bộ bảng theo đúng thứ tự dependency
+3. Chèn dữ liệu mẫu (mỗi bảng ≥ 20 bản ghi), tiếng Việt đầy đủ
 
 Script **idempotent** — chạy lại nhiều lần không bị lỗi (mỗi bước đều kiểm tra `IF NOT EXISTS`).
 

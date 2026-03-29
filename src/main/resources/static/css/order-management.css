@@ -223,16 +223,19 @@
     font-size: 12px;
     font-weight: 600;
     color: #1e293b;
-    background: #f8fafc;
+    background: #fff;
     outline: none;
     cursor: pointer;
     color-scheme: light;
+    -webkit-appearance: menulist;
+    appearance: menulist;
     transition: var(--admin-transition);
 }
 .status-select option,
 .status-select optgroup {
-    color: #1e293b;
-    background-color: #fff;
+    color: #1e293b !important;
+    background-color: #fff !important;
+    font-weight: 500;
 }
 .status-select:focus {
     border-color: var(--admin-primary);
