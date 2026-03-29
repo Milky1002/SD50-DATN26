@@ -80,14 +80,14 @@
                             Đã thanh toán
                         </span>
                     </td>
-                    <td>
+                    <td class="order-table__shipping-cell">
                         <form th:action="@{'/orders/' + ${order.id} + '/status'}" method="post"
                               onsubmit="return confirmStatusChange(this)">
                             <select name="status" class="status-select" onchange="this.form.submit()">
                                 <option th:value="${order.orderStatus}" selected th:text="${order.displayShippingStatus}">Chờ xác nhận</option>
-                                <option th:each="nextStatus : ${order.allowedTransitions}"
-                                        th:value="${nextStatus}"
-                                        th:text="${statusLabels[nextStatus]}">
+                                <option th:each="nextStatus : ${order.allowedTransitionLabels}"
+                                        th:value="${nextStatus[0]}"
+                                        th:text="${nextStatus[1]}">
                                     Trạng thái
                                 </option>
                             </select>

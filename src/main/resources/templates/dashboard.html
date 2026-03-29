@@ -50,12 +50,13 @@
                 <div class="line-chart-wrap">
                     <svg id="revenueChart" class="line-chart" viewBox="0 0 760 280" preserveAspectRatio="none"></svg>
                 </div>
+                <div class="revenue-pagination" id="revenuePagination"></div>
 
                 <div class="revenue-legend">
                     <label><input type="radio" name="revenueSeries" value="current" checked/> 7 ngày gần đây
-                        (<span th:text="${currentRangeLabel}">-</span>)</label>
+                        (<span id="revenueCurrentRange" th:text="${currentRangeLabel7Days}">-</span>)</label>
                     <label><input type="radio" name="revenueSeries" value="previous"/> Kỳ trước
-                        (<span th:text="${previousRangeLabel}">-</span>)</label>
+                        (<span id="revenuePreviousRange" th:text="${previousRangeLabel7Days}">-</span>)</label>
                 </div>
             </div>
 
@@ -99,9 +100,20 @@
 
     <script th:inline="javascript">
         window.dashboardMetrics = {
-            labels: /*[[${currentRevenueLabels}]]*/ [],
-            current: /*[[${currentRevenueValues}]]*/ [],
-            previous: /*[[${previousRevenueValues}]]*/ []
+            sales7DayLabel: /*[[${sales7DayLabel}]]*/ "",
+            sales30DayLabel: /*[[${sales30DayLabel}]]*/ "",
+            revenue7DaysCurrentLabels: /*[[${currentRevenueLabels7Days}]]*/ [],
+            revenue7DaysPreviousLabels: /*[[${previousRevenueLabels7Days}]]*/ [],
+            revenue7DaysCurrentValues: /*[[${currentRevenueValues7Days}]]*/ [],
+            revenue7DaysPreviousValues: /*[[${previousRevenueValues7Days}]]*/ [],
+            revenue30DaysCurrentLabels: /*[[${currentRevenueLabels30Days}]]*/ [],
+            revenue30DaysPreviousLabels: /*[[${previousRevenueLabels30Days}]]*/ [],
+            revenue30DaysCurrentValues: /*[[${currentRevenueValues30Days}]]*/ [],
+            revenue30DaysPreviousValues: /*[[${previousRevenueValues30Days}]]*/ [],
+            revenue7DaysCurrentRange: /*[[${currentRangeLabel7Days}]]*/ "",
+            revenue7DaysPreviousRange: /*[[${previousRangeLabel7Days}]]*/ "",
+            revenue30DaysCurrentRange: /*[[${currentRangeLabel30Days}]]*/ "",
+            revenue30DaysPreviousRange: /*[[${previousRangeLabel30Days}]]*/ ""
         };
     </script>
     <script th:src="@{/js/dashboard.js}"></script>

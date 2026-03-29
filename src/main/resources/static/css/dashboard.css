@@ -31,6 +31,8 @@
 
 .revenue-panel {
     grid-area: revenue;
+    display: flex;
+    flex-direction: column;
 }
 
 .operation-panel {
@@ -128,7 +130,8 @@
 }
 
 .line-chart-wrap {
-    height: 280px;
+    flex: 1;
+    min-height: 420px;
     background: var(--admin-card);
     border-radius: var(--admin-radius);
     border: 1px solid #f1f5f9;
@@ -141,9 +144,53 @@
     display: block;
 }
 
+.revenue-pagination {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+}
+
+.revenue-pagination.is-hidden {
+    visibility: hidden;
+}
+
+.revenue-page-info {
+    font-size: 12px;
+    color: var(--admin-text-secondary);
+    font-weight: 600;
+}
+
+.revenue-page-btn {
+    border: 1px solid var(--admin-border);
+    background: #fff;
+    color: var(--admin-text);
+    border-radius: 8px;
+    min-width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: var(--admin-transition);
+}
+
+.revenue-page-btn:hover:not(:disabled) {
+    background: var(--admin-primary-light);
+    border-color: rgba(79,70,229,.16);
+    color: var(--admin-primary);
+}
+
+.revenue-page-btn:disabled {
+    cursor: not-allowed;
+    opacity: .45;
+}
+
 .revenue-legend {
     margin-top: 8px;
     display: flex;
+    flex-wrap: wrap;
     gap: 16px;
     color: var(--admin-text-secondary);
     font-size: 13px;
@@ -243,5 +290,9 @@
             "sales"
             "revenue"
             "operation";
+    }
+
+    .line-chart-wrap {
+        min-height: 300px;
     }
 }

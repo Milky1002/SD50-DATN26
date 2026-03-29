@@ -23,34 +23,60 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public DashboardViewModel getDashboardView() {
-        LocalDate currentToDate = dashboardRepository.fetchLatestInvoiceDate().orElse(LocalDate.now());
-        LocalDate currentFromDate = currentToDate.minusDays(6);
-        long rangeDays = ChronoUnit.DAYS.between(currentFromDate, currentToDate);
-        LocalDate previousToDate = currentFromDate.minusDays(1);
-        LocalDate previousFromDate = previousToDate.minusDays(rangeDays);
+        LocalDate dataReferenceDate = dashboardRepository.fetchLatestInvoiceDate().orElse(LocalDate.now());
 
-        List<DashboardRevenuePointModel> currentSeries = fillMissingDays(
-                dashboardRepository.fetchDailyRevenue(currentFromDate, currentToDate),
-                currentFromDate,
-                currentToDate
+        LocalDate currentFromDate7Days = dataReferenceDate.minusDays(6);
+        LocalDate currentToDate7Days = dataReferenceDate;
+        long rangeDays7 = ChronoUnit.DAYS.between(currentFromDate7Days, currentToDate7Days);
+        LocalDate previousToDate7Days = currentFromDate7Days.minusDays(1);
+        LocalDate previousFromDate7Days = previousToDate7Days.minusDays(rangeDays7);
+
+        LocalDate currentFromDate30Days = dataReferenceDate.minusDays(29);
+        LocalDate currentToDate30Days = dataReferenceDate;
+        long rangeDays30 = ChronoUnit.DAYS.between(currentFromDate30Days, currentToDate30Days);
+        LocalDate previousToDate30Days = currentFromDate30Days.minusDays(1);
+        LocalDate previousFromDate30Days = previousToDate30Days.minusDays(rangeDays30);
+
+        List<DashboardRevenuePointModel> currentSeries7Days = fillMissingDays(
+                dashboardRepository.fetchDailyRevenue(currentFromDate7Days, currentToDate7Days),
+                currentFromDate7Days,
+                currentToDate7Days
         );
 
-        List<DashboardRevenuePointModel> previousSeries = fillMissingDays(
-                dashboardRepository.fetchDailyRevenue(previousFromDate, previousToDate),
-                previousFromDate,
-                previousToDate
+        List<DashboardRevenuePointModel> previousSeries7Days = fillMissingDays(
+                dashboardRepository.fetchDailyRevenue(previousFromDate7Days, previousToDate7Days),
+                previousFromDate7Days,
+                previousToDate7Days
+        );
+
+        List<DashboardRevenuePointModel> currentSeries30Days = fillMissingDays(
+                dashboardRepository.fetchDailyRevenue(currentFromDate30Days, currentToDate30Days),
+                currentFromDate30Days,
+                currentToDate30Days
+        );
+
+        List<DashboardRevenuePointModel> previousSeries30Days = fillMissingDays(
+                dashboardRepository.fetchDailyRevenue(previousFromDate30Days, previousToDate30Days),
+                previousFromDate30Days,
+                previousToDate30Days
         );
 
         return new DashboardViewModel(
-                dashboardRepository.fetchSalesByRange(currentFromDate, currentToDate),
-                dashboardRepository.fetchOperationStats(currentFromDate, currentToDate),
-                currentSeries,
-                previousSeries,
-                currentToDate,
-                currentFromDate,
-                currentToDate,
-                previousFromDate,
-                previousToDate
+                dashboardRepository.fetchSalesByRange(currentFromDate7Days, currentToDate7Days),
+                dashboardRepository.fetchOperationStats(currentFromDate7Days, currentToDate7Days),
+                currentSeries7Days,
+                previousSeries7Days,
+                currentSeries30Days,
+                previousSeries30Days,
+                dataReferenceDate,
+                currentFromDate7Days,
+                currentToDate7Days,
+                previousFromDate7Days,
+                previousToDate7Days,
+                currentFromDate30Days,
+                currentToDate30Days,
+                previousFromDate30Days,
+                previousToDate30Days
         );
     }
 

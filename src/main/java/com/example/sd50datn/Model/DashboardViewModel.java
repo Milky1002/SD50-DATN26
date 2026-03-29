@@ -12,11 +12,17 @@ public class DashboardViewModel {
 
     private final DashboardSalesModel salesOverview;
     private final DashboardOperationModel operationOverview;
-    private final List<DashboardRevenuePointModel> currentRevenueSeries;
-    private final List<DashboardRevenuePointModel> previousRevenueSeries;
+    private final List<DashboardRevenuePointModel> currentRevenueSeries7Days;
+    private final List<DashboardRevenuePointModel> previousRevenueSeries7Days;
+    private final List<DashboardRevenuePointModel> currentRevenueSeries30Days;
+    private final List<DashboardRevenuePointModel> previousRevenueSeries30Days;
     private final LocalDate dataReferenceDate;
-    private final LocalDate currentFromDate;
-    private final LocalDate currentToDate;
-    private final LocalDate previousFromDate;
-    private final LocalDate previousToDate;
+    private final LocalDate currentFromDate7Days;
+    private final LocalDate currentToDate7Days;
+    private final LocalDate previousFromDate7Days;
+    private final LocalDate previousToDate7Days;
+    private final LocalDate currentFromDate30Days;
+    private final LocalDate currentToDate30Days;
+    private final LocalDate previousFromDate30Days;
+    private final LocalDate previousToDate30Days;
 }

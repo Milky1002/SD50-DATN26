@@ -33,21 +33,41 @@ public class DashboardController {
         model.addAttribute("salesOverview", dashboardView.getSalesOverview());
         model.addAttribute("operationOverview", dashboardView.getOperationOverview());
 
-        model.addAttribute("currentRevenueLabels", dashboardView.getCurrentRevenueSeries().stream()
+        model.addAttribute("currentRevenueLabels7Days", dashboardView.getCurrentRevenueSeries7Days().stream()
                 .map(p -> p.getDate().format(dayLabelFormatter))
                 .toList());
-        model.addAttribute("currentRevenueValues", toNumbers(dashboardView.getCurrentRevenueSeries()));
-        model.addAttribute("previousRevenueValues", toNumbers(dashboardView.getPreviousRevenueSeries()));
+        model.addAttribute("previousRevenueLabels7Days", dashboardView.getPreviousRevenueSeries7Days().stream()
+                .map(p -> p.getDate().format(dayLabelFormatter))
+                .toList());
+        model.addAttribute("currentRevenueValues7Days", toNumbers(dashboardView.getCurrentRevenueSeries7Days()));
+        model.addAttribute("previousRevenueValues7Days", toNumbers(dashboardView.getPreviousRevenueSeries7Days()));
+        model.addAttribute("currentRevenueLabels30Days", dashboardView.getCurrentRevenueSeries30Days().stream()
+                .map(p -> p.getDate().format(dayLabelFormatter))
+                .toList());
+        model.addAttribute("previousRevenueLabels30Days", dashboardView.getPreviousRevenueSeries30Days().stream()
+                .map(p -> p.getDate().format(dayLabelFormatter))
+                .toList());
+        model.addAttribute("currentRevenueValues30Days", toNumbers(dashboardView.getCurrentRevenueSeries30Days()));
+        model.addAttribute("previousRevenueValues30Days", toNumbers(dashboardView.getPreviousRevenueSeries30Days()));
 
-        model.addAttribute("currentRangeLabel",
-                dashboardView.getCurrentFromDate().format(rangeFormatter) + " - " +
-                        dashboardView.getCurrentToDate().format(rangeFormatter));
-        model.addAttribute("previousRangeLabel",
-                dashboardView.getPreviousFromDate().format(rangeFormatter) + " - " +
-                        dashboardView.getPreviousToDate().format(rangeFormatter));
-        model.addAttribute("salesDateLabel",
-                dashboardView.getCurrentFromDate().format(rangeFormatter) + " - " +
-                        dashboardView.getCurrentToDate().format(rangeFormatter));
+        model.addAttribute("currentRangeLabel7Days",
+                dashboardView.getCurrentFromDate7Days().format(rangeFormatter) + " - " +
+                        dashboardView.getCurrentToDate7Days().format(rangeFormatter));
+        model.addAttribute("previousRangeLabel7Days",
+                dashboardView.getPreviousFromDate7Days().format(rangeFormatter) + " - " +
+                        dashboardView.getPreviousToDate7Days().format(rangeFormatter));
+        model.addAttribute("currentRangeLabel30Days",
+                dashboardView.getCurrentFromDate30Days().format(rangeFormatter) + " - " +
+                        dashboardView.getCurrentToDate30Days().format(rangeFormatter));
+        model.addAttribute("previousRangeLabel30Days",
+                dashboardView.getPreviousFromDate30Days().format(rangeFormatter) + " - " +
+                        dashboardView.getPreviousToDate30Days().format(rangeFormatter));
+        model.addAttribute("sales7DayLabel",
+                dashboardView.getCurrentFromDate7Days().format(rangeFormatter) + " - " +
+                        dashboardView.getCurrentToDate7Days().format(rangeFormatter));
+        model.addAttribute("sales30DayLabel",
+                dashboardView.getCurrentFromDate30Days().format(rangeFormatter) + " - " +
+                        dashboardView.getCurrentToDate30Days().format(rangeFormatter));
 
         return "layout";
     }
