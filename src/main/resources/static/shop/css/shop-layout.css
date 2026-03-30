@@ -354,6 +354,26 @@
     color: rgba(255,255,255,0.5);
 }
 
+.shop-footer__admin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: var(--shop-radius-sm);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all var(--shop-transition);
+}
+.shop-footer__admin-btn:hover {
+    background: var(--shop-primary);
+    color: #fff;
+    border-color: var(--shop-primary);
+}
+
 /* --- Mobile --- */
 .shop-mobile-menu-btn {
     display: none;

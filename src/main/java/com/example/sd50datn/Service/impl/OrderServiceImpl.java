@@ -6,6 +6,7 @@ import com.example.sd50datn.Entity.SanPham;
 import com.example.sd50datn.Repository.HoaDonChiTietRepository;
 import com.example.sd50datn.Repository.OrderRepository;
 import com.example.sd50datn.Repository.SanPhamRepository;
+import com.example.sd50datn.Repository.ThanhToanRepository;
 import com.example.sd50datn.Service.OrderService;
 import com.example.sd50datn.Util.OrderStatusUtil;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final HoaDonChiTietRepository hoaDonChiTietRepository;
     private final SanPhamRepository sanPhamRepository;
+    private final ThanhToanRepository thanhToanRepository;
 
     @Override
     public List<OrderSummaryDTO> getOrderSummaries() {
@@ -82,6 +84,14 @@ public class OrderServiceImpl implements OrderService {
 
             if (status == OrderStatusUtil.DA_HUY) {
                 restoreStock(order.getId());
+            }
+
+            // Khi đơn hàng hoàn tất → tự động cập nhật thanh toán thành "Đã thanh toán"
+            if (status == OrderStatusUtil.HOAN_TAT) {
+                thanhToanRepository.findByHoaDonId(order.getId()).ifPresent(thanhToan -> {
+                    thanhToan.setTrangThai(1); // 1 = Đã thanh toán
+                    thanhToanRepository.save(thanhToan);
+                });
             }
 
             order.setTrangThai(status);
