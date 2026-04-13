@@ -21,7 +21,7 @@
                         <div class="sales-item__icon sales-item__icon--blue"><i class="bi bi-bag-check"></i></div>
                         <div>
                             <div class="sales-item__label">Tổng bán hàng</div>
-                            <div class="sales-item__value" th:text="${salesOverview.totalOrders}">0</div>
+                            <div class="sales-item__value" id="salesTotalOrders" th:text="${salesOverview.totalOrders}">0</div>
                         </div>
                     </div>
 
@@ -29,7 +29,7 @@
                         <div class="sales-item__icon sales-item__icon--green"><i class="bi bi-cash-stack"></i></div>
                         <div>
                             <div class="sales-item__label">Tổng doanh thu</div>
-                            <div class="sales-item__value"
+                            <div class="sales-item__value" id="salesTotalRevenue"
                                  th:text="${#numbers.formatDecimal(salesOverview.totalRevenue, 0, 'COMMA', 0, 'POINT')} + 'đ'">
                                 0đ
                             </div>
@@ -48,7 +48,7 @@
                 </div>
 
                 <div class="line-chart-wrap">
-                    <svg id="revenueChart" class="line-chart" viewBox="0 0 760 280" preserveAspectRatio="none"></svg>
+                    <svg id="revenueChart" class="line-chart" viewBox="0 0 760 280" preserveAspectRatio="xMidYMid meet"></svg>
                 </div>
                 <div class="revenue-pagination" id="revenuePagination"></div>
 
@@ -64,7 +64,7 @@
                 <div class="panel-header operation-panel__header">
                     <h3><i class="bi bi-pie-chart"></i> Hiệu quả vận hành</h3>
                     <div class="operation-panel__actions">
-                        <select class="panel-select">
+                        <select class="panel-select" id="operationRangeSelect">
                             <option selected>7 ngày gần đây</option>
                             <option>30 ngày gần đây</option>
                         </select>
@@ -81,17 +81,17 @@
                     <div class="legend-item">
                         <span class="dot dot--green"></span>
                         <span>Đơn hoàn thành</span>
-                        <strong th:text="${operationOverview.completedOrders}">0</strong>
+                        <strong id="opCompleted" th:text="${operationOverview.completedOrders}">0</strong>
                     </div>
                     <div class="legend-item">
                         <span class="dot dot--blue"></span>
                         <span>Đang giao hàng</span>
-                        <strong th:text="${operationOverview.shippingOrders}">0</strong>
+                        <strong id="opShipping" th:text="${operationOverview.shippingOrders}">0</strong>
                     </div>
                     <div class="legend-item">
                         <span class="dot dot--red"></span>
                         <span>Đơn hủy</span>
-                        <strong th:text="${operationOverview.canceledOrders}">0</strong>
+                        <strong id="opCanceled" th:text="${operationOverview.canceledOrders}">0</strong>
                     </div>
                 </div>
             </div>
@@ -102,6 +102,24 @@
         window.dashboardMetrics = {
             sales7DayLabel: /*[[${sales7DayLabel}]]*/ "",
             sales30DayLabel: /*[[${sales30DayLabel}]]*/ "",
+            salesOverview7: {
+                totalOrders: /*[[${salesOverview.totalOrders}]]*/ 0,
+                totalRevenue: /*[[${#numbers.formatDecimal(salesOverview.totalRevenue, 0, 'COMMA', 0, 'POINT')}]]*/ "0"
+            },
+            salesOverview30: {
+                totalOrders: /*[[${salesOverview30.totalOrders}]]*/ 0,
+                totalRevenue: /*[[${#numbers.formatDecimal(salesOverview30.totalRevenue, 0, 'COMMA', 0, 'POINT')}]]*/ "0"
+            },
+            operationOverview7: {
+                completed: /*[[${operationOverview.completedOrders}]]*/ 0,
+                shipping: /*[[${operationOverview.shippingOrders}]]*/ 0,
+                canceled: /*[[${operationOverview.canceledOrders}]]*/ 0
+            },
+            operationOverview30: {
+                completed: /*[[${operationOverview30.completedOrders}]]*/ 0,
+                shipping: /*[[${operationOverview30.shippingOrders}]]*/ 0,
+                canceled: /*[[${operationOverview30.canceledOrders}]]*/ 0
+            },
             revenue7DaysCurrentLabels: /*[[${currentRevenueLabels7Days}]]*/ [],
             revenue7DaysPreviousLabels: /*[[${previousRevenueLabels7Days}]]*/ [],
             revenue7DaysCurrentValues: /*[[${currentRevenueValues7Days}]]*/ [],

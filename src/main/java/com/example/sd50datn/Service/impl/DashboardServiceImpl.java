@@ -64,6 +64,8 @@ public class DashboardServiceImpl implements DashboardService {
         return new DashboardViewModel(
                 dashboardRepository.fetchSalesByRange(currentFromDate7Days, currentToDate7Days),
                 dashboardRepository.fetchOperationStats(currentFromDate7Days, currentToDate7Days),
+                dashboardRepository.fetchSalesByRange(currentFromDate30Days, currentToDate30Days),
+                dashboardRepository.fetchOperationStats(currentFromDate30Days, currentToDate30Days),
                 currentSeries7Days,
                 previousSeries7Days,
                 currentSeries30Days,

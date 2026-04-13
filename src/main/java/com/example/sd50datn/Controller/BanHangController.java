@@ -4,7 +4,6 @@ import com.example.sd50datn.Entity.HoaDon;
 import com.example.sd50datn.Entity.KhachHang;
 import com.example.sd50datn.Entity.SanPham;
 import com.example.sd50datn.Service.BanHangService;
-import com.example.sd50datn.Service.CaLamViecService;
 import com.example.sd50datn.Service.KhachHangService;
 import com.example.sd50datn.Service.NhanVienHoatDongService;
 import com.example.sd50datn.Service.SanPhamService;
@@ -32,21 +31,10 @@ public class BanHangController {
     private final BanHangService banHangService;
     private final KhachHangService khachHangService;
     private final NhanVienHoatDongService nhanVienHoatDongService;
-    private final CaLamViecService caLamViecService;
     private final Validator validator;
 
     @GetMapping
     public String index(Model model, HttpSession session) {
-        String roleCode = (String) session.getAttribute("roleCode");
-        String legacyRole = (String) session.getAttribute("role");
-        boolean isStaff = "STAFF".equalsIgnoreCase(roleCode)
-                || (legacyRole != null && (legacyRole.equalsIgnoreCase("Nhân viên") || legacyRole.equalsIgnoreCase("Nhan vien")));
-        if (isStaff) {
-            Integer nhanVienId = (Integer) session.getAttribute("nhanVienId");
-            if (nhanVienId == null || caLamViecService.getCaDangMo(nhanVienId).isEmpty()) {
-                return "redirect:/cham-cong?error=chua_cham_cong";
-            }
-        }
         model.addAttribute("pageTitle", "Bán hàng tại quầy");
         model.addAttribute("pageHeading", "Bán hàng tại quầy");
         model.addAttribute("activeMenu", "banhang");
@@ -144,18 +132,6 @@ public class BanHangController {
                                                         HttpSession session) {
         try {
             Integer nhanVienId = (Integer) session.getAttribute("nhanVienId");
-            String roleCode = (String) session.getAttribute("roleCode");
-            String legacyRole = (String) session.getAttribute("role");
-            boolean isStaff = "STAFF".equalsIgnoreCase(roleCode)
-                    || (legacyRole != null && (legacyRole.equalsIgnoreCase("Nhân viên") || legacyRole.equalsIgnoreCase("Nhan vien")));
-            if (isStaff && (nhanVienId == null || caLamViecService.getCaDangMo(nhanVienId).isEmpty())) {
-                Map<String, Object> notCheckedIn = new HashMap<>();
-                notCheckedIn.put("success", false);
-                notCheckedIn.put("needCheckin", true);
-                notCheckedIn.put("redirect", "/cham-cong");
-                notCheckedIn.put("message", "Vui lòng chấm công trước khi bán hàng.");
-                return ResponseEntity.status(403).body(notCheckedIn);
-            }
 
             String tenKhachHang = (String) request.get("tenKhachHang");
             String sdtKhachHang = (String) request.get("sdtKhachHang");

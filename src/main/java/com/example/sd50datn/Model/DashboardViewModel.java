@@ -12,6 +12,8 @@ public class DashboardViewModel {
 
     private final DashboardSalesModel salesOverview;
     private final DashboardOperationModel operationOverview;
+    private final DashboardSalesModel salesOverview30Days;
+    private final DashboardOperationModel operationOverview30Days;
     private final List<DashboardRevenuePointModel> currentRevenueSeries7Days;
     private final List<DashboardRevenuePointModel> previousRevenueSeries7Days;
     private final List<DashboardRevenuePointModel> currentRevenueSeries30Days;

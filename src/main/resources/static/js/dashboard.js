@@ -4,11 +4,14 @@
     var radios = document.querySelectorAll('input[name="revenueSeries"]');
     var salesRangeSelect = document.getElementById("salesRangeSelect");
     var salesDateLabel = document.querySelector(".sales-panel .panel-note strong");
+    var salesTotalOrders = document.getElementById("salesTotalOrders");
+    var salesTotalRevenue = document.getElementById("salesTotalRevenue");
     var revenueRangeSelect = document.getElementById("revenueRangeSelect");
     var revenueCurrentRange = document.getElementById("revenueCurrentRange");
     var revenuePreviousRange = document.getElementById("revenuePreviousRange");
     var revenueLegendLabels = document.querySelectorAll(".revenue-legend label");
     var revenuePagination = document.getElementById("revenuePagination");
+    var operationRangeSelect = document.getElementById("operationRangeSelect");
     var revenuePageSize = 15;
     var revenueCurrentPage = 1;
 
@@ -35,6 +38,13 @@
         return formatDate(fromDate) + " - " + formatDate(toDate);
     }
 
+    function updateSalesValues(rangeKey) {
+        var data = rangeKey === "30days" ? metrics.salesOverview30 : metrics.salesOverview7;
+        if (!data) return;
+        if (salesTotalOrders) salesTotalOrders.textContent = data.totalOrders;
+        if (salesTotalRevenue) salesTotalRevenue.textContent = data.totalRevenue + "đ";
+    }
+
     function setupSalesRange() {
         if (!salesRangeSelect || !salesDateLabel) return;
 
@@ -48,7 +58,9 @@
         salesDateLabel.textContent = sales7DayLabel;
 
         salesRangeSelect.addEventListener("change", function () {
-            salesDateLabel.textContent = this.value === "30days" ? sales30DayLabel : sales7DayLabel;
+            var rangeKey = this.value;
+            salesDateLabel.textContent = rangeKey === "30days" ? sales30DayLabel : sales7DayLabel;
+            updateSalesValues(rangeKey);
         });
     }
 
@@ -207,14 +219,29 @@
         chart.innerHTML = '<g>' + gridY + xLabels + bars + '</g>';
     }
 
-    function drawDonut() {
+    function drawDonut(data) {
         var donut = document.getElementById("operationDonut");
         if (!donut) return;
 
-        var completed = Number(donut.dataset.completed || 0);
-        var shipping = Number(donut.dataset.shipping || 0);
-        var canceled = Number(donut.dataset.canceled || 0);
+        var completed, shipping, canceled;
+        if (data) {
+            completed = Number(data.completed || 0);
+            shipping = Number(data.shipping || 0);
+            canceled = Number(data.canceled || 0);
+        } else {
+            completed = Number(donut.dataset.completed || 0);
+            shipping = Number(donut.dataset.shipping || 0);
+            canceled = Number(donut.dataset.canceled || 0);
+        }
         var total = completed + shipping + canceled;
+
+        // Update legend values
+        var opCompleted = document.getElementById("opCompleted");
+        var opShipping = document.getElementById("opShipping");
+        var opCanceled = document.getElementById("opCanceled");
+        if (opCompleted) opCompleted.textContent = completed;
+        if (opShipping) opShipping.textContent = shipping;
+        if (opCanceled) opCanceled.textContent = canceled;
 
         if (total <= 0) {
             donut.style.background = "conic-gradient(#e2e8f0 0deg 360deg)";
@@ -231,6 +258,20 @@
             + "#dc2626 " + (completedDeg + shippingDeg) + "deg " + (completedDeg + shippingDeg + canceledDeg) + "deg)";
     }
 
+    function setupOperationRange() {
+        if (!operationRangeSelect) return;
+
+        operationRangeSelect.innerHTML =
+            '<option value="7days">7 ngày gần đây</option>' +
+            '<option value="30days">30 ngày gần đây</option>';
+        operationRangeSelect.value = "7days";
+
+        operationRangeSelect.addEventListener("change", function () {
+            var data = this.value === "30days" ? metrics.operationOverview30 : metrics.operationOverview7;
+            drawDonut(data);
+        });
+    }
+
     if (revenueRangeSelect) {
         revenueRangeSelect.innerHTML =
             '<option value="7days">7 ngày gần đây</option>' +
@@ -238,9 +279,14 @@
         revenueRangeSelect.value = "7days";
     }
 
-    drawSelectedRevenueSeries();
-    drawDonut();
     setupSalesRange();
+    setupOperationRange();
+
+    // Use requestAnimationFrame to ensure elements are laid out before drawing
+    requestAnimationFrame(function () {
+        drawSelectedRevenueSeries();
+        drawDonut();
+    });
 
     window.addEventListener("resize", function () {
         drawSelectedRevenueSeries();

@@ -224,6 +224,10 @@ public class BanHangService {
         thanhToan.setMaGiaoDich(transactionCode);
         thanhToan.setTrangThai(1);
         thanhToanRepo.save(thanhToan);
+
+        // Mark invoice as completed (trangThai=2) so dashboard counts it
+        hoaDon.setTrangThai(2);
+        hoaDonRepo.save(hoaDon);
     }
 
     /**

@@ -819,10 +819,60 @@
     font-size:14px;
 }
 
-.pos-success-actions{
+/* Modal footer & action buttons */
+.modal-footer.pos-success-actions{
     display:flex;
     justify-content:flex-end;
+    align-items:center;
     gap:10px;
+    padding:14px 20px;
+    border-top:1px solid var(--pos-border);
+    background:#fafbfc;
+}
+
+.pos-success-actions .btn-secondary,
+.pos-success-actions .btn-ghost{
+    padding:10px 20px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    border:1px solid var(--pos-border-2);
+    background:#fff;
+    color:var(--pos-text);
+    transition:all .15s;
+}
+.pos-success-actions .btn-secondary:hover,
+.pos-success-actions .btn-ghost:hover{
+    background:#f3f4f6;
+    border-color:#c5c9d4;
+}
+
+.pos-success-actions .btn-primary{
+    padding:10px 24px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    border:none;
+    background:var(--pos-primary);
+    color:#fff;
+    transition:all .15s;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+.pos-success-actions .btn-primary:hover{
+    background:var(--pos-primary-2);
+    box-shadow:0 2px 8px rgba(79,70,229,.25);
+}
+.pos-success-actions .btn-primary:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+    box-shadow:none;
+}
+.pos-success-actions .btn-primary i{
+    font-size:15px;
 }
 
 /* ---------- CUSTOMER SUGGESTIONS ---------- */

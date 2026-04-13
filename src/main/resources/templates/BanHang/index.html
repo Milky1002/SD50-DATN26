@@ -205,11 +205,11 @@
             </div>
             <div class="bh-modal__body" style="text-align:center">
                 <img id="transferQrImage" alt="VietQR" style="max-width:300px;width:100%;border:1px solid #e5e7eb;border-radius:16px;padding:10px;background:#fff" />
-                <p class="pos-success-message">Quét mã VietQR và bấm xác nhận để hoàn tất thanh toán chuyển khoản.</p>
+                <p class="pos-success-message" style="margin-top:12px">Quét mã VietQR và bấm xác nhận để hoàn tất thanh toán chuyển khoản.</p>
             </div>
             <div class="modal-footer pos-success-actions">
-                <button type="button" class="btn-secondary" onclick="document.getElementById('transferQrModal').classList.remove('is-open')">Đóng</button>
-                <button type="button" class="btn-primary" id="btnConfirmTransferQr">Xác nhận thanh toán</button>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('transferQrModal').classList.remove('is-open')"><i class="bi bi-x-lg"></i> Đóng</button>
+                <button type="button" class="btn-primary" id="btnConfirmTransferQr"><i class="bi bi-check2-circle"></i> Xác nhận thanh toán</button>
             </div>
         </div>
     </div>
@@ -218,7 +218,7 @@
         <div class="bh-modal__overlay" data-success-close></div>
         <div class="bh-modal__dialog bh-modal__dialog--success">
             <div class="bh-modal__header">
-                <div class="bh-modal__title"><i class="bi bi-check-circle-fill"></i> Thanh toán thành công</div>
+                <div class="bh-modal__title"><i class="bi bi-check-circle-fill" style="color:#10b981"></i> Thanh toán thành công</div>
                 <button type="button" class="bh-modal__close" data-success-close>&times;</button>
             </div>
             <div class="bh-modal__body">
@@ -235,8 +235,51 @@
                 <p class="pos-success-message" id="successPaymentMethod">Đã ghi nhận thanh toán.</p>
             </div>
             <div class="modal-footer pos-success-actions">
-                <button type="button" class="btn-secondary" data-success-close>Đóng</button>
-                <button type="button" class="btn-primary" id="btnSuccessPrint">Mở phiếu tính tiền PDF</button>
+                <button type="button" class="btn-secondary" data-success-close><i class="bi bi-x-lg"></i> Đóng</button>
+                <button type="button" class="btn-primary" id="btnSuccessPrint"><i class="bi bi-receipt"></i> Mở phiếu tính tiền PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Preview Modal -->
+    <div class="bh-modal" id="receiptPreviewModal" aria-hidden="true">
+        <div class="bh-modal__overlay" onclick="document.getElementById('receiptPreviewModal').classList.remove('is-open')"></div>
+        <div class="bh-modal__dialog" style="max-width:400px">
+            <div class="bh-modal__header">
+                <div class="bh-modal__title"><i class="bi bi-receipt"></i> Xem trước hóa đơn</div>
+                <button type="button" class="bh-modal__close" onclick="document.getElementById('receiptPreviewModal').classList.remove('is-open')">&times;</button>
+            </div>
+            <div class="bh-modal__body" id="receiptPreviewBody" style="background:#fff;padding:0">
+                <div id="receiptPreviewContent" style="font-family:monospace;font-size:13px;padding:20px;max-width:320px;margin:0 auto;border:1px dashed #ccc;background:#fafafa">
+                    <div style="text-align:center;margin-bottom:8px">
+                        <div style="font-weight:bold;font-size:15px;letter-spacing:1px">YONEX STORE</div>
+                        <div style="font-size:11px;color:#666">268 To Hien Thanh, Hai Ba Trung, Ha Noi</div>
+                        <div style="font-size:11px;color:#666">DT: 1900 6750</div>
+                    </div>
+                    <hr style="border:none;border-top:1px dashed #aaa;margin:8px 0">
+                    <div style="text-align:center;font-weight:bold;margin:6px 0">HOA DON THANH TOAN</div>
+                    <div id="receiptPreviewInfo" style="font-size:12px;line-height:1.6"></div>
+                    <hr style="border:none;border-top:1px dashed #aaa;margin:8px 0">
+                    <table id="receiptPreviewItems" style="width:100%;font-size:11px;border-collapse:collapse">
+                        <thead>
+                            <tr style="border-bottom:1px solid #ccc">
+                                <th style="text-align:left;padding:2px 0">TEN HANG</th>
+                                <th style="text-align:center;padding:2px 4px">SL</th>
+                                <th style="text-align:right;padding:2px 4px">DON GIA</th>
+                                <th style="text-align:right;padding:2px 0">T.TIEN</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <hr style="border:none;border-top:1px dashed #aaa;margin:8px 0">
+                    <div id="receiptPreviewTotals" style="font-size:12px"></div>
+                    <hr style="border:none;border-top:1px dashed #aaa;margin:8px 0">
+                    <div style="text-align:center;font-size:11px;color:#888;margin-top:8px">Cam On Quy Khach - Hen Gap Lai</div>
+                </div>
+            </div>
+            <div class="modal-footer pos-success-actions">
+                <button type="button" class="btn-secondary" onclick="document.getElementById('receiptPreviewModal').classList.remove('is-open')"><i class="bi bi-x-lg"></i> Đóng</button>
+                <button type="button" class="btn-primary" id="btnConfirmPrint"><i class="bi bi-printer"></i> Xuất PDF</button>
             </div>
         </div>
     </div>
@@ -772,9 +815,6 @@
                         throw new Error(res.data.message || 'Không thể xác nhận chuyển khoản');
                     }
                     transferQrModal.classList.remove('is-open');
-                    if (document.getElementById('chkPrint').checked) {
-                        window.open('/ban-hang/' + pendingTransferResult.hoaDonId + '/phieu-tinh-tien', '_blank');
-                    }
                     showPaymentSuccess(pendingTransferResult, 'transfer');
                     pendingTransferResult = null;
                 })
@@ -824,9 +864,6 @@
                             transferQrImage.src = res.data.vietQrUrl;
                             transferQrModal.classList.add('is-open');
                         } else {
-                            if (document.getElementById('chkPrint').checked) {
-                                window.open('/ban-hang/' + res.data.hoaDonId + '/phieu-tinh-tien', '_blank');
-                            }
                             showPaymentSuccess(res.data, paymentMethod);
                         }
                         cart = [];
@@ -842,8 +879,6 @@
                         clearPromotionSelection(true);
                         // Also save the cleared state
                         saveCurrentOrder();
-                    } else if (res.data.needCheckin) {
-                        window.location.href = res.data.redirect || '/cham-cong';
                     } else {
                         alert('Lỗi thanh toán: ' + (res.data.message || 'Không xác định'));
                         btnCheckout.disabled = false;
@@ -981,9 +1016,48 @@
 
             if (btnSuccessPrint) {
                 btnSuccessPrint.addEventListener('click', function () {
+                    if (!latestReceiptUrl) return;
+                    var previewUrl = latestReceiptUrl.replace('/phieu-tinh-tien', '/phieu-tinh-tien/preview');
+                    fetch(previewUrl)
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            var info = document.getElementById('receiptPreviewInfo');
+                            info.innerHTML = 'So HD: ' + String(data.invoiceId).padStart(4, '0') + '<br>'
+                                + 'Ngay: ' + data.date + '  Gio: ' + data.time + '<br>'
+                                + 'Khach hang: ' + data.customerName;
+
+                            var tbody = document.querySelector('#receiptPreviewItems tbody');
+                            var html = '';
+                            (data.items || []).forEach(function(item) {
+                                html += '<tr>'
+                                    + '<td style="padding:3px 0">' + item.stt + ')' + item.name.substring(0, 20) + '</td>'
+                                    + '<td style="text-align:center;padding:3px 4px">' + item.quantity + '</td>'
+                                    + '<td style="text-align:right;padding:3px 4px">' + item.price + '</td>'
+                                    + '<td style="text-align:right;padding:3px 0">' + item.lineTotal + '</td>'
+                                    + '</tr>';
+                            });
+                            tbody.innerHTML = html;
+
+                            var totals = document.getElementById('receiptPreviewTotals');
+                            totals.innerHTML = '<div style="display:flex;justify-content:space-between"><span>T.Cong: ' + data.totalQuantity + ' SP</span><strong>' + data.total + '</strong></div>'
+                                + '<div style="text-align:center;font-weight:bold;font-size:16px;margin-top:6px">' + data.paymentMethod.toUpperCase() + '</div>'
+                                + '<div style="text-align:center;font-weight:bold;font-size:18px">' + data.total + '</div>';
+
+                            document.getElementById('receiptPreviewModal').classList.add('is-open');
+                        })
+                        .catch(function() {
+                            window.open(latestReceiptUrl, '_blank');
+                        });
+                });
+            }
+
+            var btnConfirmPrint = document.getElementById('btnConfirmPrint');
+            if (btnConfirmPrint) {
+                btnConfirmPrint.addEventListener('click', function() {
                     if (latestReceiptUrl) {
                         window.open(latestReceiptUrl, '_blank');
                     }
+                    document.getElementById('receiptPreviewModal').classList.remove('is-open');
                 });
             }
 

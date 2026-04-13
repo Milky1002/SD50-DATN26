@@ -30,8 +30,14 @@ public class DashboardController {
         model.addAttribute("content", "dashboard");
         model.addAttribute("pageCss", "/css/dashboard.css");
 
+        model.addAttribute("salesDateLabel",
+                dashboardView.getCurrentFromDate7Days().format(rangeFormatter) + " - " +
+                        dashboardView.getCurrentToDate7Days().format(rangeFormatter));
+
         model.addAttribute("salesOverview", dashboardView.getSalesOverview());
         model.addAttribute("operationOverview", dashboardView.getOperationOverview());
+        model.addAttribute("salesOverview30", dashboardView.getSalesOverview30Days());
+        model.addAttribute("operationOverview30", dashboardView.getOperationOverview30Days());
 
         model.addAttribute("currentRevenueLabels7Days", dashboardView.getCurrentRevenueSeries7Days().stream()
                 .map(p -> p.getDate().format(dayLabelFormatter))
