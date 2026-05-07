@@ -60,7 +60,7 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
                         COALESCE(SUM(h.Tong_tien_sau_khi_giam), 0) AS totalRevenue
                     FROM HoaDon h
                     WHERE CAST(h.Ngay_tao AS date) BETWEEN :fromDate AND :toDate
-                      AND h.Trang_thai = 2
+                      AND h.Trang_thai = 3
                       AND EXISTS (
                           SELECT 1
                           FROM ThanhToan tt
@@ -76,9 +76,9 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
     @Query(
             value = """
                     SELECT
-                        SUM(CASE WHEN h.Trang_thai = 2 THEN 1 ELSE 0 END) AS completedOrders,
-                        SUM(CASE WHEN h.Trang_thai = 1 THEN 1 ELSE 0 END) AS shippingOrders,
-                        SUM(CASE WHEN h.Trang_thai = 3 THEN 1 ELSE 0 END) AS canceledOrders
+                        SUM(CASE WHEN h.Trang_thai = 3 THEN 1 ELSE 0 END) AS completedOrders,
+                        SUM(CASE WHEN h.Trang_thai = 2 THEN 1 ELSE 0 END) AS shippingOrders,
+                        SUM(CASE WHEN h.Trang_thai = 4 THEN 1 ELSE 0 END) AS canceledOrders
                     FROM HoaDon h
                     WHERE CAST(h.Ngay_tao AS date) BETWEEN :fromDate AND :toDate
                     """,
@@ -94,7 +94,7 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
                         COALESCE(SUM(h.Tong_tien_sau_khi_giam), 0) AS revenue
                     FROM HoaDon h
                     WHERE CAST(h.Ngay_tao AS date) BETWEEN :fromDate AND :toDate
-                      AND h.Trang_thai = 2
+                      AND h.Trang_thai = 3
                       AND EXISTS (
                           SELECT 1
                           FROM ThanhToan tt
@@ -108,6 +108,34 @@ public interface DashboardRepository extends JpaRepository<HoaDon, Integer> {
     )
     List<DailyRevenueProjection> findDailyRevenue(@Param("fromDate") LocalDate fromDate,
                                                   @Param("toDate") LocalDate toDate);
+
+    // Top 5 best-selling products by quantity sold (HOAN_TAT = 3)
+    interface TopSellingProjection {
+        Integer getSanPhamId();
+        String getTenSanPham();
+        Long getTotalQty();
+        BigDecimal getTotalRevenue();
+    }
+
+    @Query(
+            value = """
+                    SELECT TOP 5
+                        ct.San_pham_id AS sanPhamId,
+                        sp.Ten_san_pham AS tenSanPham,
+                        SUM(ct.So_luong_san_pham) AS totalQty,
+                        SUM(ct.So_luong_san_pham * ct.Gia) AS totalRevenue
+                    FROM HoaDonChiTiet ct
+                    JOIN SanPham sp ON sp.San_pham_id = ct.San_pham_id
+                    JOIN HoaDon h ON h.Hoa_don_id = ct.Hoa_don_id
+                    WHERE h.Trang_thai = 3
+                      AND CAST(h.Ngay_tao AS date) BETWEEN :fromDate AND :toDate
+                    GROUP BY ct.San_pham_id, sp.Ten_san_pham
+                    ORDER BY SUM(ct.So_luong_san_pham) DESC
+                    """,
+            nativeQuery = true
+    )
+    List<TopSellingProjection> findTopSellingProducts(@Param("fromDate") LocalDate fromDate,
+                                                      @Param("toDate") LocalDate toDate);
 
     default Optional<LocalDate> fetchLatestInvoiceDate() {
         return Optional.ofNullable(findLatestInvoiceDate());

@@ -36,6 +36,7 @@
                 </a>
                 <div class="sp-btn-group">
                     <button class="sp-btn sp-btn--primary" type="button" id="btnOpenAdd"><i class="bi bi-plus-lg"></i> Thêm hàng hóa</button>
+                    <button class="sp-btn sp-btn--outline" type="button" id="btnOpenNhapKho" style="margin-left:8px"><i class="bi bi-box-arrow-in-down-left"></i> Nhập kho</button>
                 </div>
             </div>
         </div>
@@ -841,6 +842,133 @@
         });
         document.addEventListener('click', function() {
             document.querySelectorAll('.sp-dropdown__menu.is-open').forEach(function(m){ m.classList.remove('is-open'); });
+        });
+    })();
+    </script>
+
+    <!-- ===== NHẬP KHO SECTION ===== -->
+    <div class="sp-card sp-tablewrap" style="margin-top:24px" id="nhapKhoSection" th:if="${nhapKhoList != null}">
+        <div class="sp-toolbar" style="padding:12px 16px;border-bottom:1px solid #e5e7eb">
+            <h3 style="margin:0;font-size:16px;font-weight:600"><i class="bi bi-box-arrow-in-down-left"></i> Lịch sử nhập kho</h3>
+        </div>
+        <table class="sp-table xk-table">
+            <thead>
+            <tr>
+                <th style="width:140px">Mã phiếu</th>
+                <th style="width:180px">Ngày nhập</th>
+                <th>Nhà cung cấp</th>
+                <th style="width:140px;text-align:right">Tổng tiền</th>
+                <th style="width:120px">Trạng thái</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item : ${nhapKhoList}">
+                <td class="mono" th:text="${item.maPhieuNhap}"></td>
+                <td th:text="${#temporals.format(item.ngayNhap, 'dd/MM/yyyy HH:mm')}"></td>
+                <td th:text="${item.nhaCungCap != null ? item.nhaCungCap.tenNhaCungCap : '--'}"></td>
+                <td style="text-align:right" th:text="${#numbers.formatDecimal(item.tongTien, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                <td>
+                    <span th:if="${item.trangThai == 1}" class="pill pill--ok">Đã xác nhận</span>
+                    <span th:if="${item.trangThai == 0}" class="pill pill--off">Chờ duyệt</span>
+                </td>
+            </tr>
+            <tr th:if="${nhapKhoList.isEmpty()}">
+                <td colspan="5" class="empty">Chưa có phiếu nhập</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- NHẬP KHO MODAL -->
+    <div class="xk-modal" id="nhapKhoModal" aria-hidden="true" th:if="${nhaCungCapList != null}">
+        <div class="xk-modal__overlay" id="nhapKhoModalOverlay"></div>
+        <div class="xk-modal__dialog xk-modal__dialog--wide">
+            <div class="xk-modal__header">
+                <div class="xk-modal__title">Tạo phiếu nhập kho</div>
+                <button type="button" class="xk-modal__close" id="btnCloseNhapKho">&times;</button>
+            </div>
+            <form th:action="@{/nhap-kho/save}" method="post" id="nhapKhoForm">
+                <div class="xk-modal__body">
+                    <div class="xk-field">
+                        <label>Nhà cung cấp</label>
+                        <select name="nhaCungCapId" required>
+                            <option value="">-- Chọn nhà cung cấp --</option>
+                            <option th:each="ncc : ${nhaCungCapList}"
+                                    th:value="${ncc.id}"
+                                    th:text="${ncc.tenNhaCungCap + (ncc.sdt != null ? ' - ' + ncc.sdt : '')}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="xk-field">
+                        <label>Ghi chú</label>
+                        <textarea name="ghiChu" rows="2" placeholder="Ghi chú thêm"></textarea>
+                    </div>
+                    <div class="xk-field">
+                        <label>Chọn sản phẩm</label>
+                        <select id="nhapKhoSpSelect">
+                            <option value="">-- Chọn sản phẩm --</option>
+                            <option th:each="sp : ${list}"
+                                    th:value="${sp.id}"
+                                    th:text="${sp.maSanPham + ' - ' + sp.tenSanPham + ' (Tồn: ' + sp.soLuongTon + ')'}"
+                                    th:data-name="${sp.tenSanPham}"
+                                    th:data-gia-nhap="${sp.giaNhap}">
+                            </option>
+                        </select>
+                        <button type="button" class="xk-btn xk-btn--outline" id="btnAddSpNhapKho" style="margin-top:8px">+ Thêm sản phẩm</button>
+                    </div>
+                    <table class="xk-table" id="nhapKhoSpTable" style="margin-top:8px">
+                        <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th style="width:120px">Số lượng</th>
+                            <th style="width:160px">Giá nhập</th>
+                            <th style="width:80px"></th>
+                        </tr>
+                        </thead>
+                        <tbody id="nhapKhoSpTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="xk-modal__footer">
+                    <button type="button" class="xk-btn xk-btn--ghost" id="btnCancelNhapKho">Hủy</button>
+                    <button type="submit" class="xk-btn xk-btn--primary">Xác nhận nhập kho</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        var modal = document.getElementById('nhapKhoModal');
+        var openBtn = document.getElementById('btnOpenNhapKho');
+        var closeBtn = document.getElementById('btnCloseNhapKho');
+        var cancelBtn = document.getElementById('btnCancelNhapKho');
+        var overlay = document.getElementById('nhapKhoModalOverlay');
+
+        function openModal() { modal && modal.classList.add('is-open'); }
+        function closeModal() { modal && modal.classList.remove('is-open'); }
+
+        openBtn && openBtn.addEventListener('click', openModal);
+        closeBtn && closeBtn.addEventListener('click', closeModal);
+        cancelBtn && cancelBtn.addEventListener('click', closeModal);
+        overlay && overlay.addEventListener('click', closeModal);
+
+        var addSpBtn = document.getElementById('btnAddSpNhapKho');
+        addSpBtn && addSpBtn.addEventListener('click', function () {
+            var sel = document.getElementById('nhapKhoSpSelect');
+            var id = sel.value;
+            if (!id) return;
+            var opt = sel.options[sel.selectedIndex];
+            var name = opt.dataset.name;
+            var giaNhap = opt.dataset.giaNhap || '0';
+            var tbody = document.getElementById('nhapKhoSpTableBody');
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td>' + name
+                + '<input type="hidden" name="sanPhamIds" value="' + id + '"/></td>'
+                + '<td><input type="number" name="soLuongs" value="1" min="1" style="width:100%;padding:6px 8px;border:1px solid #d9dfec;border-radius:6px"/></td>'
+                + '<td><input type="number" name="donGiaNhaps" value="' + giaNhap + '" min="0" step="0.01" style="width:100%;padding:6px 8px;border:1px solid #d9dfec;border-radius:6px"/></td>'
+                + '<td><button type="button" onclick="this.closest(\'tr\').remove()">&times;</button></td>';
+            tbody.appendChild(tr);
+            sel.value = '';
         });
     })();
     </script>

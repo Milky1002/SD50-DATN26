@@ -10,7 +10,6 @@ import com.example.sd50datn.Dto.ChuongTrinhKhuyenMaiDTO;
 import com.example.sd50datn.Repository.HinhThucThanhToanRepository;
 import com.example.sd50datn.Repository.HoaDonChiTietRepository;
 import com.example.sd50datn.Repository.InvoiceRepository;
-import com.example.sd50datn.Repository.SanPhamRepository;
 import com.example.sd50datn.Repository.ThanhToanRepository;
 import com.example.sd50datn.Service.ChuongTrinhKhuyenMaiService;
 import com.example.sd50datn.Service.GioHangService;
@@ -45,7 +44,6 @@ public class ShopCheckoutController {
     private final HinhThucThanhToanRepository hinhThucThanhToanRepo;
     private final InvoiceRepository hoaDonRepo;
     private final HoaDonChiTietRepository hoaDonChiTietRepo;
-    private final SanPhamRepository sanPhamRepo;
     private final ThanhToanRepository thanhToanRepo;
     private final ChuongTrinhKhuyenMaiService chuongTrinhKhuyenMaiService;
 
@@ -202,14 +200,7 @@ public class ShopCheckoutController {
                     ? cartItem.getGiaTaiThoiDiem()
                     : cartItem.getSanPham().getGiaBan());
             hoaDonChiTietRepo.save(detail);
-
-            if (cartItem.getSanPham() != null && cartItem.getSanPham().getId() != null && cartItem.getSoLuong() != null) {
-                sanPhamRepo.findById(cartItem.getSanPham().getId()).ifPresent(sp -> {
-                    Integer currentStock = sp.getSoLuongTon() != null ? sp.getSoLuongTon() : 0;
-                    sp.setSoLuongTon(Math.max(0, currentStock - cartItem.getSoLuong()));
-                    sanPhamRepo.save(sp);
-                });
-            }
+            // Stock deduction happens when admin confirms the order (DA_XAC_NHAN transition)
         }
 
         gioHangService.clearCart(cart);
@@ -222,7 +213,7 @@ public class ShopCheckoutController {
             return "redirect:/thanh-toan/xac-nhan";
         }
 
-        ra.addFlashAttribute("orderId", hoaDon.getId());
+        session.setAttribute("pendingTransferOrderId", hoaDon.getId());
         return "redirect:/thanh-toan/chuyen-khoan";
     }
 
@@ -230,7 +221,10 @@ public class ShopCheckoutController {
     public String transferConfirmation(@RequestParam(value = "orderId", required = false) Integer orderId,
                                        HttpSession session,
                                        Model model) {
-        Integer resolvedOrderId = orderId != null ? orderId : (Integer) model.asMap().get("orderId");
+        Integer resolvedOrderId = orderId;
+        if (resolvedOrderId == null) {
+            resolvedOrderId = (Integer) session.getAttribute("pendingTransferOrderId");
+        }
         if (resolvedOrderId == null) {
             return "redirect:/thanh-toan";
         }

@@ -13,7 +13,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-@Controller
+// @Controller — disabled: attendance UI removed per requirements (2026-05-07)
+// API endpoints (/api/ca-lam-viec/**) also removed; CaLamViec entity/table kept intact.
 @RequiredArgsConstructor
 public class CaLamViecController {
 

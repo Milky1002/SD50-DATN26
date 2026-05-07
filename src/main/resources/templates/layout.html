@@ -53,14 +53,6 @@
             </a>
 
             <a class="nav__item"
-               th:if="${session.roleCode == 'ADMIN' or session.role == 'Quản lý' or session.role == 'Quan ly'}"
-               th:href="@{/lich-su-nhan-vien}"
-               th:classappend="${activeMenu == 'lichsunhanvien'} ? ' active'">
-                <span class="nav__icon"><i class="bi bi-clock-history"></i></span>
-                <span class="nav__text">Lịch sử nhân viên</span>
-            </a>
-
-            <a class="nav__item"
                th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
                 th:href="@{/khachhang/hienthi}"
                 th:classappend="${activeMenu == 'khachhang'} ? ' active'">
@@ -135,32 +127,6 @@
                 <span class="nav__text">Bán tại cửa hàng</span>
             </a>
 
-            <a class="nav__item"
-               th:href="@{/cham-cong}"
-               th:classappend="${activeMenu == 'chamcong'} ? ' active'">
-                <span class="nav__icon"><i class="bi bi-clock-fill"></i></span>
-                <span class="nav__text">Chấm công</span>
-            </a>
-
-            <div class="nav__section-title"
-                 th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}">
-                <span class="nav__text">KHO HÀNG</span>
-            </div>
-
-            <a class="nav__item"
-               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
-                th:href="@{/xuat-kho}"
-                th:classappend="${activeMenu == 'xuatkho'} ? ' active'">
-                <span class="nav__icon"><i class="bi bi-box-arrow-up-right"></i></span>
-                <span class="nav__text">Xuất kho</span>
-            </a>
-            <a class="nav__item"
-               th:if="${session.roleCode != 'STAFF' and session.role != 'Nhân viên' and session.role != 'Nhan vien'}"
-                th:href="@{/nhap-kho}"
-                th:classappend="${activeMenu == 'nhapkho'} ? ' active'">
-                <span class="nav__icon"><i class="bi bi-box-arrow-in-down-left"></i></span>
-                <span class="nav__text">Nhập kho</span>
-            </a>
         </nav>
 
         <div class="sidebar__bottom">

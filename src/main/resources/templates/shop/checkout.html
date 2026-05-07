@@ -158,6 +158,11 @@
                             <strong th:text="${#numbers.formatInteger(cartSubtotal, 0, 'DEFAULT')} + 'đ'">0đ</strong>
                         </div>
 
+                        <div class="shop-checkout__total">
+                            <span>Phí vận chuyển</span>
+                            <strong style="color:#16a34a">Miễn phí</strong>
+                        </div>
+
                         <div class="shop-checkout__total" th:if="${discountAmount != null and discountAmount > 0}">
                             <span>Giảm giá</span>
                             <strong th:text="'-' + ${#numbers.formatInteger(discountAmount, 0, 'DEFAULT')} + 'đ'">-0đ</strong>

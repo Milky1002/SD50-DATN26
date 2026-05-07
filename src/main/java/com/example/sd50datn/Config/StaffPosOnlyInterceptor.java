@@ -26,10 +26,10 @@ public class StaffPosOnlyInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        // Staff role is restricted to POS only — redirect any other admin page to POS
+        // /cham-cong and /api/ca-lam-viec removed (attendance feature disabled)
         String uri = request.getRequestURI();
         boolean allowed = uri.startsWith("/ban-hang")
-                || uri.equals("/cham-cong")
-                || uri.startsWith("/api/ca-lam-viec")
                 || uri.equals("/logout")
                 || uri.equals("/login");
         if (!allowed) {

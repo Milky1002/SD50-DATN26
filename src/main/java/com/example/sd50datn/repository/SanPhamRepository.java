@@ -22,6 +22,10 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Integer> {
 
     List<SanPham> findByDanhMucSanPham_DanhMucSanPhamId(Integer danhMucSanPhamId);
 
+    boolean existsByTenSanPhamIgnoreCase(String tenSanPham);
+
+    boolean existsByTenSanPhamIgnoreCaseAndIdNot(String tenSanPham, Integer id);
+
     boolean existsByMaSanPham(String maSanPham);
 
     boolean existsBySku(String sku);

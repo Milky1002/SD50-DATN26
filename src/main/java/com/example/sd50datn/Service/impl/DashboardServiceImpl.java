@@ -1,6 +1,8 @@
 package com.example.sd50datn.Service.impl;
 
+import com.example.sd50datn.Entity.SanPham;
 import com.example.sd50datn.Repository.DashboardRepository;
+import com.example.sd50datn.Repository.SanPhamRepository;
 import com.example.sd50datn.Service.DashboardService;
 import com.example.sd50datn.Model.DashboardRevenuePointModel;
 import com.example.sd50datn.Model.DashboardViewModel;
@@ -14,12 +16,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
 
     private final DashboardRepository dashboardRepository;
+    private final SanPhamRepository sanPhamRepository;
 
     @Override
     public DashboardViewModel getDashboardView() {
@@ -80,6 +84,18 @@ public class DashboardServiceImpl implements DashboardService {
                 previousFromDate30Days,
                 previousToDate30Days
         );
+    }
+
+    @Override
+    public List<DashboardRepository.TopSellingProjection> getTopSellingProducts(LocalDate from, LocalDate to) {
+        return dashboardRepository.findTopSellingProducts(from, to);
+    }
+
+    @Override
+    public List<SanPham> getLowStockProducts(int threshold) {
+        return sanPhamRepository.findAll().stream()
+                .filter(sp -> sp.getSoLuongTon() != null && sp.getSoLuongTon() <= threshold && sp.getTrangThai() != null && sp.getTrangThai() == 1)
+                .collect(Collectors.toList());
     }
 
     private List<DashboardRevenuePointModel> fillMissingDays(List<DashboardRevenuePointModel> raw,

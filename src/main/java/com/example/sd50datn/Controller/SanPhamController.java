@@ -1,8 +1,10 @@
 package com.example.sd50datn.Controller;
 
 import com.example.sd50datn.Entity.SanPham;
+import com.example.sd50datn.Repository.NhaCungCapRepository;
 import com.example.sd50datn.Service.DanhMucSanPhamService;
 import com.example.sd50datn.Service.MauSacService;
+import com.example.sd50datn.Service.NhapKhoService;
 import com.example.sd50datn.Service.SanPhamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -28,6 +30,8 @@ public class SanPhamController {
     private final SanPhamService sanPhamService;
     private final DanhMucSanPhamService danhMucService;
     private final MauSacService mauSacService;
+    private final NhapKhoService nhapKhoService;
+    private final NhaCungCapRepository nhaCungCapRepo;
 
     @GetMapping
     public String list(@RequestParam(value = "q", required = false) String q,
@@ -57,6 +61,9 @@ public class SanPhamController {
         model.addAttribute("q", q != null ? q : "");
         model.addAttribute("filterTrangThai", trangThai);
         model.addAttribute("filterDanhMucId", danhMucId);
+
+        model.addAttribute("nhapKhoList", nhapKhoService.getAll());
+        model.addAttribute("nhaCungCapList", nhaCungCapRepo.findByTrangThai(1));
 
         model.addAttribute("pageTitle", "Hàng hóa");
         model.addAttribute("pageHeading", "Hàng hóa");

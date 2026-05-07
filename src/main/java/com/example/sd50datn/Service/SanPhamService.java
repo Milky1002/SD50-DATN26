@@ -225,6 +225,10 @@ public class SanPhamService {
             sp.setSku(generateSku(sp.getMaSanPham()));
         }
         if (sp.getId() == null) {
+            // New product
+            if (sanPhamRepo.existsByTenSanPhamIgnoreCase(sp.getTenSanPham().trim())) {
+                return "Tên hàng hóa đã tồn tại (trùng tên)";
+            }
             if (sanPhamRepo.existsByMaSanPham(sp.getMaSanPham())) {
                 return "Mã hàng hóa đã tồn tại";
             }
@@ -236,6 +240,10 @@ public class SanPhamService {
                 return "Mã vạch đã tồn tại";
             }
         } else {
+            // Editing existing product
+            if (sanPhamRepo.existsByTenSanPhamIgnoreCaseAndIdNot(sp.getTenSanPham().trim(), sp.getId())) {
+                return "Tên hàng hóa đã tồn tại (trùng tên)";
+            }
             if (sanPhamRepo.existsByMaSanPhamAndIdNot(sp.getMaSanPham(), sp.getId())) {
                 return "Mã hàng hóa đã tồn tại";
             }

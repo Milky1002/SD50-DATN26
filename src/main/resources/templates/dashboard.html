@@ -98,6 +98,71 @@
         </div>
     </div>
 
+    <!-- ===== WIDGETS: Top-selling & Low-stock ===== -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+
+        <!-- Top 5 best-selling products (last 30 days) -->
+        <div class="dashboard-panel" style="padding:0">
+            <div class="panel-header" style="padding:16px 20px 12px">
+                <h3><i class="bi bi-trophy-fill" style="color:#f59e0b"></i> Top 5 sản phẩm bán chạy <small style="font-weight:400;font-size:12px">(30 ngày)</small></h3>
+            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+                <thead>
+                <tr style="background:#f8fafc">
+                    <th style="padding:8px 16px;text-align:left;font-weight:600;color:#6b7280">#</th>
+                    <th style="padding:8px 16px;text-align:left;font-weight:600;color:#6b7280">Tên sản phẩm</th>
+                    <th style="padding:8px 16px;text-align:right;font-weight:600;color:#6b7280">Đã bán</th>
+                    <th style="padding:8px 16px;text-align:right;font-weight:600;color:#6b7280">Doanh thu</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item, stat : ${topSellingProducts}"
+                    style="border-top:1px solid #f1f5f9">
+                    <td style="padding:8px 16px;color:#9ca3af" th:text="${stat.count}">1</td>
+                    <td style="padding:8px 16px" th:text="${item.tenSanPham}">Sản phẩm</td>
+                    <td style="padding:8px 16px;text-align:right;font-weight:600" th:text="${item.totalQty}">0</td>
+                    <td style="padding:8px 16px;text-align:right;color:#16a34a"
+                        th:text="${#numbers.formatDecimal(item.totalRevenue, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                </tr>
+                <tr th:if="${topSellingProducts == null or #lists.isEmpty(topSellingProducts)}">
+                    <td colspan="4" style="padding:16px;text-align:center;color:#9ca3af">Chưa có dữ liệu</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Low-stock products alert -->
+        <div class="dashboard-panel" style="padding:0">
+            <div class="panel-header" style="padding:16px 20px 12px">
+                <h3><i class="bi bi-exclamation-triangle-fill" style="color:#ef4444"></i> Sản phẩm sắp hết hàng <small style="font-weight:400;font-size:12px">(tồn ≤ 5)</small></h3>
+            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:13px">
+                <thead>
+                <tr style="background:#f8fafc">
+                    <th style="padding:8px 16px;text-align:left;font-weight:600;color:#6b7280">Sản phẩm</th>
+                    <th style="padding:8px 16px;text-align:left;font-weight:600;color:#6b7280">Mã</th>
+                    <th style="padding:8px 16px;text-align:right;font-weight:600;color:#6b7280">Tồn kho</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="sp : ${lowStockProducts}"
+                    style="border-top:1px solid #f1f5f9">
+                    <td style="padding:8px 16px" th:text="${sp.tenSanPham}">Sản phẩm</td>
+                    <td style="padding:8px 16px;color:#6b7280;font-family:monospace" th:text="${sp.maSanPham}">HH01</td>
+                    <td style="padding:8px 16px;text-align:right">
+                        <span style="background:#fee2e2;color:#dc2626;padding:2px 8px;border-radius:12px;font-weight:700"
+                              th:text="${sp.soLuongTon}">0</span>
+                    </td>
+                </tr>
+                <tr th:if="${lowStockProducts == null or #lists.isEmpty(lowStockProducts)}">
+                    <td colspan="3" style="padding:16px;text-align:center;color:#16a34a"><i class="bi bi-check-circle"></i> Tất cả sản phẩm đều còn hàng</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
     <script th:inline="javascript">
         window.dashboardMetrics = {
             sales7DayLabel: /*[[${sales7DayLabel}]]*/ "",

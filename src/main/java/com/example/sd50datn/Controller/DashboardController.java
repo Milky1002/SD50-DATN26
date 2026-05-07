@@ -75,6 +75,13 @@ public class DashboardController {
                 dashboardView.getCurrentFromDate30Days().format(rangeFormatter) + " - " +
                         dashboardView.getCurrentToDate30Days().format(rangeFormatter));
 
+        // Phase 3 widgets: top-selling products and low-stock alerts
+        model.addAttribute("topSellingProducts",
+                dashboardService.getTopSellingProducts(
+                        dashboardView.getCurrentFromDate30Days(),
+                        dashboardView.getCurrentToDate30Days()));
+        model.addAttribute("lowStockProducts", dashboardService.getLowStockProducts(5));
+
         return "layout";
     }
 

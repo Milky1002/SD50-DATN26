@@ -6,7 +6,6 @@ import com.example.sd50datn.Entity.SanPham;
 import com.example.sd50datn.Repository.HinhThucThanhToanRepository;
 import com.example.sd50datn.Repository.HoaDonChiTietRepository;
 import com.example.sd50datn.Repository.InvoiceRepository;
-import com.example.sd50datn.Repository.SanPhamRepository;
 import com.example.sd50datn.Service.GioHangService;
 import com.example.sd50datn.Service.SanPhamService;
 import jakarta.servlet.http.HttpSession;
@@ -43,7 +42,6 @@ public class GuestOrderController {
     private final InvoiceRepository        hoaDonRepo;
     private final HoaDonChiTietRepository  hoaDonChiTietRepo;
     private final HinhThucThanhToanRepository hinhThucThanhToanRepo;
-    private final SanPhamRepository        sanPhamRepo;
     private final GioHangService gioHangService;
 
     /** POST /dat-hang-nhanh — create order from single-product quick-buy form */
@@ -107,12 +105,7 @@ public class GuestOrderController {
         chiTiet.setSoLuongSanPham(qty);
         chiTiet.setGia(unitPrice);
         hoaDonChiTietRepo.save(chiTiet);
-
-        sanPhamRepo.findById(product.getId()).ifPresent(sp -> {
-            Integer currentStock = sp.getSoLuongTon() != null ? sp.getSoLuongTon() : 0;
-            sp.setSoLuongTon(Math.max(0, currentStock - qty));
-            sanPhamRepo.save(sp);
-        });
+        // Stock deduction happens when admin confirms the order (DA_XAC_NHAN transition)
 
         ra.addFlashAttribute("orderId",    hoaDon.getId());
         ra.addFlashAttribute("orderTotal", total);

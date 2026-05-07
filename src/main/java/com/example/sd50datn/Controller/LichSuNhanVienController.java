@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@Controller
+// @Controller — disabled: employee history UI removed per requirements (2026-05-07)
 @RequestMapping("/lich-su-nhan-vien")
 @RequiredArgsConstructor
 public class LichSuNhanVienController {

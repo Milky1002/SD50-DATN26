@@ -82,7 +82,13 @@ public class OrderServiceImpl implements OrderService {
                                 + "' sang '" + OrderStatusUtil.getLabel(status) + "'");
             }
 
-            if (status == OrderStatusUtil.DA_HUY) {
+            // Khi admin xác nhận đơn → trừ tồn kho
+            if (status == OrderStatusUtil.DA_XAC_NHAN) {
+                deductStock(order.getId());
+            }
+
+            // Khi hủy đơn → chỉ hoàn kho nếu đơn đã được xác nhận (tồn kho đã bị trừ)
+            if (status == OrderStatusUtil.DA_HUY && previousStatus >= OrderStatusUtil.DA_XAC_NHAN) {
                 restoreStock(order.getId());
             }
 
@@ -103,6 +109,19 @@ public class OrderServiceImpl implements OrderService {
     public ByteArrayInputStream exportOrdersPdf() {
         List<OrderSummaryDTO> orders = getOrderSummaries();
         return new ByteArrayInputStream(renderOrdersPdf(orders));
+    }
+
+    private void deductStock(Integer orderId) {
+        List<HoaDonChiTiet> orderItems = hoaDonChiTietRepository.findByHoaDonId(orderId);
+        for (HoaDonChiTiet item : orderItems) {
+            SanPham sanPham = item.getSanPham();
+            if (sanPham == null || item.getSoLuongSanPham() == null) {
+                continue;
+            }
+            Integer currentStock = sanPham.getSoLuongTon() != null ? sanPham.getSoLuongTon() : 0;
+            sanPham.setSoLuongTon(Math.max(0, currentStock - item.getSoLuongSanPham()));
+            sanPhamRepository.save(sanPham);
+        }
     }
 
     private void restoreStock(Integer orderId) {

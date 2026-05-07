@@ -70,12 +70,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/error"
                 );
 
-        // Order 3: Shop customer auth — required for account & checkout pages
+        // Order 3: Shop customer auth — required for account pages only
+        // /thanh-toan/** is excluded so guests can reach checkout without logging in
         registry.addInterceptor(shopAuthInterceptor)
                 .order(3)
                 .addPathPatterns(
-                        "/tai-khoan/**",
-                        "/thanh-toan/**"
+                        "/tai-khoan/**"
                 );
     }
 
